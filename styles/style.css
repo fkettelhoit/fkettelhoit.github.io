@@ -80,6 +80,10 @@ li {
 pre {
     border: 1px solid black;
     padding: 12pt;
+    white-space: pre;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
 }
 
 code {
@@ -93,5 +97,5 @@ a {
 }
 
 a:visited {
-    color: #e00054;
+    color: #d0004c;
 }
