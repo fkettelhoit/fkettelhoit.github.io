@@ -16,7 +16,7 @@
     </h1>
     <p>
       (This is a continuation of
-      <a href="./004_custom_binding_constructs_without_macros_2.html"
+      <a href="./004-custom-binding-constructs-without-macros-2.html"
         >last week's experiment</a
       >.)
     </p>
@@ -35,7 +35,7 @@
     <p>
       Here's a proposal for enriching a minimal functional language step by step
       until it supports syntax like the above, using
-      <a href="./003_custom_binding_constructs_without_macros.html"
+      <a href="./003-custom-binding-constructs-without-macros.html"
         >explicit bindings</a
       >.
     </p>
@@ -57,7 +57,7 @@ f(x) // function f called with argument x</code></pre>
       Anonymous functions are defined using <em>blocks,</em> written { ... }. A
       block is like the body of an anonymous function that does not specify its
       arguments. The arguments of a block are
-      <a href="./003_custom_binding_constructs_without_macros.html"
+      <a href="./003-custom-binding-constructs-without-macros.html"
         >statically resolved</a
       >
       by looking for the nearest <em>binding:</em>
@@ -212,7 +212,7 @@ f Foo(Bar) { Bar }()  // sugar for `f(Foo(Bar), { Bar }())`</code></pre>
 )</code></pre>
     <p>
       ...which is further desugared using
-      <a href="./003_custom_binding_constructs_without_macros.html"
+      <a href="./003-custom-binding-constructs-without-macros.html"
         >explicit bindings</a
       >
       into...
