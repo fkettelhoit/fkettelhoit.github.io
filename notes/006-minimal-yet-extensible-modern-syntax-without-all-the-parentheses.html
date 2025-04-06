@@ -350,6 +350,14 @@ let('f, 'x => { x + x }, { f(Y) })
     <p>This makes it easy to mix binding constructs and side effects:</p>
     <pre><code>// translates to: =('a, x, { (_ ===> f(a))(print(a)) })
 { 'a = x, print(a), f(a) }</code></pre>
+    <p>
+      Lastly, a program is treated as a {...} block without the “{” and “}” at
+      the start/end:
+    </p>
+    <pre><code>// sugar for `{ 'x = "foo", 'y = "bar", f(x, y) }`:
+'x = "foo"
+'y = "bar"
+f(x, y)</code></pre>
     <h1>Separators: Commas or Newlines</h1>
     <p>
       Functions calls, [...] and {...} all assume that their elements are
@@ -370,14 +378,6 @@ let('f, 'x => { x + x }, { f(Y) })
     Baz
 ]</code></pre>
     <h1>Putting it All Together</h1>
-    <p>
-      A program is treated as a {...} block without the “{” and “}” at the start
-      and end:
-    </p>
-    <pre><code>// sugar for `{ 'x = "foo", 'y = "bar", f(x, y) }`:
-'x = "foo"
-'y = "bar"
-f(x, y)</code></pre>
     <p>Using all of this syntactic sugar, we can see how...</p>
     <pre><code>match (x) [
   Pair('x, 'x) -> { f(x) }
