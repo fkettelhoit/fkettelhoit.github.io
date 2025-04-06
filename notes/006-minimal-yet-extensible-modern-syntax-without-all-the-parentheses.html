@@ -411,27 +411,29 @@ if (x == y) {
     </p>
     <ul>
       <li>
-        Single argument calls: Just like infix calls are a special case of
+        “<strong>f a</strong>”: Just like infix calls are a special case of
         function calls and cannot be chained, it would be possible to treat “f
         a” as the call “f(a)”. Would save a couple of parentheses and doesn't
         conflict with other syntax, but maybe not worth the little bit of extra
         complexity.
       </li>
       <li>
-        Pairs: It is common to build data structures of keys and values, but
-        right now there is no syntax for maps. A simple yet general addition in
-        this direction could be “x: y” as sugar for “[x, y]”. Just like infix
-        calls, pairs cannot be chained without explicit parentheses and cannot
-        be used in infix calls, to avoid precedence issues in cases such as “a f
-        x: y”.
+        “<strong>a: b</strong>”: It is common to build data structures of keys
+        and values, but right now there is no syntax for maps. A simple yet
+        general addition in this direction could be “x: y” as sugar for “[x,
+        y]”. Just like infix calls, pairs cannot be chained without explicit
+        parentheses and cannot be used in infix calls, to avoid precedence
+        issues in cases such as “a f x: y”.
       </li>
       <li>
-        Trailing data structures: Only [...] and {...} can currently be used as
-        trailing arguments, which privileges lists compared to other data
-        structures that are built using tags, such as “Set(Foo, Bar)”. It is
-        tempting to allow data structures as trailing arguments, which would
-        however require treating parentheses after trailing arguments as being
-        arguments to the trailing argument, not the function call.
+        “<strong>f Foo Set(Bar, Baz)</strong>”: Only [...] and {...} can
+        currently be used as trailing arguments, which privileges lists compared
+        to other data structures that are built using tags, such as “Set(Bar,
+        Baz)”. It is tempting to allow data structures as trailing arguments,
+        which would however require treating parentheses after trailing
+        arguments as being arguments to the trailing argument, not the function
+        call. Another problem is that such a call looks too much like a keyword
+        call.
       </li>
     </ul>
   </body>
