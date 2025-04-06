@@ -228,14 +228,14 @@ a = b // the variable a is being bound</code></pre>
     </p>
     <pre><code>{
   let('x, y),
-  x
+  f(x)
 }</code></pre>
     <p>
       Whenever explicit bindings are declared inside a block but not consumed
       until the end of the block, the bindings will be consumed by the enclosing
       block, as if everything that follows the call with the explicit bindings
       had been passed as a block right then. The above example will be desugared
-      to “let('x, y, { f(x) })” In other words, instead of passing a block as
+      to “let('x, y, { f(x) })”. In other words, instead of passing a block as
       the last argument of a function call, we can just use that function inside
       the block. This is especially helpful for nested bindings:
     </p>
