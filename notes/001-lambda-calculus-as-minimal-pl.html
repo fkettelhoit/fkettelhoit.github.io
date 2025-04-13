@@ -97,7 +97,7 @@
     </p>
     <pre><code>let y = f(x)
 g(y, y)</code></pre>
-    <p>...is desugared as...</p>
+    <p>...is desugared to...</p>
     <pre><code>(y => g(y, y))(f(x))</code></pre>
     <p>
       This allows us to stick to a more familar flow of reading, where the
@@ -255,7 +255,7 @@ fix(foo) // == foo(fix(foo)) == foo(foo(fix(foo))) == ...</code></pre>
     </p>
     <pre><code>loop r = x
 y</code></pre>
-    <p>...will be desugared as...</p>
+    <p>...will be desugared to...</p>
     <pre><code>let r = r ~> x
 y</code></pre>
     <p>
@@ -365,7 +365,7 @@ t'' = var
     <ul>
       <li>
         The sugar for applying multiple arguments could be extended to
-        abstractions, so that “(x, y) => z” desugares as “x => y => z”.
+        abstractions, so that “(x, y) => z” desugars to “x => y => z”.
       </li>
       <li>
         Nested lists such as “Cons(X, Cons(Y, Cons(Z, Nil)))” are cumbersome. It
