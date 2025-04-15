@@ -54,10 +54,10 @@ foo(bar, baz) // some code
     <p>
       Here's the grammar for the language, dubbed “Vorpal” (with syntax examples
       below). Variables are identifiers starting with a lowercase letter and
-      ending with “!” (like “foo”, “foo-bar”, “fooBar”), tags are identifiers
-      starting with an uppercase letter or enclosed in quotation marks (like
-      “Foo”, “"some string"”), and effects are identifiers that end with “!”
-      (like “print!”, “read-char!”).
+      ending with “!” (like foo, foo-bar, fooBar), tags are identifiers starting
+      with an uppercase letter or enclosed in quotation marks (like Foo, "some
+      string"), and effects are identifiers that end with “!” (like print!,
+      read-char!).
     </p>
     <pre><code>t = var                        // variable
   | var "=>" t                 // abstraction
@@ -231,7 +231,7 @@ with-state(
         solve this.
       </li>
       <li>
-        To stay close to the semantics of how functions are called im lambda
+        To stay close to the semantics of how functions are called in lambda
         calculus (without arity, multiple arguments need to be implemented using
         currying), effects likewise do not have a fixed arity, even though the
         handler syntax suggests so. In other words, a handler like “catch
