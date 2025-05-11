@@ -92,10 +92,7 @@ code {
     line-height: 12pt;
 }
 
-a {
-    color: #ff005c;
-}
-
+a,
 a:visited {
-    color: #d0004c;
+    color: #ff005c;
 }
