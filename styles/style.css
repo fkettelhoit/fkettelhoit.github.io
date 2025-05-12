@@ -47,7 +47,7 @@ a:visited {
     text-decoration: none;
     background-color: #ffe100;
     color: #000;
-    padding: 3pt;
+    padding: 0 2pt;
     /* to keep the padding consistent for line breaks: */
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
