@@ -1,63 +1,10 @@
-/* space-grotesk-regular - latin */
-@font-face {
-    font-display: swap;
-    font-family: 'Space Grotesk';
-    font-style: normal;
-    font-weight: 400;
-    src: url('../fonts/space-grotesk-v16-latin-regular.woff2') format('woff2');
-}
-
-/* space-grotesk-700 - latin */
-@font-face {
-    font-display: swap;
-    font-family: 'Space Grotesk';
-    font-style: normal;
-    font-weight: 700;
-    src: url('../fonts/space-grotesk-v16-latin-700.woff2') format('woff2');
-}
-
-/* space-mono-regular - latin */
-@font-face {
-    font-display: swap;
-    font-family: 'Space Mono';
-    font-style: normal;
-    font-weight: 400;
-    src: url('../fonts/space-mono-v15-latin-regular.woff2') format('woff2');
-}
-
-/* space-mono-italic - latin */
-@font-face {
-    font-display: swap;
-    font-family: 'Space Mono';
-    font-style: italic;
-    font-weight: 400;
-    src: url('../fonts/space-mono-v15-latin-italic.woff2') format('woff2');
-}
-
-/* space-mono-700 - latin */
-@font-face {
-    font-display: swap;
-    font-family: 'Space Mono';
-    font-style: normal;
-    font-weight: 700;
-    src: url('../fonts/space-mono-v15-latin-700.woff2') format('woff2');
-}
-
-/* space-mono-700italic - latin */
-@font-face {
-    font-display: swap;
-    font-family: 'Space Mono';
-    font-style: italic;
-    font-weight: 700;
-    src: url('../fonts/space-mono-v15-latin-700italic.woff2') format('woff2');
-}
-
 body {
     font-size: 14pt;
-    max-width: 62ch;
+    max-width: 72ch;
     margin: auto;
     padding: 3em 1em;
-    font-family: "Space Grotesk", sans-serif;
+    font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;
+    font-weight: 300;
 }
 
 p,
@@ -70,6 +17,8 @@ h1 {
     font-size: 24pt;
     line-height: 24pt;
     margin: 72pt 0 24pt 0;
+    font-family: Didot, 'Bodoni MT', 'Noto Serif Display', 'URW Palladio L', P052, Sylfaen, serif;
+    font-weight: 700;
 }
 
 p,
@@ -87,9 +36,10 @@ pre {
 }
 
 code {
-    font-family: "Space Mono", monospace;
     font-size: 12pt;
     line-height: 12pt;
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+    font-weight: 400;
 }
 
 a,
