@@ -44,5 +44,16 @@ code {
 
 a,
 a:visited {
-    color: #ff005c;
+    text-decoration: none;
+    background-color: #ff005c;
+    color: #fff;
+    padding: 0 2pt;
+    /* to keep the padding consistent for line breaks: */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+a:hover,
+a:active {
+    text-decoration: underline;
 }
