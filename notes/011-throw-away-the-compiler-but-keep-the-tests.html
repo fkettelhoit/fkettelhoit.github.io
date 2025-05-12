@@ -132,9 +132,9 @@ Foo</code></pre>
         intermediate representation.
       </li>
       <li>
-        “( ( ( => => 0 "x" ) => 0 ) "Foo" )” is a pretty-printed representation
-        of the lambda calculus intermediate representation that the AST is
-        desugared to, using
+        “( ( ( => => 0 "x" ) => "Bar" ) "Foo" )” is a pretty-printed
+        representation of the lambda calculus intermediate representation that
+        the AST is desugared to, using
         <a href="https://en.wikipedia.org/wiki/De_Bruijn_index"
           >de Bruijn indices</a
         >. “=>” is used instead of “λ” to stick more closely to the surface
@@ -142,14 +142,13 @@ Foo</code></pre>
         extended with string constants and a couple of primitive functions.
       </li>
       <li>
-        “00000: PushVar(00000) ...” is the pretty-printed bytecode that the
+        “00000: PushString("Bar") ...” is the pretty-printed bytecode that the
         lambda calculus expressions are compiled to. All strings are interned in
         a separate section and referred to by their index, but the
-        pretty-printed representation resolves them to be more human-readable,
-        e.g. “00006: PushString("Foo")”.
+        pretty-printed representation resolves them to be more human-readable.
       </li>
       <li>
-        “Foo” is the expected output of running the bytecode using Vorpal's VM.
+        “Bar” is the expected output of running the bytecode using Vorpal's VM.
       </li>
     </ol>
     <h1>Partial Tests</h1>
