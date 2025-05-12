@@ -1,6 +1,6 @@
 body {
     font-size: 14pt;
-    max-width: 72ch;
+    max-width: 75ch;
     margin: auto;
     padding: 3em 1em;
     font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;
@@ -45,9 +45,9 @@ code {
 a,
 a:visited {
     text-decoration: none;
-    background-color: #ff005c;
-    color: #fff;
-    padding: 0 2pt;
+    background-color: #ffe100;
+    color: #000;
+    padding: 3pt;
     /* to keep the padding consistent for line breaks: */
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
