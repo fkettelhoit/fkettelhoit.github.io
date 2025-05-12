@@ -238,6 +238,16 @@ if(
     ]
 )</code></pre>
     <p>
+      There is some ambiguity when it comes to an expression such as “f(x) g
+      h(y)”, which we probably want to interpret as the infix expression
+      corresponding to “g(f(x), h(y))”, but this would clash with keyword calls.
+      There are two ways to resolve this: Either prefix calls are not allowed as
+      arguments of infix calls, or the syntax explicitly distinguishes between
+      “f(x)” and “f (x)”, with the former being treated as a prefix call (which
+      can be an infix argument) and the latter being treated as a keyword call
+      (which cannot be an infix argument).
+    </p>
+    <p>
       Having 4 different ways to call functions (prefix call, piped call, infix
       call and keyword call) might seem excessive, but it's usually easy to know
       which one to pick:
