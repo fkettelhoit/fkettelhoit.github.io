@@ -9,7 +9,8 @@ body {
 
 p,
 pre,
-ul {
+ul,
+img {
     margin: 0 0 24pt 0;
 }
 
@@ -56,4 +57,12 @@ a:visited {
 a:hover,
 a:active {
     text-decoration: underline;
+}
+
+img {
+    width: 100%;
+}
+
+img.border {
+    border: 1px solid black;
 }

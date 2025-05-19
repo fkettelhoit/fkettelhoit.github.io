@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Garble Programming Language</title>
+    <link rel="stylesheet" href="../styles/style.css" />
+  </head>
+  <body>
+    <p><a href="..">Projects</a><br />2025</p>
+    <h1>The Garble Programming Language</h1>
+    <p>
+      <a href="https://github.com/sine-fdn/garble-lang"
+        >github.com/sine-fdn/garble-lang</a
+      >
+    </p>
+    <p>
+      Garble is a simple statically typed programming language with a Rust-like
+      syntax for
+      <a href="https://en.wikipedia.org/wiki/Secure_multi-party_computation"
+        >Multi-Party Computation</a
+      >
+      with
+      <a href="https://en.wikipedia.org/wiki/Garbled_circuit"
+        >garbled circuits</a
+      >. Garble programs look like Rust programs, but are compiled to boolean
+      circuits consisting only of AND, XOR and NOT gates. All programs are
+      guaranteed to terminate and always run in a constant time, which is a
+      fancy way of saying that the underlying circuits do not have (unbounded)
+      loops or (real) jumps / branches. This makes for a
+      <a href="https://garble-lang.org/computational_model.html"
+        >weird programming model</a
+      >, because Garble programs don't execute instructions on a typical von
+      Neumann architecture with memory and CPU.
+    </p>
+    <p>
+      Apart from its unusual compilation target, Garble is deliberately
+      <em>boring</em> and implements a simple subset of Rust (basically Rust
+      without references, generics and unbounded loops). Garble stays as close
+      to Rust's syntax and semantics as it can, even implementing Rust's
+      <a
+        href="https://doc.rust-lang.org/nightly/nightly-rustc/rustc_pattern_analysis/usefulness/index.html"
+        >pattern matching algorithm</a
+      >.
+    </p>
+    <p>Here's how Garble looks like:</p>
+    <pre><code>enum Bucket {
+    Above,
+    Within,
+    Below,
+}
+
+fn bucket(p: i32, min: i32, max: i32) -> Bucket {
+    if p > max {
+        Bucket::Above
+    } else if p < min {
+        Bucket::Below
+    } else {
+        Bucket::Within
+    }
+}
+
+pub fn main(x: i32, y: i32, z: i32) -> [Bucket; 3] {
+    let avg = (x + y + z) * 1000 / 3;
+    let range_in_percent = 10;
+    let min = avg * (100 - range_in_percent) / 100;
+    let max = avg * (100 + range_in_percent) / 100;
+    [
+        bucket(x * 1000, min, max),
+        bucket(y * 1000, min, max),
+        bucket(z * 1000, min, max),
+    ]
+}</code></pre>
+    <p>
+      For more, see the <a href="https://garble-lang.org">Garble website</a>.
+    </p>
+  </body>
+</html>

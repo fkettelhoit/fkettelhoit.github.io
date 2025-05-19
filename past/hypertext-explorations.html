@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hypertext Explorations</title>
+    <link rel="stylesheet" href="../styles/style.css" />
+  </head>
+  <body>
+    <p><a href="..">Projects</a><br />2023</p>
+    <h1>Hypertext Explorations</h1>
+    <p>
+      I built several prototypes of hypertext systems between 2019 and 2023, all
+      focused on the idea of linking <em>snippets</em> of text
+      <em>implicitly</em> and <em>bidirectionally</em> when they appear in
+      different contexts/documents, instead of creating explicit jump-links like
+      on the web.
+    </p>
+    <p>
+      The various experiments are attempts to reimagine and prototype a
+      different vision of the web as connected and
+      <em>overlapping</em> documents/pages/media. The resulting system works
+      similar to a wiki and shares a few similarities with Ted Nelson's
+      <a href="https://xanadu.com/zigzag/">ZigZag</a>. It grew out of a
+      hypertext system for Wittgenstein's philosophical Nachlass, a
+      philosophical corpus of 20.000 pages with a strikingly non-linear
+      structure. It is also vaguely inspired by Deleuze and Guattari's
+      <a href="https://en.wikipedia.org/wiki/Rhizome_(philosophy)">rhizome</a>
+      and McLuhan's notion of acoustic space. One aim of the project was to
+      explore how theoretical ideas about non-linear structure can be turned
+      into software and used practically.
+    </p>
+    <h1>Asterion (2023)</h1>
+    <p>
+      Asterion is an experimental app for non-linear reading and writing that
+      links together similar snippets using a <em>subway metaphor</em>, where
+      similar snippets form the <em>stations</em> and the documents they appear
+      in form the <em>lines</em> that connect them. Whenever a snippet appears
+      in different documents, Asterion automatically displays
+      <em>bidirectional branches</em> to other documents.
+    </p>
+    <img
+      src="./hypertext_explorations/asterion_screenshots.png"
+      alt="Screenshot of the Asterion Hypertext App"
+    />
+    <p>
+      The app is built with Tauri, the similarity search is a custom inverted
+      index using n-grams, all data is stored in a simple log-structured KV
+      store written in Rust.
+    </p>
+    <h1>AssemblageDB (2021)</h1>
+    <p>
+      <a href="https://github.com/fkettelhoit/assemblagedb">AssemblageDB</a> is
+      a transactional high-level database for connected webs of pages, notes,
+      texts and other media. Think of it like a <em>personal web,</em> but
+      easily editable, with more connections and better navigation than the web.
+      It is high-level in the sense that it defines a document model similar to
+      HTML but vastly simpler and with graph-like 2-way links instead of
+      tree-like 1-way jump links. The data model is both:
+    </p>
+    <ul>
+      <li>
+        <em>document-oriented:</em> supports nested documents without a fixed
+        schema
+      </li>
+      <li>
+        <em>graph-based:</em> documents can have multiple parents and form a
+        directed graph
+      </li>
+    </ul>
+    <p>
+      All data is automatically indexed and supports similarity search using an
+      inverted index built on n-grams. This allows efficiently finding similar
+      snippets, which are linked automatically.
+    </p>
+    <p>
+      The DB is built on top of
+      <a
+        href="https://github.com/fkettelhoit/assemblagedb/tree/main/assemblage_kv"
+        >AssemblageKV</a
+      >, a simple embedded key-value store with
+      <a href="https://en.wikipedia.org/wiki/Multiversion_concurrency_control"
+        >MVCC</a
+      >
+      implemented in 100% safe Rust as a log-structured hash table similar to
+      <a href="https://riak.com/assets/bitcask-intro.pdf">Bitcask</a>. Writes of
+      new or changed values never overwrite old entries, but are simply appended
+      to the end of the storage. Old values are kept at earlier offsets in the
+      storage and remain accessible. An in-memory hash table tracks the storage
+      offsets of all keys and allows efficient reads directly from the relevant
+      portions of the storage. A store can be merged, which discards old
+      versions and builds a more compact representation containing only the
+      latest value of each key.
+    </p>
+    <h1>Wittgenstein Übersicht (2019)</h1>
+    <p>
+      I first started working on a hypertext system at the Wittgenstein Archives
+      Bergen, built specifically for linking together similar documents and
+      snippets in Ludwig Wittgenstein's philosophical corpus (consisting of
+      about 20 000 pages).
+    </p>
+    <p>
+      The system isn't public available (because the XML sources of the
+      Wittgenstein corpus unfortunately haven't been released under an open
+      license), but I gave a
+      <a href="https://www.youtube.com/watch?v=NX6JYDlJB6U">short talk</a>
+      presenting a prototype to a philosophical audience.
+    </p>
+  </body>
+</html>
