@@ -17,7 +17,7 @@
       tie up a couple of loose threads related to
       <a href="./013-rc-week-1-vorpal-a-minimal-and-malleable-language.html"
         >Vorpal</a
-      >, the programming that I'm building.
+      >, the programming language that I'm building.
     </p>
     <p>
       Vorpal is now in a state where I can use it to write programs with a
@@ -79,11 +79,11 @@
         onto the intermediate stack.
       </li>
       <li>
-        LOAD_STRING looks up a string in the string section of the bytecode
-        (using a 20 bit STRING_INDEX) and pushes it onto the intermediate stack.
+        LOAD_STR looks up a string in the string section of the bytecode (using
+        a 20 bit STRING_INDEX) and pushes it onto the intermediate stack.
       </li>
       <li>
-        LOAD_EFFECT looks up the name of an effect in the string section of the
+        LOAD_EFF looks up the name of an effect in the string section of the
         bytecode (using a 20 bit STRING_INDEX) and pushes it onto the
         intermediate stack.
       </li>
@@ -106,9 +106,9 @@
       <li>
         CMP pops an if-false branch, pops an if-true branch, pops two values
         (all from the intermediate stack) and then applies if-true to the nil
-        value if the two values are the same strings, otherwise applies
-        if-branch to the nil value. (This acts as a simple if-then-else without
-        deep equality.)
+        value if the two values are the same strings, otherwise applies if-false
+        to the nil value. (This acts as a simple if-then-else without deep
+        equality.)
       </li>
       <li>
         UNPACK pops an if-false branch, pops an if-true branch, pops a compound
@@ -154,7 +154,7 @@ let mut bytecode = vec![
       <li>implement closure optimizations,</li>
       <li>implement tail call optimization,</li>
       <li>build a static site generator in Vorpal,</li>
-      <li>write an article about reasonable macro and publish it here.</li>
+      <li>write an article about reasonable macros and publish it here.</li>
     </ul>
     <div class="rc-scout-wrapper">
       <div class="rc-scout" data-scout-rendered="true">
