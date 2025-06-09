@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RC Week 3</title>
+    <link rel="stylesheet" href="../styles/style.css" />
+  </head>
+  <body>
+    <p>
+      <a href="..">Notes</a><br /><time datetime="2025-06-08">2025/06/08</time>
+    </p>
+    <h1>RC Week 3:<br />A Gentle Introduction to Vorpal</h1>
+    <p>
+      <a href="./013-rc-week-1-vorpal-a-minimal-and-malleable-language.html"
+        >Vorpal</a
+      >
+      is a minimal and malleable programming language, which I'm building during
+      my 12 weeks at the <a href="https://www.recurse.com/">Recurse Center</a>.
+      Here's what it looks like:
+    </p>
+    <h1>Comments</h1>
+    <p>Comments start with // and end at the end of the line.</p>
+    <pre><code>// This is a comment.</code></pre>
+    <h1>Strings + Atoms</h1>
+    <p>
+      The only basic data type that Vorpal provides are strings. Strings might
+      be composite data types in other languages, but from the perspective of
+      Vorpal each string is an <em>atomic value:</em> You can check whether one
+      string is equal to another, but there are no operations to manipulate
+      strings. (Vorpal strings are interned, just like symbols in Ruby, atoms in
+      Elixir and keywords in Clojure.)
+    </p>
+    <p>There are two string-like data types:</p>
+    <pre><code>// Strings are wrapped in double quotes:
+
+"a string"
+#"raw strings can contain " characters"#
+##"this raw string contains a #" in the string"##
+
+// Capitalized identifiers are string-like atoms:
+Foo
+BarBaz</code></pre>
+    <p>
+      While Foo and "Foo" are both represented as strings under the hood, they
+      are different values. Uppercase identifiers are called atoms,
+      double-quoted strings are just called strings.
+    </p>
+    <h1>Compounds</h1>
+    <p>
+      Strings and atoms can be applied to each other to form ad-hoc compound
+      data structures without the need to define any types beforehand. An atom
+      Foo applied to the two atoms X and Y can be thought of as a
+      <em>record</em> Foo with two positional fields holding the atoms X and Y.
+    </p>
+    <pre><code>// A record Foo containing X and Y:
+Foo(X, Y)
+
+// A Pair of two other records:
+Pair(Section(X, Y), Paragraph(Z))</code></pre>
+    <h1>[] + Lists</h1>
+    <p>
+      The empty atom is written [] and represents an empty list. Lists of values
+      can be built by successively applying [] to values,
+      <em>with the first value of the list as the last applied value:</em>
+    </p>
+    <pre><code>[Foo, Bar, Baz] // ...is the same as:
+[](Baz, Bar, Foo) // ...which is the same as:
+(([](Baz))(Bar))(Foo)</code></pre>
+    <h1>Functions</h1>
+    <p>
+      Function names start with non-uppercase ASCII characters (otherwise they
+      would be atoms). Here's an example of a function f being applied to the
+      two atoms Foo and Bar:
+    </p>
+    <pre><code>f(Foo, Bar)</code></pre>
+    <p>Functions can also be applied using infix notation:</p>
+    <pre><code>Foo f Bar // ...is the same as f(Foo, Bar)</code></pre>
+    <p>
+      Every function can be applied using infix notation. All infix functions
+      have the same precedence and it is invalid to use different infix
+      functions in the same expression without grouping their parts using (...).
+    </p>
+    <pre><code>(X f Y) g Z // ...is ok, but X f Y g Z would be invalid.
+X f Y f Z   // ...is ok and parsed as (X f Y) f z.</code></pre>
+    <p>
+      Vorpal supports a third way of calling functions, keyword calls, which are
+      especially useful for control structures (which are just regular functions
+      in Vorpal). A function named foo-bar-baz can be called as foo: arg1 bar:
+      arg2 baz: arg3, which Vorpal will splice together as foo-bar-baz(arg1,
+      arg2, arg3).
+    </p>
+    <pre><code>foo: X bar: Y baz: Z // ...is the same as foo-bar-baz(X, Y, Z)
+foo: X bar: Y        // ...is the same as foo-bar(X, Y)
+foo: Bar             // ...is the same as foo(Bar)</code></pre>
+    <p>
+      This means that a single argument function f(x) can always be called as f:
+      X.
+    </p>
+    <p>Nested keyword calls must be grouped using (...):</p>
+    <pre><code>foo: (bar: X baz: Y) qux: Z</code></pre>
+    <p>
+      Lastly, f(x, y, z) is just sugar for ((f(x))(y))(z), in other words f(x,
+      y, z) is sugar for <em>currying</em>, the repeated application of a
+      function to a single argument.
+    </p>
+    <h1>Variables + Bindings</h1>
+    <p></p>
+    <p>
+      All variables start with non-uppercase ASCII characters (otherwise they
+      would be atoms). A variable can be assigned using the = function, which
+      expects a <em>binding</em>, which is the name of a variable prefixed with
+      “:”. Here's an example:
+    </p>
+    <pre><code>:x = Foo // Assigns the atom Foo to the variable x.
+:y = x   // Assigns the value of the variable x to the variable y.</code></pre>
+    <p>
+      Why does Vorpal distinguish bindings and variables instead of just using y
+      = x like other languages? In Vorpal, the = function is just a regular
+      function and the :x syntax signals that x is not being <em>used</em>, it
+      is being <em>bound</em>. This might look superfluous here, but will come
+      in handy later on.
+    </p>
+    <h1>Blocks</h1>
+    <p>
+      New function can be defined using the => function, which binds one or more
+      variables on the left-hand side to a function body enclosed in {...} on
+      the right-hand side:
+    </p>
+    <pre><code>:x => { f(x) }          // A single argument function with body f(x).
+[:x, :y] => { f(x, y) } // A function of two arguments x and y.</code></pre>
+    <p>
+      The {...} part is called a <em>block</em> and can contain variable
+      definitions separated by commas or newlines. A block always evaluates to
+      the last expression in the block:
+    </p>
+    <pre><code>:x => {
+    :y = f(x)
+    :z = g(y, y)
+    Pair(z, z) // This is the return value of the function.
+}</code></pre>
+    <p>
+      A Vorpal program is a collection of expressions that are implicitly
+      wrapped in {...}.
+    </p>
+    <h1>Recursion</h1>
+    <p>
+      Recursive functions can be built using the ~> function, which binds a
+      variable to itself:
+    </p>
+    <pre><code>:f ~> {
+    // Inside of this block, f is bound to itself.
+    [:x, :y] => {
+        f(x, y) // This will call f recursively (and never terminate).
+    }
+}</code></pre>
+    <h1>Pattern Matching</h1>
+    <p>
+      Apart from =, => and ~>, the most useful function provided by Vorpal are
+      the pattern matching functions -> and match-with:
+    </p>
+    <pre><code>// match: ... with: ... is a keyword call for match-with
+match: x with: [
+    Foo(Bar, Baz) -> { "just Foo(Bar, Baz)" }
+    Foo(:x, :x) -> { twice(x) }
+    Foo(:x, y) -> { "the second element is the value of y" }
+]</code></pre>
+    <p>
+      Notice how y is used as a <em>value</em>, not as a <em>binding</em>. The
+      last clause of the pattern match only succeeds if the second element of
+      Foo has the value y, whereas the first element of Foo is <em>bound</em> to
+      the variable x, not matter what the element's value is.
+    </p>
+    <h1>Effects</h1>
+    <p>
+      What happens when no pattern matches the value? This is an example of an
+      <em>effect</em>, which is like an exception that can be resumed by its
+      exception handler (if desired). Effects look like function names, but
+      always end with “!” and do not need to defined before being used. What
+      happens when an effect is called depends on which
+      <em>effect handler</em> has been (dynamically) installed. If there is no
+      effect handler, the execution will stop and the effect will bubble up all
+      the way to the (Rust) host, which can then handle the effect and resume
+      the execution.
+    </p>
+    <pre><code>// This will bubble up to the Rust host:
+throw!("throwing something without a handler")
+
+// This will evaluate to Bar(Twice(x, x)):
+try: {
+  match: x with: [
+    Pair(:x, :x) -> {
+      Foo(Twice(x, x))
+    }
+    :value -> {
+      // The not-equal! effect will be handled.
+      Bar(not-equal!(value))
+    }
+  ]
+} catch: not-equal! as: [:resume, :arg] => {
+  // We handle it by resuming execution:
+  resume(Twice(arg, arg))
+}</code></pre>
+    <h1>Commas and Newlines</h1>
+    <p>
+      One last thing to point out is that commas and newlines are completely
+      interchangeable in Vorpal. Every (...), [...] and {...} can contain one or
+      more commas/newlines before and after each element (including leading or
+      trailing commas/newlines), but elements must be separated by at least one
+      comma or newline.
+    </p>
+    <pre><code>// [Foo, Bar]
+[
+    Foo
+    Bar
+]
+
+// f(Foo, Bar)
+f(
+  Foo
+  Bar
+)
+
+// { :x = Foo, :y = Bar }
+{
+  :x = Foo
+  :y = Bar
+}</code></pre>
+    <p>
+      Commas/newlines are <em>not</em> allowed immediately after keywords ending
+      in “:”.
+    </p>
+    <div class="rc-scout-wrapper">
+      <div class="rc-scout" data-scout-rendered="true">
+        <p class="rc-scout__text">
+          <i class="rc-scout__logo"></i> Want to become a better programmer?
+          <a
+            class="rc-scout__link"
+            href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d"
+            >Join the Recurse Center!</a
+          >
+        </p>
+      </div>
+      <style class="rc-scout__style" type="text/css">
+        .rc-scout-wrapper {
+          margin-top: 96pt;
+          border: 1px solid black;
+          padding: 10px;
+        }
+        .rc-scout {
+          display: block;
+          padding: 0;
+          border: 0;
+          margin: 0;
+        }
+        .rc-scout__text {
+          display: block;
+          padding: 0;
+          border: 0;
+          margin: 0;
+          height: 100%;
+          font-size: 100%;
+        }
+        .rc-scout__logo {
+          display: inline-block;
+          padding: 0;
+          border: 0;
+          margin: 0;
+          width: 0.85em;
+          height: 0.85em;
+          background: no-repeat center
+            url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2012%2015%22%3E%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%2212%22%20height%3D%2210%22%20fill%3D%22%23000%22%3E%3C%2Frect%3E%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2210%22%20height%3D%228%22%20fill%3D%22%23fff%22%3E%3C%2Frect%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%228%22%20height%3D%226%22%20fill%3D%22%23000%22%3E%3C%2Frect%3E%3Crect%20x%3D%222%22%20y%3D%223%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%233dc06c%22%3E%3C%2Frect%3E%3Crect%20x%3D%224%22%20y%3D%223%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%233dc06c%22%3E%3C%2Frect%3E%3Crect%20x%3D%226%22%20y%3D%223%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%233dc06c%22%3E%3C%2Frect%3E%3Crect%20x%3D%223%22%20y%3D%225%22%20width%3D%222%22%20height%3D%221%22%20fill%3D%22%233dc06c%22%3E%3C%2Frect%3E%3Crect%20x%3D%226%22%20y%3D%225%22%20width%3D%222%22%20height%3D%221%22%20fill%3D%22%233dc06c%22%3E%3C%2Frect%3E%3Crect%20x%3D%224%22%20y%3D%229%22%20width%3D%224%22%20height%3D%223%22%20fill%3D%22%23000%22%3E%3C%2Frect%3E%3Crect%20x%3D%221%22%20y%3D%2211%22%20width%3D%2210%22%20height%3D%224%22%20fill%3D%22%23000%22%3E%3C%2Frect%3E%3Crect%20x%3D%220%22%20y%3D%2212%22%20width%3D%2212%22%20height%3D%223%22%20fill%3D%22%23000%22%3E%3C%2Frect%3E%3Crect%20x%3D%222%22%20y%3D%2213%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%23fff%22%3E%3C%2Frect%3E%3Crect%20x%3D%223%22%20y%3D%2212%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%23fff%22%3E%3C%2Frect%3E%3Crect%20x%3D%224%22%20y%3D%2213%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%23fff%22%3E%3C%2Frect%3E%3Crect%20x%3D%225%22%20y%3D%2212%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%23fff%22%3E%3C%2Frect%3E%3Crect%20x%3D%226%22%20y%3D%2213%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%23fff%22%3E%3C%2Frect%3E%3Crect%20x%3D%227%22%20y%3D%2212%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%23fff%22%3E%3C%2Frect%3E%3Crect%20x%3D%228%22%20y%3D%2213%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%23fff%22%3E%3C%2Frect%3E%3Crect%20x%3D%229%22%20y%3D%2212%22%20width%3D%221%22%20height%3D%221%22%20fill%3D%22%23fff%22%3E%3C%2Frect%3E%3C%2Fsvg%3E");
+        }
+      </style>
+    </div>
+  </body>
+</html>
