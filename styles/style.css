@@ -18,16 +18,34 @@ img {
     margin: 0 0 24pt 0;
 }
 
-h1 {
-    font-size: 24pt;
-    line-height: 24pt;
-    margin: 72pt 0 24pt 0;
-    font-family: Didot, 'Bodoni MT', 'Noto Serif Display', 'URW Palladio L', P052, Sylfaen, serif;
+h1,
+h2 {
     font-weight: 700;
+    font-family: Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif;
+}
+
+h1 {
+    font-size: 44pt;
+    line-height: 48pt;
+    margin: 72pt 0 24pt 0;
+}
+
+/* this will become h2 once I manage to update all existing notes: */
+h1 {
+    font-size: 32pt;
+    line-height: 36pt;
+    margin: 72pt 0 24pt 0;
+}
+
+h3 {
+    font-size: 14pt;
+    margin: 36pt 0 12pt 0;
+    font-weight: 300;
 }
 
 p,
-li {
+li,
+h3 {
     line-height: 24pt;
 }
 
@@ -52,7 +70,7 @@ a:visited {
     text-decoration: none;
     background-color: #ffe100;
     color: #000;
-    padding: 4pt;
+    padding: 4pt 2pt;
     /* to keep the padding consistent for line breaks: */
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
@@ -65,8 +83,5 @@ a:active {
 
 img {
     width: 100%;
-}
-
-img.border {
     border: 1px solid black;
 }
