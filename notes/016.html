@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="../styles/style.css" /><title>RC week 4: building a language to write a blog post</title></head><body><p><a href="..#notes">Notes</a><br />2025/06/14</p><h1>RC week 4: building a language to write a blog post</h1><p>This blog post is written using a simple site generator written in <a href="013-rc-week-1-vorpal-a-minimal-and-malleable-language.html">Vorpal</a>, the programming language I&apos;ve been building at the <a href="https://www.recurse.com">Recurse Center</a> for the past few weeks.</p><p>Here&apos;s the full source code for this post:</p><pre><code>Html lang: &quot;en&quot; stylesheet: &quot;../styles/style.css&quot; title: &quot;RC week 4: building a language to write a blog post&quot; sections: [
+    Note date: [&quot;2025&quot;, &quot;06&quot;, &quot;14&quot;]
+    Section blocks: [
+        [&quot;This blog post is written using a simple site generator written in &quot;, Link href: &quot;013-rc-week-1-vorpal-a-minimal-and-malleable-language.html&quot; text: &quot;Vorpal&quot;, &quot;, the programming language I&apos;ve been building at the &quot;, Link href: &quot;https://www.recurse.com&quot; text: &quot;Recurse Center&quot;, &quot; for the past few weeks.&quot;]
+        [&quot;Here&apos;s the full source code for this post:&quot;]
+        Code(quine!())
+    ]
+    Section title: &quot;Why?&quot; blocks: [
+        [&quot;It seemed like a great way to write a non-trivial and useful program in my language. But more importantly, it allowed me to test both the “prelude” (the 10 or so functions that are currently included in every program) and Vorpal&apos;s ability to encode data in a natural and readable way.&quot;]
+        [&quot;Vorpal is quite minimal, closer to a (purely functional) Lisp (with effect handlers) than most other languages, but it does support quite a bit of syntactic sugar, which is general enough that applies to all functions and data structures. The file shown above is just normal code which uses Vorpal&apos;s keyword call syntax, which is borrowed from &quot;, Link href: &quot;https://hexdocs.pm/elixir/main/optional-syntax.html&quot; text: &quot;keyword lists in Elixir:&quot;, &quot; The call &quot;, Code(#&quot;Note date: [&quot;2025&quot;, &quot;06&quot;, &quot;14&quot;]&quot;#), &quot; is just sugar for “calling” the atomic string &quot;, Code(&quot;Note&quot;), &quot; with the combined keyword list as the last argument, in other words &quot;, Code(#&quot;Note([[&quot;date&quot;, [&quot;2025&quot;, &quot;06&quot;, &quot;14&quot;]]])&quot;#), &quot;.&quot;]
+        [&quot;Notice also how the page description, which is data, contains a call to the &quot;, Code(&quot;quine!&quot;), &quot; effect, which suspends execution of the VM, loads the file that is being processed (using the Rust host) and then resume the VM with the code as a string. This is not really a quine, at most a &quot;, Link href: &quot;https://en.wikipedia.org/wiki/Quine_(computing)#%22Cheating%22_quines&quot; text: &quot;cheating quine&quot;, &quot;, but hey, I wanted to get this blog post done and this seemed like a nice way to illustrate how you can mix data and effects.&quot;]
+    ]
+    Section title: &quot;How?&quot; blocks: [
+        [&quot;The program that generates the HTML based on the input data is relatively short, around 70 lines of code. Here&apos;s the function that transforms sections into HTML:&quot;]
+        Code(##&quot;::gen-section(:title, :section) = {
+    match (section) with: [
+        Note([[&quot;date&quot;, [:yy, :mm, :dd]]]) -&gt; { [
+            #&quot;&lt;p&gt;&lt;a href=&quot;..#notes&quot;&gt;Notes&lt;/a&gt;&lt;br /&gt;&quot;#, yy, &quot;/&quot;, mm, &quot;/&quot;, dd, &quot;&lt;/p&gt;&quot;
+            &quot;&lt;h1&gt;&quot;, escape(title), &quot;&lt;/h1&gt;&quot;
+        ] }
+        Section([[&quot;blocks&quot;, :blocks]]) -&gt; { [
+            blocks |&gt; map(gen-block(&quot;&lt;p&gt;&quot;, &quot;&lt;/p&gt;&quot;))
+        ] }
+        Section([[&quot;title&quot;, :title], [&quot;blocks&quot;, :blocks]]) -&gt; { [
+            &quot;&lt;h2&gt;&quot;, escape(title), &quot;&lt;/h2&gt;&quot;
+            blocks |&gt; map(gen-block(&quot;&lt;p&gt;&quot;, &quot;&lt;/p&gt;&quot;))
+        ] }
+        Section([[&quot;title&quot;, :title], [&quot;id&quot;, :id], [&quot;blocks&quot;, :blocks]]) -&gt; { [
+            #&quot;&lt;h2 id=&quot;&quot;#, id, #&quot;&quot;&gt;&quot;#, escape(title), &quot;&lt;/h2&gt;&quot;
+            blocks |&gt; map(gen-block(&quot;&lt;p&gt;&quot;, &quot;&lt;/p&gt;&quot;))
+        ] }
+    ]
+}&quot;##)
+    ]
+    Section title: &quot;What?&quot; blocks: [
+        [&quot;Does this count as a full static site generator? No. Will it ever be usable by others? No, not really. But what I like about it is precisely that it&apos;s purpose-built for my website and that it doesn&apos;t need to support every HTML tag under the sun. Instead, it is &quot;, Em(&quot;malleable&quot;), &quot; enough that I can quickly add whatever I need. This is exactly the niche that I want my language to fill: Building small, bespoke pieces of &quot;, Link href: &quot;https://www.inkandswitch.com/essay/malleable-software/&quot; text: &quot;malleable software&quot;, &quot;, which feel more like a &quot;, Link href: &quot;https://www.robinsloan.com/notes/home-cooked-app/&quot; text: &quot;home-cooked meal&quot;, &quot; than something mass-produced.&quot;]
+        [&quot;So, that&apos;s it. I want to gradually convert the existing pages of this website to use the site generator and hopefully finally add some RSS support!&quot;]
+    ]
+]
+</code></pre><h2>Why?</h2><p>It seemed like a great way to write a non-trivial and useful program in my language. But more importantly, it allowed me to test both the “prelude” (the 10 or so functions that are currently included in every program) and Vorpal&apos;s ability to encode data in a natural and readable way.</p><p>Vorpal is quite minimal, closer to a (purely functional) Lisp (with effect handlers) than most other languages, but it does support quite a bit of syntactic sugar, which is general enough that applies to all functions and data structures. The file shown above is just normal code which uses Vorpal&apos;s keyword call syntax, which is borrowed from <a href="https://hexdocs.pm/elixir/main/optional-syntax.html">keyword lists in Elixir:</a> The call <code>Note date: [&quot;2025&quot;, &quot;06&quot;, &quot;14&quot;]</code> is just sugar for “calling” the atomic string <code>Note</code> with the combined keyword list as the last argument, in other words <code>Note([[&quot;date&quot;, [&quot;2025&quot;, &quot;06&quot;, &quot;14&quot;]]])</code>.</p><p>Notice also how the page description, which is data, contains a call to the <code>quine!</code> effect, which suspends execution of the VM, loads the file that is being processed (using the Rust host) and then resume the VM with the code as a string. This is not really a quine, at most a <a href="https://en.wikipedia.org/wiki/Quine_(computing)#%22Cheating%22_quines">cheating quine</a>, but hey, I wanted to get this blog post done and this seemed like a nice way to illustrate how you can mix data and effects.</p><h2>How?</h2><p>The program that generates the HTML based on the input data is relatively short, around 70 lines of code. Here&apos;s the function that transforms sections into HTML:</p><pre><code>::gen-section(:title, :section) = {
+    match (section) with: [
+        Note([[&quot;date&quot;, [:yy, :mm, :dd]]]) -&gt; { [
+            #&quot;&lt;p&gt;&lt;a href=&quot;..#notes&quot;&gt;Notes&lt;/a&gt;&lt;br /&gt;&quot;#, yy, &quot;/&quot;, mm, &quot;/&quot;, dd, &quot;&lt;/p&gt;&quot;
+            &quot;&lt;h1&gt;&quot;, escape(title), &quot;&lt;/h1&gt;&quot;
+        ] }
+        Section([[&quot;blocks&quot;, :blocks]]) -&gt; { [
+            blocks |&gt; map(gen-block(&quot;&lt;p&gt;&quot;, &quot;&lt;/p&gt;&quot;))
+        ] }
+        Section([[&quot;title&quot;, :title], [&quot;blocks&quot;, :blocks]]) -&gt; { [
+            &quot;&lt;h2&gt;&quot;, escape(title), &quot;&lt;/h2&gt;&quot;
+            blocks |&gt; map(gen-block(&quot;&lt;p&gt;&quot;, &quot;&lt;/p&gt;&quot;))
+        ] }
+        Section([[&quot;title&quot;, :title], [&quot;id&quot;, :id], [&quot;blocks&quot;, :blocks]]) -&gt; { [
+            #&quot;&lt;h2 id=&quot;&quot;#, id, #&quot;&quot;&gt;&quot;#, escape(title), &quot;&lt;/h2&gt;&quot;
+            blocks |&gt; map(gen-block(&quot;&lt;p&gt;&quot;, &quot;&lt;/p&gt;&quot;))
+        ] }
+    ]
+}</code></pre><h2>What?</h2><p>Does this count as a full static site generator? No. Will it ever be usable by others? No, not really. But what I like about it is precisely that it&apos;s purpose-built for my website and that it doesn&apos;t need to support every HTML tag under the sun. Instead, it is <em>malleable</em> enough that I can quickly add whatever I need. This is exactly the niche that I want my language to fill: Building small, bespoke pieces of <a href="https://www.inkandswitch.com/essay/malleable-software/">malleable software</a>, which feel more like a <a href="https://www.robinsloan.com/notes/home-cooked-app/">home-cooked meal</a> than something mass-produced.</p><p>So, that&apos;s it. I want to gradually convert the existing pages of this website to use the site generator and hopefully finally add some RSS support!</p></body></html>

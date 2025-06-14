@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-size: 14pt;
     max-width: 75ch;
@@ -30,8 +34,7 @@ h1 {
     margin: 72pt 0 24pt 0;
 }
 
-/* this will become h2 once I manage to update all existing notes: */
-h1 {
+h2 {
     font-size: 32pt;
     line-height: 36pt;
     margin: 72pt 0 24pt 0;
@@ -62,6 +65,11 @@ code {
     font-size: 12pt;
     line-height: 12pt;
     font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+    font-weight: 600;
+}
+
+pre code {
+    font-size: 10pt;
     font-weight: 400;
 }
 
@@ -70,7 +78,7 @@ a:visited {
     text-decoration: none;
     background-color: #ffe100;
     color: #000;
-    padding: 4pt 2pt;
+    padding: 3pt 2pt;
     /* to keep the padding consistent for line breaks: */
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
