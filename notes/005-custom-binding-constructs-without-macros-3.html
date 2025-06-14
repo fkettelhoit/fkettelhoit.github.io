@@ -10,9 +10,9 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-03-29">2025/03/29</time>
     </p>
-    <h1>
+    <h2>
       Custom Binding Constructs Without Macros, Part 3: Generalizable Sugar
-    </h1>
+    </h2>
     <p>
       (This is a continuation of
       <a href="./004-custom-binding-constructs-without-macros-2.html"
@@ -38,7 +38,7 @@
         >explicit bindings</a
       >.
     </p>
-    <h1>The Starting Point: Curried Functions + Blocks</h1>
+    <h2>The Starting Point: Curried Functions + Blocks</h2>
     <p>
       Our base language will be a minimal functional language with variables,
       anonymous functions and function application. Basically lambda calculus,
@@ -86,7 +86,7 @@ fn('x)({ x })</code></pre>
       anonymous functions (using blocks), we can enrich the language with a bit
       of syntactic sugar.
     </p>
-    <h1>Tags</h1>
+    <h2>Tags</h2>
     <p>
       Right now there is no way to represent data, which might be enough for
       lambda calculus, where everything is a function, but insufficient for a
@@ -99,7 +99,7 @@ fn('x)({ x })</code></pre>
     <pre><code>Foo           // the tag Foo
 Foo(Bar)      // Foo applied to Bar
 Foo(Bar)(Baz) // Foo applied to Bar, then applied to Baz</code></pre>
-    <h1>Prefix Calls: f(a, b, c)</h1>
+    <h2>Prefix Calls: f(a, b, c)</h2>
     <p>
       Calling a function f with three arguments a, b and c as “f(a)(b)(c)” is
       quite annoying, so let's define some syntax which just desugars to
@@ -107,7 +107,7 @@ Foo(Bar)(Baz) // Foo applied to Bar, then applied to Baz</code></pre>
     </p>
     <pre><code>f(a, b, c)     // sugar for `f(a)(b)(c)`
 Pair(Foo, Bar) // sugar for `Pair(Foo)(Bar)`</code></pre>
-    <h1>Side Effects: (), f()</h1>
+    <h2>Side Effects: (), f()</h2>
     <p>
       Right now there are no "zero argument" functions, each function call needs
       an explicit argument. But in a language with side effects, it would be
@@ -117,7 +117,7 @@ Pair(Foo, Bar) // sugar for `Pair(Foo)(Bar)`</code></pre>
     </p>
     <pre><code>()  // special nil tag
 f() // sugar for f(())</code></pre>
-    <h1>Infix Calls: a f b, a f(b, c)</h1>
+    <h2>Infix Calls: a f b, a f(b, c)</h2>
     <p>
       Prefix calls of the form “f(a, b)” are great, but it would be nice to be
       able to define infix functions such as “a + b” or “a == b”. So let's add
@@ -140,7 +140,7 @@ a f(b, c) // sugar for `f(a, b, c)`</code></pre>
       for free, because instead of “a.f(b, c).g(d, e)” we can just write “a f(b,
       c) g(d, e)”.
     </p>
-    <h1>Grouping: (a)</h1>
+    <h2>Grouping: (a)</h2>
     <p>
       Strictly speaking, we don't need grouping via parentheses to resolve
       precedence, because infix calls are left-associative and the right hand
@@ -154,7 +154,7 @@ a f(b, c) // sugar for `f(a, b, c)`</code></pre>
       where the infix functions have names such as “+”, “-”, “*”, “/”, “=”, “=>”
       etc, where something other than left-associativity might be assumed.)
     </p>
-    <h1>Lists: [...]</h1>
+    <h2>Lists: [...]</h2>
     <p>
       While tags and tags applied to other values make it possible to build
       arbitrary data structures, sometimes we simply want a collection of values
@@ -162,7 +162,7 @@ a f(b, c) // sugar for `f(a, b, c)`</code></pre>
       to build lists and add some sugar for it:
     </p>
     <pre><code>[Foo, Bar] // sugar for the list tag applied to Foo, then to Bar</code></pre>
-    <h1>Separators: Commas + Newlines</h1>
+    <h2>Separators: Commas + Newlines</h2>
     <p>
       Functions calls, lists and blocks all assume that their elements are
       separated by commas. Let's treat commas and newlines interchangeably as
@@ -181,7 +181,7 @@ a f(b, c) // sugar for `f(a, b, c)`</code></pre>
     )
     Baz
 ]</code></pre>
-    <h1>Trailing Arguments: Tags, bindings, [...], {...}</h1>
+    <h2>Trailing Arguments: Tags, bindings, [...], {...}</h2>
     <p>
       Finally, let's allow trailing arguments: Whenever tags, bindings, lists or
       blocks appear as the last arguments of a function call, they can be
@@ -195,7 +195,7 @@ f(a) Foo [b, c] { d } // sugar for `f(a, Foo, [b, c], { d })`
 f Foo Bar             // sugar for `f(Foo, Bar)`
 f Foo { Bar } { Baz } // sugar for `f(Foo, { Bar }, { Baz })`
 f Foo(Bar) { Bar }()  // sugar for `f(Foo(Bar), { Bar }())`</code></pre>
-    <h1>Putting it All Together</h1>
+    <h2>Putting it All Together</h2>
     <p>Using all of this syntactic sugar, we can see how...</p>
     <pre><code>match(x) [
   Pair('x, 'x) -> { f(x) }
@@ -233,7 +233,7 @@ match(x)(
         )
     )
 )</code></pre>
-    <h1>Too Much or Too Little Sugar?</h1>
+    <h2>Too Much or Too Little Sugar?</h2>
     <p>
       The resulting language is syntactically quite flexible, but I'm not sure
       whether it might not be <em>too much</em> sugar. In many situations, there
@@ -283,7 +283,7 @@ if (x == y) do: {
 } else: {
     f(y)
 }</code></pre>
-    <h1>Next Steps</h1>
+    <h2>Next Steps</h2>
     <p>
       I'm generally happy with how these bits of sugar interact, even though it
       might be necessary to dial down the use of trailing arguments a bit. It's

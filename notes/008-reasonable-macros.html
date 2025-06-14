@@ -10,7 +10,7 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-04-20">2025/04/20</time>
     </p>
-    <h1>Reasonable Macros</h1>
+    <h2>Reasonable Macros</h2>
     <p>
       Over the past couple of weeks I've been experimenting with a restricted
       form of metaprogramming that supports user-defined control structures and
@@ -34,7 +34,7 @@
     </p>
     <pre><code>f(x)           // the variables f and x are used, no quote necessary
 'x => { g(x) } // the lambda binds the variable x in the body g(x)</code></pre>
-    <h1>Privileged Syntax or Full Macros?</h1>
+    <h2>Privileged Syntax or Full Macros?</h2>
     <p>
       The alternatives to explicitly distinguishing uses and bindings are to
       either privilege some control structures or binding constructs as core
@@ -79,7 +79,7 @@
       form of macros, using explicit bindings, that supports equational
       reasoning without the need to expand any macros.
     </p>
-    <h1>From Fexprs to Reasonable Macros</h1>
+    <h2>From Fexprs to Reasonable Macros</h2>
     <p>
       Let's take a step back and first look at how fexprs work in John Shutt's
       <a
@@ -149,7 +149,7 @@ f('x, y + z) // y + z will be evaluated, but x remains unevaluated</code></pre>
       + y } is statically guaranteed to be a lambda abstraction with one
       variable x (because 'x appears as an argument to f).
     </p>
-    <h1>Reasonable Macros as Syntactic Sugar</h1>
+    <h2>Reasonable Macros as Syntactic Sugar</h2>
     <p>
       To be clear, making bindings explicit and syntactic marks a
       <em>loss of power</em> compared to Kernel-style fexprs, which is made even

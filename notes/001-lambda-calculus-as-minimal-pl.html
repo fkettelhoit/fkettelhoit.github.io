@@ -10,7 +10,7 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-03-01">2025/03/01</time>
     </p>
-    <h1>Turning Lambda Calculus Into a Minimal Programming Language</h1>
+    <h2>Turning Lambda Calculus Into a Minimal Programming Language</h2>
     <p>
       <a href="https://en.wikipedia.org/wiki/Lambda_calculus"
         >Lambda calculus</a
@@ -41,7 +41,7 @@
         >Github</a
       >.)
     </p>
-    <h1>Pure Lambda Calculus</h1>
+    <h2>Pure Lambda Calculus</h2>
     <p>Lambda calculus uses only three constructs. A term t can be:</p>
     <ul>
       <li>a variable (which resolves to another term) such as “x” or “y”,</li>
@@ -63,7 +63,7 @@
     <pre><code>t = x                  // variable
   | "(λ" var "." t ")" // abstraction
   | "(" t t ")"        // application</code></pre>
-    <h1>A Bit of Syntax and Sugar</h1>
+    <h2>A Bit of Syntax and Sugar</h2>
     <p>
       Let's turn the calculus into something that can be used for practical
       programs. The first change is purely cosmetic, by using a more familiar
@@ -117,7 +117,7 @@ g(y, y)</code></pre>
       tiny bit of syntatic sugar which is guaranteed to be generally applicable,
       not just in a case-by-case fashion.
     </p>
-    <h1>Data Structures</h1>
+    <h2>Data Structures</h2>
     <p>
       Data structures and values such as true, false, numbers and lists can be
       encoded in lambda calculus by using functions.
@@ -210,7 +210,7 @@ else
 
 pat = tag
     | pat "(" var ")" // application with distinct (!) vars</code></pre>
-    <h1>Explicit Recursion</h1>
+    <h2>Explicit Recursion</h2>
     <p>
       While we take it for granted that function definitions in modern languages
       can refer to themselves and thus recursively call the function being
@@ -272,7 +272,7 @@ map(x => Foo(x), Cons(Bar, Cons(Baz, Nil)))
     <p>Let's update the grammar with our recursion construct:</p>
     <pre><code>t = ...
   | var "~>" t // recursion</code></pre>
-    <h1>Putting it Together</h1>
+    <h2>Putting it Together</h2>
     <p>
       This brings the total number of constructs up to 6: The original 3 lambda
       calculus constructs (variables, abstractions, applications), 2 more for
@@ -309,7 +309,7 @@ t'' = var
         >Github</a
       >.
     </p>
-    <h1>A Separation of Concepts</h1>
+    <h2>A Separation of Concepts</h2>
     <p>
       Why go through all the trouble of adding three new constructs and a bit of
       sugar to the lambda calculus? Isn't the end result pretty trivial, having
@@ -357,7 +357,7 @@ t'' = var
       >
       distinguishes <em>values</em> from <em>computations</em>.)
     </p>
-    <h1>Going Further</h1>
+    <h2>Going Further</h2>
     <p>
       What else can be added to the calculus without sacrificing its minimalism?
     </p>

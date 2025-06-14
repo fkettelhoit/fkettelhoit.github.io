@@ -10,7 +10,7 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-05-11">2025/05/11</time>
     </p>
-    <h1>Throw Away the Compiler, But Keep the Tests</h1>
+    <h2>Throw Away the Compiler, But Keep the Tests</h2>
     <p>
       While working on a
       <a href="./010-stack-based-bytecode-vm-for-vorpal.html">stack-based VM</a>
@@ -40,7 +40,7 @@
       and its stack-based bytecode. Changing these representations slightly
       meant changing a lot of tests in a very superficial way.
     </p>
-    <h1>Testing Different Compiler Stages</h1>
+    <h2>Testing Different Compiler Stages</h2>
     <p>
       This is why I've been experimenting with a more rigorous testing
       infrastructure that can more quickly adapt to changes in the various
@@ -150,7 +150,7 @@ Foo</code></pre>
         “Bar” is the expected output of running the bytecode using Vorpal's VM.
       </li>
     </ol>
-    <h1>Partial Tests</h1>
+    <h2>Partial Tests</h2>
     <p>
       A test doesn't have to specify all stages, it's also possible to test that
       the compiler aborts with an expected error message by leaving out the
@@ -177,7 +177,7 @@ Expected an infix argument after the function '+' at line 1, col 5, but found ')
       it's possible to see all error messages at a glance in a single file,
       without having to set up a ton of tests.
     </p>
-    <h1>Iterating Quickly by Overwriting Tests</h1>
+    <h2>Iterating Quickly by Overwriting Tests</h2>
     <p>
       The nice thing about keeping the tests in separate text files that specify
       all or just a subset of the full compiler stages is that the testing
@@ -195,7 +195,7 @@ Expected an infix argument after the function '+' at line 1, col 5, but found ')
       in the test file and can immediately see whether a regression occurred in
       the VM, the compiler or perhaps even earlier when the code is desugared.
     </p>
-    <h1>Abstraction by Pretty-Printing</h1>
+    <h2>Abstraction by Pretty-Printing</h2>
     <p>
       All the stages (after the initial source code) that are specified in a
       test file abstract away some of the details of their corresponding

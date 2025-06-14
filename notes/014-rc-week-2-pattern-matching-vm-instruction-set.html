@@ -10,7 +10,7 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-06-01">2025/06/01</time>
     </p>
-    <h1>RC Week 2:<br />Pattern Matching, VM Instruction Set</h1>
+    <h2>RC Week 2:<br />Pattern Matching, VM Instruction Set</h2>
     <p>
       Another week has flown by at the
       <a href="https://www.recurse.com/">Recurse Center</a>, where I managed to
@@ -27,7 +27,7 @@
       design, however, because one of the goals is to be extensible enough that
       such language constructs can be added in the language using macros.
     </p>
-    <h1>Bootstrapping Pattern Matching</h1>
+    <h2>Bootstrapping Pattern Matching</h2>
     <p>
       That's what I did this week, going from a level of abstraction similar to
       lambda calculus to pattern matching with unification. Here's the end
@@ -47,7 +47,7 @@
       function that takes a value and executes the body if the pattern matches
       the value).
     </p>
-    <h1>Bytecode Instruction Format</h1>
+    <h2>Bytecode Instruction Format</h2>
     <p>
       I settled on an instruction set for Vorpal's
       <a href="./010-stack-based-bytecode-vm-for-vorpal.html"
@@ -125,7 +125,7 @@
       </li>
       <li>UNWIND pops an effect handler from the handler stack.</li>
     </ol>
-    <h1>Fixed-Point Combinator + Recursion</h1>
+    <h2>Fixed-Point Combinator + Recursion</h2>
     <p>
       I got rid of a special instruction for recursion. There is still a
       recursion combinator in the intermediate (lambda-like) calculus, but the
@@ -148,7 +148,7 @@ let mut bytecode = vec![
     Op::ApplyPrefix,                  // f(fix(f))(x)
     Op::Return,
 ];</code></pre>
-    <h1>Next Steps</h1>
+    <h2>Next Steps</h2>
     <p>Next week I want to...</p>
     <ul>
       <li>implement closure optimizations,</li>

@@ -12,9 +12,9 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-04-06">2025/04/06</time>
     </p>
-    <h1>
+    <h2>
       Minimal Yet Extensible Modern Syntax—(Without (All (the (Parentheses))))
-    </h1>
+    </h2>
     <p>
       This is a proposal for a programming language syntax that is both modern
       and familiar to anyone used to C/JS-style languages with curly braces, yet
@@ -64,7 +64,7 @@ if (x == y) {
 } else {
     g(x, y)
 }</code></pre>
-    <h1>The Starting Point: Curried Functions</h1>
+    <h2>The Starting Point: Curried Functions</h2>
     <p>
       Let's start with a minimal functional language with variables, anonymous
       functions and function application. Basically lambda calculus, but with
@@ -87,7 +87,7 @@ f(x)        // function f called with argument x
       <a href="https://en.wikipedia.org/wiki/Currying">currying</a>:
     </p>
     <pre><code>f(a)(b)(c)</code></pre>
-    <h1>Tags: Foo, "foo", "foo bar"</h1>
+    <h2>Tags: Foo, "foo", "foo bar"</h2>
     <p>
       Right now there is no way to represent data, which might be enough for
       lambda calculus, but insufficient for a real programming language. Let's
@@ -124,14 +124,14 @@ Foo(Bar)(Baz) // Foo applied to Bar, then applied to Baz,
     <pre><code>"foo"
 "foo bar"
 "Foo" // same as `Foo`</code></pre>
-    <h1>Lists: [...]</h1>
+    <h2>Lists: [...]</h2>
     <p>
       While tags make it possible to build arbitrary data structures, sometimes
       we simply want a collection of values without tagging it with an explicit
       name, so let's add syntax for lists:
     </p>
     <pre><code>[Foo, Bar, Baz]</code></pre>
-    <h1>Side Effects: (), f(), { ... }</h1>
+    <h2>Side Effects: (), f(), { ... }</h2>
     <p>
       Right now there are no “zero argument” functions, each call needs an
       explicit argument. But in a language with side effects, there might be
@@ -147,7 +147,7 @@ f() // sugar for f(())</code></pre>
       ignores its argument:
     </p>
     <pre><code>{ f(y) } // sugar for `{ 'x => f(y) }`</code></pre>
-    <h1>Prefix Calls: f(a, b, c) [...] {...}</h1>
+    <h2>Prefix Calls: f(a, b, c) [...] {...}</h2>
     <p>
       Calling a function f with three arguments a, b and c as “f(a)(b)(c)” is a
       bit unfamiliar coming from C/JS-like languages, so let's define some sugar
@@ -168,7 +168,7 @@ f [a, b]                // sugar for `f([a, b])`
 f { Bar } { Baz }       // sugar for `f({ Bar }, { Baz })`
 
 f { Bar }(x)  // not allowed, (x) appears after trailing arg</code></pre>
-    <h1>Piped Calls: a.f(b, c) [...] {...}</h1>
+    <h2>Piped Calls: a.f(b, c) [...] {...}</h2>
     <p>
       It is often natural to express computations as a chain of operations
       applied to a value, transforming the value step by step. Instead of a
@@ -189,7 +189,7 @@ f { Bar }(x)  // not allowed, (x) appears after trailing arg</code></pre>
       left of the function, so piped calls support [...] and {...} as trailing
       arguments.
     </p>
-    <h1>Infix Calls: a f b</h1>
+    <h2>Infix Calls: a f b</h2>
     <p>
       It would be nice to be able to use infix functions without any
       parentheses, such as “a + b” or “a == b”. So let's add some sugar for
@@ -209,7 +209,7 @@ a -> (b -> c) // sugar for `->(a, ->(b, c))`</code></pre>
       calls), the function f must be always be a
       <em>variable</em>, never a composite expression.
     </p>
-    <h1>Keyword Calls: f (a) { ... } else { ... }</h1>
+    <h2>Keyword Calls: f (a) { ... } else { ... }</h2>
     <p>
       Requiring infix functions to be variables makes it possible to have
       <em>keywords calls</em>, which are similar to Elixir's
@@ -272,7 +272,7 @@ if(
         control structures and core syntax.
       </li>
     </ul>
-    <h1>Explicit Bindings and {...}</h1>
+    <h2>Explicit Bindings and {...}</h2>
     <p>
       It might seem strange to make the bound variable of an anonymous function
       explicit by writing { 'x => x } instead of just { x => x }, but making
@@ -321,7 +321,7 @@ let('f, 'x => { x + x }, { f(Y) })
 //
 // { x + x } is translated to `x ===> x + x`
 // { f(Y) } is translated to `f ===> f(Y)`</code></pre>
-    <h1>Nested Blocks: {..., ...}</h1>
+    <h2>Nested Blocks: {..., ...}</h2>
     <p>
       Let's add a bit more syntactic sugar: Right now blocks always have to be
       used <em>after</em> the explicit bindings that the block is supposed to
@@ -369,7 +369,7 @@ let('f, 'x => { x + x }, { f(Y) })
 'x = "foo"
 'y = "bar"
 f(x, y)</code></pre>
-    <h1>Separators: Commas or Newlines</h1>
+    <h2>Separators: Commas or Newlines</h2>
     <p>
       Functions calls, [...] and {...} all assume that their elements are
       separated by commas. Let's treat commas and newlines interchangeably as
@@ -388,7 +388,7 @@ f(x, y)</code></pre>
     )
     Baz
 ]</code></pre>
-    <h1>Putting it All Together</h1>
+    <h2>Putting it All Together</h2>
     <p>Using all of this syntactic sugar, we can see how...</p>
     <pre><code>match (x) [
   Pair('x, 'x) -> { f(x) }
@@ -414,7 +414,7 @@ if (x == y) {
 )([
     ["else", { 'z => g(x)(y) }]
 ])</code></pre>
-    <h1>Possible Extensions</h1>
+    <h2>Possible Extensions</h2>
     <p>
       While the above syntax makes up the core of the proposal, there are a
       couple of extensions that could be added while keeping the syntax minmal

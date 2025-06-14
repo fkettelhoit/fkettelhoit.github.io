@@ -10,7 +10,7 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-03-16">2025/03/16</time>
     </p>
-    <h1>Custom Binding Constructs Without Macros, Part 1: Explicit Bindings</h1>
+    <h2>Custom Binding Constructs Without Macros, Part 1: Explicit Bindings</h2>
     <p>
       Programming languages face a tension between the ability to extend them
       <em>dynamically</em> and the ability to reason about them
@@ -41,7 +41,7 @@
       The result will be a surface syntax that looks similarly dynamic to Lisp
       macros, but is fully desugared to a functional language without macros.
     </p>
-    <h1>Dynamic vs. Static Syntax</h1>
+    <h2>Dynamic vs. Static Syntax</h2>
     <p>
       The more a language is defined in terms of static constructs that cannot
       be redefined, the easier it is to reason about (both for humans and
@@ -114,7 +114,7 @@
       about code. Macros are powerful, but they come with almost no limitations.
     </p>
     <p>Can we do better?</p>
-    <h1>Step 1: Making Bindings Explicit</h1>
+    <h2>Step 1: Making Bindings Explicit</h2>
     <p>
       Let's start with an observation. Most languages do not visually
       distinguish between bound variables that are <em>used</em> and fresh
@@ -138,7 +138,7 @@ a = b // the variable a is being bound</code></pre>
     </p>
     <pre><code>a + b  // the variable a is being used
 'a = b // the variable a is being bound</code></pre>
-    <h1>Step 2: Splitting Bindings and Blocks</h1>
+    <h2>Step 2: Splitting Bindings and Blocks</h2>
     <p>
       We haven't said anything about where and for how long a variable remains
       in scope. Let's make this scope explicit by writing “{ ... }”, which
@@ -218,7 +218,7 @@ a = b // the variable a is being bound</code></pre>
   Pair('x, 'x) -> { x },
   'x           -> { ... }
 ])</code></pre>
-    <h1>Step 3: Nesting Bindings and Blocks</h1>
+    <h2>Step 3: Nesting Bindings and Blocks</h2>
     <p>
       Let's add a bit more syntactic sugar: Right now blocks always have to be
       used <em>after</em> the explicit bindings that the block is supposed to
@@ -274,7 +274,7 @@ a = b // the variable a is being bound</code></pre>
   print(a),
   f(a)
 }</code></pre>
-    <h1>Step 4: Joining Bindings and Blocks</h1>
+    <h2>Step 4: Joining Bindings and Blocks</h2>
     <p>
       So far we have looked at how binding constructs can be <em>used,</em> but
       how can they actually be <em>defined?</em> Let's say we wanted to define
@@ -354,7 +354,7 @@ a = b // the variable a is being bound</code></pre>
         >Github</a
       >.
     </p>
-    <h1>Open Question: Using Bindings More Than Once</h1>
+    <h2>Open Question: Using Bindings More Than Once</h2>
     <p>
       The current proposal assumes that explicit bindings can only be used in a
       single scope, because they get consumed by the nearest block and are not

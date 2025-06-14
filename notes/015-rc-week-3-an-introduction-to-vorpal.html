@@ -10,7 +10,7 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-06-08">2025/06/08</time>
     </p>
-    <h1>RC Week 3:<br />A Gentle Introduction to Vorpal</h1>
+    <h2>RC Week 3:<br />A Gentle Introduction to Vorpal</h2>
     <p>
       <a href="./013-rc-week-1-vorpal-a-minimal-and-malleable-language.html"
         >Vorpal</a
@@ -19,10 +19,10 @@
       my 12 weeks at the <a href="https://www.recurse.com/">Recurse Center</a>.
       Here's what it looks like:
     </p>
-    <h1>Comments</h1>
+    <h2>Comments</h2>
     <p>Comments start with // and end at the end of the line.</p>
     <pre><code>// This is a comment.</code></pre>
-    <h1>Strings + Atoms</h1>
+    <h2>Strings + Atoms</h2>
     <p>
       The only basic data type that Vorpal provides are strings. Strings might
       be composite data types in other languages, but from the perspective of
@@ -46,7 +46,7 @@ BarBaz</code></pre>
       are different values. Uppercase identifiers are called atoms,
       double-quoted strings are just called strings.
     </p>
-    <h1>Compounds</h1>
+    <h2>Compounds</h2>
     <p>
       Strings and atoms can be applied to each other to form ad-hoc compound
       data structures without the need to define any types beforehand. An atom
@@ -58,7 +58,7 @@ Foo(X, Y)
 
 // A Pair of two other records:
 Pair(Section(X, Y), Paragraph(Z))</code></pre>
-    <h1>[] + Lists</h1>
+    <h2>[] + Lists</h2>
     <p>
       The empty atom is written [] and represents an empty list. Lists of values
       can be built by successively applying [] to values,
@@ -67,7 +67,7 @@ Pair(Section(X, Y), Paragraph(Z))</code></pre>
     <pre><code>[Foo, Bar, Baz] // ...is the same as:
 [](Baz, Bar, Foo) // ...which is the same as:
 (([](Baz))(Bar))(Foo)</code></pre>
-    <h1>Functions</h1>
+    <h2>Functions</h2>
     <p>
       Function names start with non-uppercase ASCII characters (otherwise they
       would be atoms). Here's an example of a function f being applied to the
@@ -104,7 +104,7 @@ foo: Bar             // ...is the same as foo(Bar)</code></pre>
       y, z) is sugar for <em>currying</em>, the repeated application of a
       function to a single argument.
     </p>
-    <h1>Variables + Bindings</h1>
+    <h2>Variables + Bindings</h2>
     <p></p>
     <p>
       All variables start with non-uppercase ASCII characters (otherwise they
@@ -121,7 +121,7 @@ foo: Bar             // ...is the same as foo(Bar)</code></pre>
       is being <em>bound</em>. This might look superfluous here, but will come
       in handy later on.
     </p>
-    <h1>Blocks</h1>
+    <h2>Blocks</h2>
     <p>
       New function can be defined using the => function, which binds one or more
       variables on the left-hand side to a function body enclosed in {...} on
@@ -143,7 +143,7 @@ foo: Bar             // ...is the same as foo(Bar)</code></pre>
       A Vorpal program is a collection of expressions that are implicitly
       wrapped in {...}.
     </p>
-    <h1>Recursion</h1>
+    <h2>Recursion</h2>
     <p>
       Recursive functions can be built using the ~> function, which binds a
       variable to itself:
@@ -154,7 +154,7 @@ foo: Bar             // ...is the same as foo(Bar)</code></pre>
         f(x, y) // This will call f recursively (and never terminate).
     }
 }</code></pre>
-    <h1>Pattern Matching</h1>
+    <h2>Pattern Matching</h2>
     <p>
       Apart from =, => and ~>, the most useful function provided by Vorpal are
       the pattern matching functions -> and match-with:
@@ -171,7 +171,7 @@ match: x with: [
       Foo has the value y, whereas the first element of Foo is <em>bound</em> to
       the variable x, not matter what the element's value is.
     </p>
-    <h1>Effects</h1>
+    <h2>Effects</h2>
     <p>
       What happens when no pattern matches the value? This is an example of an
       <em>effect</em>, which is like an exception that can be resumed by its
@@ -201,7 +201,7 @@ try: {
   // We handle it by resuming execution:
   resume(Twice(arg, arg))
 }</code></pre>
-    <h1>Commas and Newlines</h1>
+    <h2>Commas and Newlines</h2>
     <p>
       One last thing to point out is that commas and newlines are completely
       interchangeable in Vorpal. Every (...), [...] and {...} can contain one or

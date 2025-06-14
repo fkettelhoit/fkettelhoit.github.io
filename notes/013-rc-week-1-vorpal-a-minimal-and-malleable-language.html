@@ -10,7 +10,7 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-05-24">2025/05/24</time>
     </p>
-    <h1>RC Week 1:<br />Vorpal—A Minimal and Malleable Language</h1>
+    <h2>RC Week 1:<br />Vorpal—A Minimal and Malleable Language</h2>
     <p>
       This week marks my first week at the
       <a href="https://www.recurse.com/">Recurse Center</a>, where I got to meet
@@ -35,7 +35,7 @@
       (<a href="https://nicknoble.works/">Nick</a> perfectly described it as
       “end-user programming for <em>Rustaceans</em>”.)
     </p>
-    <h1>Minimal</h1>
+    <h2>Minimal</h2>
     <p>
       Vorpal is minimal, in the sense that the language provides a small core
       which can then be extended. This applies both to the syntax and the
@@ -57,7 +57,7 @@ if: x is: y do: {
 } else: {
     ...
 }</code></pre>
-    <h1>Malleable</h1>
+    <h2>Malleable</h2>
     <p>
       Not having any privileged control structures or special keywords makes
       Vorpal <em>malleable:</em> It is easy to make the language fit the problem
@@ -75,7 +75,7 @@ if: x is: y do: {
 'x = Pair(Foo, Bar)
 
 print!(first(x))</code></pre>
-    <h1>Effectful</h1>
+    <h2>Effectful</h2>
     <p>
       Any symbol ending with “!” is an <em>effect</em>, which can be handled
       using an <em>effect handler</em>. An effect is like an exception that is
@@ -100,7 +100,7 @@ try: {
 } catch: read! as: ('resume, 'arg) => {
     resume("TestInput")
 }</code></pre>
-    <h1>Symbiotic</h1>
+    <h2>Symbiotic</h2>
     <p>
       Effects don't have to be handled inside of Vorpal, it is fine to just let
       an effect bubble up all the way to the Rust host, who can then handle it
@@ -113,7 +113,7 @@ match: file with: (
   Ok('contents) -> { print!(contents) }
   Err('_)       -> { print!("Could not read file.") }
 )</code></pre>
-    <h1>Reasonable</h1>
+    <h2>Reasonable</h2>
     <p>
       Vorpal is in many ways a very dynamic language and built with a fast
       iteration speed in mind, but it also aims to be easy to
@@ -131,7 +131,7 @@ match: Pair(x, y) with: (
   Pair('_, '_) -> { "any pair" }
   '_           -> { "any value" }
 )</code></pre>
-    <h1>Reloadable</h1>
+    <h2>Reloadable</h2>
     <p>
       This goal is still aspirational (and one of the topics that I want to
       focus on at Recurse Center). One of the ideas behind Vorpal is to be able

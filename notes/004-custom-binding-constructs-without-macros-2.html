@@ -10,9 +10,9 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-03-22">2025/03/22</time>
     </p>
-    <h1>
+    <h2>
       Custom Binding Constructs Without Macros, Part 2: Desugaring Bindings
-    </h1>
+    </h2>
     <p>
       (This is a continuation of
       <a href="./003-custom-binding-constructs-without-macros.html"
@@ -43,7 +43,7 @@ match(v, Pair(x, 1), { print(x) })</code></pre>
       intuition of how variables are used: Renaming a variable should never
       change program behavior. Can we do better?
     </p>
-    <h1>Explicit Bindings</h1>
+    <h2>Explicit Bindings</h2>
     <p>
       Here's a proposal for how custom binding constructs could be defined
       without bringing in full macros, in other words, without exposing the
@@ -80,7 +80,7 @@ let('f, fn('x, { x + x }), { f(2) })
 //
 // { x + x } is desugared to x => x + x
 // { f(2) } is desugared to f => f(2)</code></pre>
-    <h1>Implementing a Binding Construct</h1>
+    <h2>Implementing a Binding Construct</h2>
     <p>
       So far, so good. But how can <em>binders</em>, functions that accept
       blocks, be implemented in such a way that they can bind explicit bindings
@@ -120,7 +120,7 @@ y == z // false</code></pre>
       variables and that renaming a binding never changes the behavior of a
       program.
     </p>
-    <h1>Runtime Reflection</h1>
+    <h2>Runtime Reflection</h2>
     <p>
       There's one more requirement if we want to make the match(v, Pair('x, 'x),
       { x }) example work: Pair('x, 'x) cannot be a struct that is sealed off
@@ -170,7 +170,7 @@ match(v, p, { ... })</code></pre>
       1.0) with Pair(1, 1) but the built-in equality does not support coercion
       between ints and floats, we're out of luck.
     </p>
-    <h1>Under the Hood</h1>
+    <h2>Under the Hood</h2>
     <p>
       Here's a sketch for a lower level language that is deliberately simple but
       supports just enough runtime reflection that explicit bindings and custom

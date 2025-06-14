@@ -10,7 +10,7 @@
     <p>
       <a href="..">Notes</a><br /><time datetime="2025-05-06">2025/05/06</time>
     </p>
-    <h1>A Stack-Based Bytecode VM for Vorpal</h1>
+    <h2>A Stack-Based Bytecode VM for Vorpal</h2>
     <p>
       This weekly note is a bit less self-contained than most of the previous
       ones, as it is about implementing a simple bytecode virtual machine for
@@ -19,7 +19,7 @@
       particularly novel, so this note is more of a summary for me than an
       article with a central argument.
     </p>
-    <h1>Desugaring Into Lambda Calculus</h1>
+    <h2>Desugaring Into Lambda Calculus</h2>
     <p>
       All source code is first parsed, then desugared into a simple form that is
       similar to untyped lambda calculus.
@@ -64,7 +64,7 @@
       evaluate to t applied to some nil-like value, otherwise it will evaluate
       to f applied to some nil-like value.
     </p>
-    <h1>A Stack-Based VM</h1>
+    <h2>A Stack-Based VM</h2>
     <p>
       Desugared expressions are then compiled into a list of bytecode
       instructions:
@@ -145,7 +145,7 @@
       as only the VM is aware of the return address and thus the following
       instruction.)
     </p>
-    <h1>Unifying Vars and Temps using Registers?</h1>
+    <h2>Unifying Vars and Temps using Registers?</h2>
     <p>
       Separating variables and temporaries into separate stacks turned out to be
       easier than trying to track the locations of variables using call frames
