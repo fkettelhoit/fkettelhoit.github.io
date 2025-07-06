@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="../styles/style.css" /><title>RC week 7: introduction to live reloading with replay semantics</title></head><body><p><a href="..#notes">Notes</a><br />2025/07/06</p><h1>RC week 7: introduction to live reloading with replay semantics</h1><p>Most modern software is developed by writing code in text files, running and testing the code, then stopping the running code to modify the text files, in a continuous write-run-stop cycle. Minimizing the time it takes to run code can greatly improve the overall development speed, for example by using a language that is fast to compile. But even in the absence of long compile times, <em>rebuilding the state</em> during each cycle can have a large impact on the iteration speed, especially in interactive programs that might depend on a lot of user input, where it quickly becomes tedious to rerun the same program over and over again.</p><p><em>Live reloading</em> code (sometimes known as <em>hot reloading</em>) is an alternative approach that keeps some or all of the program state alive between modifications of the code, so that the modified code can reuse previously computed results or user input without having to run the program from the start. Existing approaches generally fall into two categories:</p><ul><li>Most programming languages do not provide support for live reloading as part of the language, but libraries and frameworks might provide support for live reloading in specific situations, such as in game engines or in web development. These approaches specify what is reloaded and when a reload happens (each frame, each time a page is refreshed, etc).</li><li>Some programming languages do provide support for live reloading that is independent of a specific use case. Examples are Lisps with their Read-Eval-Print-Loops (REPLs), Smalltalk and Self with their focus on <em>images</em> that combine state and code, as well as Erlang (and other languages on the BEAM VM) that support hot reloading actors.</li></ul><p>Given that fast feedback cycles are generally desirable when developing software, one might ask why most languages only provide limited support for live reloading in the form of libraries and frameworks, if they provide support for it at all. Why do we not see more adoption of live reloading at the language level? Going further, why are write-run-stop cycles still the norm in software development, instead of being able to go from empty source file to fully working software without ever stopping a running program?</p><p>One answer is that the issue of <em>stale state</em> becomes much harder to solve in languages that support live reloading at the language level: Since a new version of a file or module might modify existing functions that have been used by other parts of the code, the live state of the system could contain data that is impossible to generate with the current version of the code and yet persists after a live reload. If the system were to be restarted from scratch at this point, the current version of the code would never be able to reach the same live state. In systems with unrestricted live reload, the textual code in the source files thus stops being the single source of truth, because the live state of the system might contain and depend on older versions with no counterparts in the source files. As a result, programmers have to actively pay attention not just to the source files but also to the code in the live state of the system and how it is being modified, which considerably complicates the mental model of the system as a whole.</p><p>A good example are Lisp systems, which traditionally deemphasize source files in favor of REPL-driven development. While experienced Lisp programmers often have a good mental model of when the current live session may end up containing stale state (and thus require a restart), novice programmers can quickly end up in a state that works in the current session, only to break due to missing function definitions (or definitions in the wrong order) when the program is restarted.</p><p>What would it take for a language to support live reloading at the language level in such a way that entire programs can be developed starting from an empty source file, without ever having to restart the live system and without ever ending up with stale state? Such an approach would exhibit <em>replay semantics:</em> Semantics that guarantee that no matter when and what code is reloaded, the live state of the system can always be reached by <em>replaying</em> the live session from the start, <em>by only using the most recently loaded version of the code</em>.</p><h2>A guessing game example</h2><p>Here's an example of how a live reload session could look like. How exactly the effects (such as <code>random()</code>, <code>read_num_stdin()</code>, <code>print()</code>) are handled will not be discussed here, as this is where different live reload systems will differ.</p><p>Let's start with an empty file for a guessing game:</p><pre><code>// guess_number (v0)
+</code></pre><p>At first, the main logic of a guessing game is sketched out:</p><pre><code>// guess_number (v1)
+const secret = random();
+const guess = read_num_stdin();
+if (guess &lt; secret) {
+    print(&quot;&lt;&quot;);
+} else if (guess &gt; secret) {
+    print(&quot;&gt;&quot;);
+} else {
+    print(&quot;success&quot;);
+}
+</code></pre><p>This only allows a single guess, so let's wrap everything in a loop:</p><pre><code>// guess_number (v2)
+while (true) {
+    const secret = random();
+    const guess = read_num_stdin();
+    if (guess &lt; secret) {
+        print(&quot;&lt;&quot;);
+    } else if (guess &gt; secret) {
+        print(&quot;&gt;&quot;);
+    } else {
+        print(&quot;success&quot;);
+    }
+}
+</code></pre><p>Oops, we made a mistake, the <code>random()</code> function should only be called once:</p><pre><code>// guess_number (v3)
+const secret = random();
+while (true) {
+    const guess = read_num_stdin();
+    if (guess &lt; secret) {
+        print(&quot;&lt;&quot;);
+    } else if (guess &gt; secret) {
+        print(&quot;&gt;&quot;);
+    } else {
+        print(&quot;success&quot;);
+    }
+}
+</code></pre><p>Better. Now we can improve the printed messages a bit:</p><pre><code>// guess_number (v4)
+const secret = random();
+while (true) {
+    const guess = read_num_stdin();
+    if (guess &lt; secret) {
+        print(&quot;Your guess is &lt; my number.&quot;);
+    } else if (guess &gt; secret) {
+        print(&quot;Your guess is &gt; my number.&quot;);
+    } else {
+        print(&quot;You guessed my number!&quot;);
+    }
+}
+</code></pre><p>Let's split this into two files and communicate between them using effect handlers:</p><pre><code>// guess_number (v5)
+const secret = random();
+let attempt = 1;
+while (true) {
+    try {
+        exec(&quot;guess_inner.js&quot;);
+    } handle (get_secret()) {
+        resume(secret);
+    } handle (get_attempt()) {
+        resume(attempt);
+    }
+    attempt += 1;
+}
+
+// guess_inner (v0)
+const guess = read_num_stdin();
+print(&quot;Attempt &quot; + attempt);
+if (guess &lt; secret) {
+    print(&quot;Your guess is &lt; my number.&quot;);
+} else if (guess &gt; secret) {
+    print(&quot;Your guess is &gt; my number.&quot;);
+} else {
+    print(&quot;You guessed my number!&quot;);
+}
+</code></pre><p>As a last step, let's only print the message starting with the second attempt:</p><pre><code>// guess_inner (v1)
+const guess = read_num_stdin();
+if (attempt &gt; 1) {
+    print(&quot;Attempt &quot; + attempt);
+}
+if (guess &lt; secret) {
+    print(&quot;Your guess is &lt; my number.&quot;);
+} else if (guess &gt; secret) {
+    print(&quot;Your guess is &gt; my number.&quot;);
+} else {
+    print(&quot;You guessed my number!&quot;);
+}
+</code></pre></body></html>
