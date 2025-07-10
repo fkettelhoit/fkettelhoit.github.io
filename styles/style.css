@@ -23,8 +23,9 @@ img {
 }
 
 h1,
-h2 {
-    font-weight: 700;
+h2,
+h3 {
+    font-weight: 500;
     font-family: Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif;
 }
 
@@ -41,9 +42,8 @@ h2 {
 }
 
 h3 {
-    font-size: 14pt;
+    font-size: 16pt;
     margin: 36pt 0 12pt 0;
-    font-weight: 300;
 }
 
 p,
@@ -75,18 +75,39 @@ pre code {
 
 a,
 a:visited {
+    color: #000;
+}
+
+a[href*='//'],
+a[href*='//']:visited {
+    text-decoration-color: #ffe100;
+    text-decoration-thickness: 4pt;
+
+    &:hover,
+    &:active {
+        text-decoration-color: #000;
+    }
+}
+
+a:not([href*='//']),
+a:not([href*='//']):visited {
+    position: relative;
+    /* Required for z-index to work */
     text-decoration: none;
     background-color: #ffe100;
-    color: #000;
     padding: 3pt 2pt;
     /* to keep the padding consistent for line breaks: */
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
-}
+    z-index: 1;
 
-a:hover,
-a:active {
-    text-decoration: underline;
+    &:hover,
+    &:active {
+        color: #ffe100;
+        /* color: #fff; */
+        background-color: #000;
+        z-index: 10;
+    }
 }
 
 img {
