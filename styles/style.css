@@ -32,7 +32,9 @@ h3 {
 h1 {
     font-size: 44pt;
     line-height: 48pt;
-    margin: 72pt 0 24pt 0;
+    margin: 128pt 0 72pt 0;
+    text-align: center;
+    text-wrap: balance;
 }
 
 h2 {
@@ -91,8 +93,8 @@ a[href*='//']:visited {
 
 a:not([href*='//']),
 a:not([href*='//']):visited {
+    /* Required for z-index to work: */
     position: relative;
-    /* Required for z-index to work */
     text-decoration: none;
     background-color: #ffe100;
     padding: 3pt 2pt;
@@ -104,7 +106,6 @@ a:not([href*='//']):visited {
     &:hover,
     &:active {
         color: #ffe100;
-        /* color: #fff; */
         background-color: #000;
         z-index: 10;
     }
