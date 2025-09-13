@@ -26,6 +26,13 @@ blockquote {
     margin: 0 0 24pt 24pt;
 }
 
+footer {
+    margin: 48pt 0 24pt 0;
+    font-style: italic;
+    text-align: center;
+    color: #666;
+}
+
 h1,
 h2,
 h3 {
@@ -82,7 +89,7 @@ pre code {
 
 a,
 a:visited {
-    color: #000;
+    color: unset;
 }
 
 a[href*='//'],
