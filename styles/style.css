@@ -22,6 +22,10 @@ img {
     margin: 0 0 24pt 0;
 }
 
+blockquote {
+    margin: 0 0 24pt 24pt;
+}
+
 h1,
 h2,
 h3 {
@@ -50,7 +54,8 @@ h3 {
 
 p,
 li,
-h3 {
+h3,
+blockquote {
     line-height: 24pt;
 }
 
