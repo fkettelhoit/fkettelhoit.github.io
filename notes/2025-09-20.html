@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="../styles/style.css" /><title>RC week 17: test cases for paradoxical fixed points</title></head><body><p><a href="..#notes">Notes</a><br />2025/09/20</p><h1>RC week 17: test cases for paradoxical fixed points</h1><p>Continuing <a href="./2025-09-13.html">last week's thoughts</a> about paradoxical solutions for recursive loops that show similarities to the halting problem, here are a couple of “test cases” that any attempted solution should be able to handle.</p><p>The following code snippets all assume that the language provides some kind of paradoxical values, such as <code>"x" & "y"</code>, which are <em>both</em> <code>"x"</code> and <code>"y"</code> <em>at the same time.</em> When the paradoxical value <code>"x" & "y"</code> is compared to the normal value <code>"x"</code> using an if-then-else construct, the paradoxical value matches <em>both</em> the then-branch and the else-branch.</p><p>What this means in practice depends on the implementation and on the logical laws that govern the behavior of paradoxical values.</p><h2>Prologue: equality</h2><p>If paradoxical values are part of the language and can be referred to from within the language (as opposed to being constructs in some meta language), it is possible to compare a paradoxical value against another (syntactically equivalent) paradoxical value:</p><pre><code>v = &quot;x&quot; &amp; &quot;y&quot;
+if v == (&quot;x&quot; &amp; &quot;y&quot;):
+    a
+else:
+    b
+</code></pre><p>If two paradoxical values are compared using some form of distributive law, it must be guaranteed that the comparison of two syntactically equivalent values simply evaluate to being true. In other words, the comparison of two equivalent paradoxes must not lead to a paradox:</p><pre><code># this should always evaluate to `x`
+if v == v:
+    x
+else:
+    y
+</code></pre><p>With that out of the way, let's look at a few test cases that involve recursive loops:</p><h2>The Liar</h2><p>The whole reason for introducing paradoxical values is that we want to be able to reason about self-referential expressions that resemble the liar's paradox:</p><pre><code># should lead to a paradox like &quot;x&quot; &amp; &quot;y&quot;
+def f():
+    if f() == &quot;x&quot;:
+        &quot;y&quot;
+    else:
+        &quot;x&quot;
+</code></pre><h2>The captured liar</h2><p>But if paradoxical values can be named in the language, it becomes possible to “capture” a paradox and then return a non-paradoxical value. A valid prediction must thus be “stronger” than just <code>"x" & "y"</code>:</p><pre><code>def f():
+    if f() == (&quot;x&quot; &amp; &quot;y&quot;):
+        &quot;y&quot;
+    else:
+        &quot;x&quot;
+</code></pre><h2>The escaped liar</h2><p>Here's another variant, which embeds the liar in the else-branch of the captured liar. If <code>"x" & "y"</code> is a valid prediction for the liar, a stronger prediction is necessary for this case, because <code>"x" & "y"</code> would just return the non-paradoxical <code>"x"</code>. A prediction for such a strengthened liar must thus be stronger than <code>"x" & "y"</code> without collapsing back into <code>"x" & "y"</code>.</p><pre><code>def f():
+    if f() == (&quot;x&quot; &amp; &quot;y&quot;):
+        &quot;x&quot;
+    else:
+        if f() == &quot;x&quot;:
+            &quot;y&quot;
+        else:
+            &quot;x&quot;
+</code></pre><h2>The escaped liar, part 2</h2><p>Like the above, but returning a different value in case the liar is captured:</p><pre><code>def f():
+    if f() == (&quot;x&quot; &amp; &quot;y&quot;):
+        &quot;z&quot;
+    else:
+        if f() == &quot;x&quot;:
+            &quot;y&quot;
+        else:
+            &quot;x&quot;
+</code></pre><h2>The liar's twin</h2><p>Now we come to a few equivalences that should hold even in the presence of paradoxes. We often reason about conditionals by analyzing the cases, inferring that in the else-branch of <code>if v == "x": ... else: ...</code> the value <code>v</code> can never be equal to <code>"x"</code>. This should be preserved in the presence of paradoxical values <code>v</code> which could be <em>both</em> <code>"x"</code> and not <code>"x"</code>.</p><pre><code># f should be identical to the following:
+#
+# def f():
+#     if f() == &quot;x&quot;:
+#         &quot;y&quot;
+#     else:
+#         &quot;x&quot;
+#
+def f():
+    if f() == &quot;x&quot;:
+        &quot;y&quot;
+    else:
+        if f() == &quot;x&quot;:
+            &quot;y&quot;
+        else:
+            &quot;x&quot;
+</code></pre><h2>The liar's twin, part 2</h2><p>Like the above, but returning a different value in the nested then-branch:</p><pre><code># f should be identical to the following:
+#
+# def f():
+#     if f() == &quot;x&quot;:
+#         &quot;y&quot;
+#     else:
+#         &quot;x&quot;
+#
+def f():
+    if f() == &quot;x&quot;:
+        &quot;y&quot;
+    else:
+        if f() == &quot;x&quot;:
+            &quot;z&quot;
+        else:
+            &quot;x&quot;
+</code></pre><h2>Epilogue: referential transparency</h2><p>Lastly, if paradoxical values are meant to be the fixed points of loops, we come to the question of how different paradoxical values interact without breaking referential transparency, in other words, without breaking the guarantee that variables can be freely substituted for their values and vice versa.</p><p>For example, let's consider the following function:</p><pre><code>def f():
+    g = f
+    if f() == &quot;x&quot;:
+        &quot;y&quot;
+    else:
+        if g() == &quot;x&quot;:
+            &quot;z&quot;
+        else:
+            &quot;x&quot;
+</code></pre><p>Since <code>g</code> is equal to <code>f</code>, the function should never return <code>"z"</code>, because whenever <code>g() == "x"</code> it is also the case that <code>f() == "x"</code>, so <code>"y"</code> should be returned. This would allow us to simplify the above to the following:</p><pre><code>def f():
+    if f() == &quot;x&quot;:
+        &quot;y&quot;
+    else:
+        &quot;x&quot;
+</code></pre><p>This is just the liar, so it should evaluate to the paradoxical value <code>"x" & "y"</code>. But if we now take this value for <code>f()</code> and substitute it in the code snippet that we started with, we get the following:</p><pre><code>def f():
+    if (&quot;x&quot; &amp; &quot;y&quot;) == &quot;x&quot;:
+        &quot;y&quot;
+    else:
+        if (&quot;x&quot; &amp; &quot;y&quot;) == &quot;x&quot;:
+            &quot;z&quot;
+        else:
+            &quot;x&quot;
+</code></pre><p>But this is clearly not equal to the liar, because the inner conditional would evaluate to <code>"x" & "z"</code>:</p><pre><code>def f():
+    if (&quot;x&quot; &amp; &quot;y&quot;) == &quot;x&quot;:
+        &quot;y&quot;
+    else:
+        &quot;x&quot; &amp; &quot;z&quot;
+</code></pre><p>The lesson here is that we need to be careful how we substitute equal values in the presence of recursion, because fixed points implicitly have a notion of “scope” due to being recursive.</p><footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer></body></html>
