@@ -8,7 +8,7 @@ if v == v:
     x
 else:
     y
-</code></pre><p>With that out of the way, let's look at a few test cases that involve recursive loops:</p><h2>The Liar</h2><p>The whole reason for introducing paradoxical values is that we want to be able to reason about self-referential expressions that resemble the liar's paradox:</p><pre><code># should lead to a paradox like &quot;x&quot; &amp; &quot;y&quot;
+</code></pre><p>With that out of the way, let's look at a few test cases that involve recursive loops:</p><h2>The liar</h2><p>The whole reason for introducing paradoxical values is that we want to be able to reason about self-referential expressions that resemble the liar's paradox:</p><pre><code># should lead to a paradox like &quot;x&quot; &amp; &quot;y&quot;
 def f():
     if f() == &quot;x&quot;:
         &quot;y&quot;
