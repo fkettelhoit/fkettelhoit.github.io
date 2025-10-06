@@ -42,7 +42,6 @@ h2 {
     font-weight: 700;
     font-family: "Imbue", serif;
     font-style: italic;
-    text-wrap: balance;
 }
 
 h1 {
@@ -74,6 +73,13 @@ h3::after {
     margin-left: 1rem;
     height: var(--line-thickness);
     background-color: black;
+}
+
+h1,
+h2,
+h3,
+ul {
+    text-wrap: balance;
 }
 
 p,
