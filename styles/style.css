@@ -147,7 +147,10 @@ a:not([href*='//']):visited {
     text-decoration: none;
     background-color: black;
     color: #ddd;
-    padding: 4pt 2pt;
+    padding: 4pt;
+    /* to keep the padding consistent for line breaks: */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
 
     &:hover,
     &:active {
