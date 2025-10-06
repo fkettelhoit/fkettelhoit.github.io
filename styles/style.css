@@ -113,7 +113,8 @@ img {
 }
 
 ul {
-    padding: 0;
+    padding-left: 24pt;
+    list-style-type: square;
 }
 
 strong {
