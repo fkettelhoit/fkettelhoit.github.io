@@ -1,16 +1,16 @@
 @font-face {
-    font-family: 'Wintyr';
-    src: url('../fonts/WintyrVF.woff2') format('woff2'),
-        url('../fonts/WintyrVF.ttf') format('truetype');
+    font-family: "Wintyr";
+    src: url("../fonts/WintyrVF.woff2") format("woff2"),
+        url("../fonts/WintyrVF.ttf") format("truetype");
     font-weight: 100 900;
     font-style: normal;
     font-display: block;
 }
 
 @font-face {
-    font-family: 'Imbue';
-    src: url('../fonts/Imbue.woff2') format('woff2'),
-        url('../fonts/Imbue.ttf') format('truetype');
+    font-family: "Imbue";
+    src: url("../fonts/Imbue.woff2") format("woff2"),
+        url("../fonts/Imbue.ttf") format("truetype");
     font-weight: 100 900;
     font-display: block;
 }
@@ -23,6 +23,7 @@
 html {
     scroll-behavior: smooth;
     text-transform: lowercase;
+    position: relative;
 }
 
 body {
@@ -34,7 +35,21 @@ body {
     font-family: "Wintyr", monospace;
     font-optical-sizing: auto;
     font-style: normal;
-    font-feature-settings: 'ss01' 1, 'ss08' 1, 'ss13' 1;
+    font-feature-settings: "ss01" 1, "ss08" 1, "ss13" 1;
+}
+
+html::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, #ccc 1px, transparent 1px);
+    background-size: 24pt 24pt;
+    background-position: calc((100vw - 45em) / 2 + 1em) 0;
+    pointer-events: none;
+    z-index: -1;
 }
 
 h1,
@@ -47,7 +62,7 @@ h2 {
 h1 {
     font-size: 72pt;
     line-height: 72pt;
-    margin: 128pt 0 72pt 0;
+    margin: 120pt 0 72pt 0;
 }
 
 h2 {
@@ -62,22 +77,23 @@ h3 {
     line-height: 24pt;
     font-weight: 300;
     font-style: italic;
-    margin: 60pt 0 12pt 0;
+    margin: 48pt 0 24pt 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 }
 
 h3::after {
-    content: '';
+    content: "";
     flex: 1;
+    min-width: 50%;
     margin-left: 1rem;
     height: var(--line-thickness);
     background-color: black;
+    margin-top: calc(12pt - (var(--line-thickness) / 2));
 }
 
 h1,
 h2,
-h3,
 ul {
     text-wrap: balance;
 }
@@ -85,7 +101,8 @@ ul {
 p,
 li,
 h3,
-blockquote {
+blockquote,
+footer {
     line-height: 24pt;
 }
 
@@ -144,7 +161,8 @@ a:visited {
 }
 
 a:not([href*='//']),
-a:not([href*='//']):visited {
+a:not([href*='//']):visited
+{
     text-decoration: none;
     background-color: black;
     color: #ddd;
@@ -161,7 +179,8 @@ a:not([href*='//']):visited {
 }
 
 a[href*='//'],
-a[href*='//']:visited {
+a[href*='//']:visited
+{
     padding: 4pt 0;
     text-decoration-thickness: var(--line-thickness);
     text-underline-offset: 4pt;
