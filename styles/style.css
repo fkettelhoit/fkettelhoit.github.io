@@ -160,8 +160,8 @@ a:visited {
   color: unset;
 }
 
-a:not([href*='//']),
-a:not([href*='//']):visited
+a:not([href*='//']):not([href*='mailto:']),
+a:not([href*='//']):not([href*='mailto:']):visited
 {
   text-decoration: none;
   background-color: black;
@@ -178,6 +178,7 @@ a:not([href*='//']):visited
   }
 }
 
+a[href*='mailto:'],
 a[href*='//'],
 a[href*='//']:visited
 {
