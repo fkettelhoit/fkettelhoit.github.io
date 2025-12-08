@@ -115,9 +115,9 @@ code {
 }
 
 pre {
-  margin: 0 0 24pt 0;
+  margin: 36pt 0 36pt 0;
   outline: var(--line-thickness) solid black;
-  padding: 0 12pt;
+  padding: 12pt;
   white-space: pre;
   overflow-x: auto;
   overflow-y: hidden;
@@ -126,7 +126,7 @@ pre {
 
 pre code {
   line-height: 24pt;
-  font-weight: 500;
+  font-weight: 300;
   font-variation-settings: "MONO" 1;
 }
 
