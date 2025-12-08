@@ -196,5 +196,5 @@ a[href*='//']:visited
 
 img {
   width: 100%;
-  border: var(--line-thickness) solid black;
+  outline: var(--line-thickness) solid black;
 }
