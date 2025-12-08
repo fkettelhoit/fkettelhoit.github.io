@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="../styles/style.css" /><title>Colons for bindings, macros, types and keywords</title></head><body><p><a href="..#notes">Notes</a><br />2025/12/07</p><h1>Colons for bindings, macros, types and keywords</h1><p>As part of sketching out Kombucha's <a href="./2025-11-30.html">type system</a>, I've been thinking about how to reduce the visual noise in Kombucha's syntax, primarily in two areas: macros and keyword calls.</p><h2>Bindings and macros</h2><p>Right now, Kombucha's macro system requires every binding (every “variable-to-be-bound”) to be marked using an explicit prefix colon, both when variables are to be bound in the enclosing scope and in an explicit <code>{...}</code> block:</p><pre><code>// `p` will be bound
+:p = Point(x, y)
+
+match (p) [
+    // `x` and `y` will be bound
+    Point(:x, :y) -&gt; {
+        // ...
+    }
+]
+</code></pre><p>Peppering the code with <code>:</code> prefixes isn't exactly pretty. It would be possible to infer from context that <code>x</code> and <code>y</code> are bindings in the pattern matching example, because a <code>{...}</code> block appears on the right hand side of <code>-></code>. However, this is harder to do for something like assignment using <code>=</code>, because <code>p</code> will be bound in the <em>enclosing</em> scope.</p><p>Not all statements in the outer scope bind something though, some just cause side effects:</p><pre><code>// `=` binds the value bar to foo
+:foo = bar
+
+// print presumably has a side effect
+print(foo)
+</code></pre><p>These two cases need to be desugared differently, which is why Kombucha's current syntax requires the <code>:</code> prefix for <code>:foo</code>, so that it's clear that <code>=</code> acts as a macro and not as a side effect.</p><p>Is there a better solution for the enclosing scope that could infer that <code>foo</code> is supposed to be a binding, similar to the pattern matching case?</p><p>One option is to assume that <em>all</em> identifiers that appear to the left hand side of an infix function are to be bound, unless the whole expression is explicitly marked as a side effect, for example using <code>;</code>. (If identifiers on the left hand side of an infix function are to be used as <em>values</em>, they can be explicitly resolved using the pin syntax <code>^foo</code>.)</p><p>The above examples would then look as follows:</p><pre><code>// `p` will be bound
+p = Point(x, y)
+
+match (p) [
+    // `x` and `y` will be bound
+    Point(x, y) -&gt; {
+        // ...
+    }
+]
+
+// `=` binds the value bar to foo
+foo = bar
+
+// print has a side effect
+print(foo);
+</code></pre><p>This has a few drawbacks:</p><ul><li>The macro system would be restricted to infix functions. Additionally, bindings can only appear as the left hand side argument of an infix function. (But separate syntax could later be added for explicitly calling prefix functions as macros.)</li><li>The <code>;</code> suffix is necessary to mark an expression as having a side effect, even in inline contexts separated with commas, leading to expressions such as <code>{ foo = bar, print(foo);, baz = qux }</code>. (This could be solved by breaking the assumption that newlines and commas are always interchangeable.)</li></ul><p>An even more restrictive alternative would be to assume that (inside of blocks) infix functions are always macros that bind variables, whereas prefix functions always have side effects.</p><h2>Types and keywords</h2><p>Kombucha currently uses postfix <code>:</code> for Ruby/Elixir-inspired <a href="https://hexdocs.pm/elixir/keywords-and-maps.html">keyword lists</a>: A keyword is any identifier followed by a colon. Prefix function calls can have trailing keyword arguments, which are pairs of keywords and expressions:</p><pre><code>// This keyword list...
+if (x == y) do: {
+    print(&quot;true&quot;)
+} else: {
+    print(&quot;false&quot;)
+}
+
+// ...is desugared to:
+if(
+    x == y,
+    [
+        [&quot;do&quot;, { print(&quot;true&quot;) }],
+        [&quot;else&quot;, { print(&quot;false&quot;) }]
+    ]
+)
+</code></pre><p>This also makes for a nice data language, because atoms (identifiers starting with an uppercase letter, acting as interned strings) support this syntax as well:</p><pre><code>// This...
+Link href: &quot;http://example.com&quot; title: &quot;Just an example&quot;
+
+// ...is desugared to:
+Link([
+    [&quot;href&quot;, &quot;http://example.com&quot;],
+    [&quot;title&quot;, &quot;Just an example&quot;]
+])
+</code></pre><p>It is sometimes nice to write these keyword calls on multiple lines, which is why Kombucha interprets an expression <code>foo: bar</code> as <code>["foo", bar]</code> and also allows <code>[...]</code> to appear as a trailing argument:</p><pre><code>// This...
+Link [
+    href: &quot;http://example.com&quot;
+    title: &quot;Just an example&quot;
+]
+
+// ...is desugared to:
+Link([
+    [&quot;href&quot;, &quot;http://example.com&quot;],
+    [&quot;title&quot;, &quot;Just an example&quot;]
+])
+</code></pre><p>But it would be nice to use a postfix <code>:</code> for type annotations, as this has become the standard syntax in most modern languages. While this might be compatible with keyword function calls (where keywords only appear <em>after</em> the initial function identifier, never as the first part of an expression), it would however conflict with the above syntax, because <code>x: y</code> could either stand for <code>["x", y]</code> or the value <code>x</code> followed by the type <code>y</code>.</p><p>What's the best way to solve this? There are a few options:</p><ul><li>Continue using <code>:</code> for keyword arguments, use a different syntax for type annotations, such as <code>::</code>. This would work, but feels quite unfamiliar coming from other languages. Additionally, type annotations will likely be used more often than keyword arguments and should have a succinct syntax.</li><li>Use <code>:</code> for types, use a different syntax for keyword arguments. It is unclear what kind of syntax would make sense for keyword calls though.</li><li>Use <code>:</code> for both keyword arguments and types, drop support for <code>x: y</code> as sugar for <code>["x", y]</code>. This would work, but would make the data language considerably less elegant and force all keyword arguments to appear on the same line.</li><li>Use <code>:</code> for both keyword arguments and types, disambiguate based on the context. Types can only appear after bindings and bindings can only appear in limited contexts where the macro system supports them. However, there are context such as patterns where both type annotations and the sugar for keyword pairs would make sense.</li></ul><h2>Preliminary decisions</h2><p>Here's what I'm leaning towards, for bindings, macros, types and keywords:</p><ul><li>Drop prefix <code>:</code> for bindings completely, disambiguate based on context, only allow macro arguments on the left hand side of infix expressions. This would restrict macros quite a bit, but perhaps that's fine?</li><li>Don't use <code>;</code> for sequencing, instead consider all prefix function calls (possibly with keyword arguments) to have side effects, consider all infix calls to be macros that bind variables.</li><li>Use <code>:</code> for trailing keyword arguments after prefix function calls, just as Kombucha does right now. This makes it possible to build most language constructs.</li><li>Use <code>:</code> for types, because it is the most familiar syntax. Type annotations are only allowed after bindings, which are determined by the macro system.</li><li>Disallow <code>:</code> for pairs, so that <code>x: y</code> never desugars to <code>["x": y]</code> and can only be used for type annotations.</li></ul><p>I'm not happy about the last decision, but making <code>x: y</code> context-dependent would be both confusing and require the parser to be aware of the macro desugaring, which I've been trying to avoid until this point.</p><p>Those are the preliminary decisions. Let's see whether that combination works in practice.</p><footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer></body></html>
