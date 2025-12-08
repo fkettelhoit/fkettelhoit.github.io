@@ -116,8 +116,8 @@ code {
 
 pre {
   margin: 0 0 24pt 0;
-  border: var(--line-thickness) solid black;
-  padding: 12pt;
+  outline: var(--line-thickness) solid black;
+  padding: 0 12pt;
   white-space: pre;
   overflow-x: auto;
   overflow-y: hidden;
@@ -125,8 +125,8 @@ pre {
 }
 
 pre code {
-  line-height: 12pt;
-  font-weight: 300;
+  line-height: 24pt;
+  font-weight: 500;
   font-variation-settings: "MONO" 1;
 }
 
