@@ -175,7 +175,22 @@ ul {
 
 ul {
   padding-left: 2rem;
-  list-style-type: square;
+  list-style-type: none;
+}
+
+li {
+  position: relative;
+}
+
+li::before {
+  content: "";
+  position: absolute;
+  left: -1rem;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(var(--line-thickness) * 2);
+  height: calc(var(--line-thickness) * 2);
+  background-color: black;
 }
 
 strong {
