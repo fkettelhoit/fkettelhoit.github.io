@@ -132,22 +132,34 @@ footer {
   line-height: 2rem;
 }
 
+img {
+  margin: 2rem 0 2rem 0;
+  /* combine border and outline so that the line sits right on the dot grid */
+  border: calc(var(--line-thickness) / 2) solid black;
+  outline: calc(var(--line-thickness) / 2) solid black;
+  padding: 0;
+  display: block;
+  width: 100%;
+}
+
+pre {
+  margin: 2rem -2rem 2rem -2rem;
+  /* combine border and outline so that the line sits right on the dot grid */
+  border: calc(var(--line-thickness) / 2) solid black;
+  outline: calc(var(--line-thickness) / 2) solid black;
+  padding: 2rem;
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
+
 code {
   font-family: "Wintyr", monospace;
   font-optical-sizing: auto;
   font-style: normal;
   font-weight: 700;
   text-transform: none;
-}
-
-pre {
-  margin: 3rem -1rem 3rem -1rem;
-  outline: var(--line-thickness) solid black;
-  padding: 1rem;
-  white-space: pre;
-  overflow-x: auto;
-  overflow-y: hidden;
-  max-width: 100%;
 }
 
 pre code {
@@ -157,8 +169,7 @@ pre code {
 }
 
 p,
-ul,
-img {
+ul {
   margin: 0 0 2rem 0;
 }
 
@@ -218,9 +229,4 @@ a[href*='//']:visited
     color: black;
     background-color: var(--color-yellow);
   }
-}
-
-img {
-  width: 100%;
-  outline: var(--line-thickness) solid black;
 }
