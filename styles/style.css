@@ -186,9 +186,8 @@ li {
 li::before {
   content: "";
   position: absolute;
-  left: -1rem;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  left: calc(-1rem - var(--line-thickness));
+  top: calc(1rem - var(--line-thickness));
   width: calc(var(--line-thickness) * 2);
   height: calc(var(--line-thickness) * 2);
   background-color: black;
