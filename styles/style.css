@@ -24,7 +24,6 @@
 
 html {
   scroll-behavior: smooth;
-  text-transform: lowercase;
   position: relative;
 }
 
@@ -102,7 +101,7 @@ h3 {
   font-family: "Wintyr", monospace;
   font-size: 1rem;
   line-height: 2rem;
-  font-weight: 300;
+  font-weight: 700;
   font-style: italic;
   margin: 4rem 0 0rem 0;
   display: flex;
