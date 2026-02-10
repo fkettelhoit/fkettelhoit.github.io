@@ -20,6 +20,7 @@
   --line-thickness: 2px;
   --max-width: 46rem;
   --hover-padding: 0.25rem;
+  --dotgrid-offset: max(((100vw - var(--max-width)) / 2 - 2rem), 1rem);
 }
 
 html {
@@ -37,6 +38,13 @@ body {
   font-optical-sizing: auto;
   font-style: normal;
   font-feature-settings: "ss01" 1, "ss08" 1, "ss13" 1;
+}
+
+@media (max-width: 46rem) {
+  body {
+    margin-left: calc(mod(100vw, 2rem) / 2);
+    margin-right: calc(mod(100vw, 2rem) / 2);
+  }
 }
 
 p,
@@ -59,12 +67,12 @@ footer::before {
   content: "";
   position: absolute;
   top: -2.2rem;
-  left: min(-1 * ((100vw - var(--max-width)) / 2 - 2rem), -1rem);
-  right: min(-1 * ((100vw - var(--max-width)) / 2 - 2rem), -1rem);
+  left: calc(-1 * var(--dotgrid-offset));
+  right: calc(-1 * var(--dotgrid-offset));
   bottom: -2.2rem;
   background: radial-gradient(circle at center, #bbb 1px, transparent 1px);
   background-size: 2rem 2rem;
-  background-position: calc((100vw - var(--max-width)) / 2 + 1rem) 1.2rem;
+  background-position: calc(var(--dotgrid-offset) - 1rem) 1.2rem;
   pointer-events: none;
   z-index: -1;
 }
