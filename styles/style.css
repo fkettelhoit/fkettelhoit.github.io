@@ -61,6 +61,21 @@ nav > ul > li::before {
   }
 }
 
+section {
+  position: relative;
+}
+
+section::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--line-thickness) / 2 - 2rem);
+  top: 1rem;
+  bottom: 0;
+  width: 1rem;
+  border-top: var(--line-thickness) solid black;
+  border-left: var(--line-thickness) solid black;
+}
+
 p,
 h1,
 h2,
