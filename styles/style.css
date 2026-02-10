@@ -40,10 +40,24 @@ body {
   font-feature-settings: "ss01" 1, "ss08" 1, "ss13" 1;
 }
 
-@media (max-width: 46rem) {
+nav > ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0rem 0.5rem;
+  padding: 0;
+}
+
+nav > ul > li::before {
+  display: none;
+}
+
+@media (max-width: 48rem) {
   body {
     margin-left: calc(mod(100vw, 2rem) / 2);
     margin-right: calc(mod(100vw, 2rem) / 2);
+  }
+  nav > ul {
+    display: block;
   }
 }
 
