@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="../styles/style.css" /><title>RC week 1: Kombucha—a minimal and malleable language</title></head><body><p><a href="..#notes">Notes</a><br />2025/05/24</p><h1>RC week 1: Kombucha—a minimal and malleable language</h1><p>This week marks my first week at the <a href="https://www.recurse.com/">Recurse Center</a>, where I got to meet a lot of amazing people and had a ton of interesting conversations. I didn't find a lot of time to work on my programming language, Kombucha, but I got the chance to talk about why I'm building a new language and realized that I'm bad at explaining it. So here's why:</p><p>I'm building a <em>minimal</em> and <em>malleable</em> language for <em>end-user programming.</em></p><p>In many ways, Kombucha is supposed to be the opposite of Rust: Kombucha is intended for <em>programming in the small</em>, for <em>incremental development</em> with a <em>rapid feedback cycle</em>. It does not compete with Rust, but is meant to extend Rust <em>symbiotically</em>.</p><p>(<a href="https://nicknoble.works/">Nick</a> perfectly described it as "end-user programming for <em>Rustaceans</em>".)</p><h2>Minimal</h2><p>Kombucha is minimal, in the sense that the language provides a small core which can then be extended. This applies both to the syntax and the semantics of the language: Kombucha's syntax is extremely small and regular, there are no built-in keywords or control structures with special syntax, even variable assignment is just a normal function. Kombucha is similar to Lisps in this regard, but Kombucha additionally provides some syntactic sugar that avoids Lisp's parentheses-heavy syntax.</p><pre><code>// prefix function call
+f(x, y)
+
+// infix function call
+x f y
+
+// keyword function call
+if: x is: y do: {
+    ...
+} else: {
+    ...
+}
+</code></pre><h2>Malleable</h2><p>Not having any privileged control structures or special keywords makes Kombucha <em>malleable:</em> It is easy to make the language fit the problem domain. Even something as fundamental as pattern matching does not need to be built into Kombucha, because it can be defined as a function and then used like any other function.</p><pre><code>&apos;first(&apos;x, &apos;y) = {
+  match: Pair(x, y) with: (
+    Pair(&apos;x, &apos;y) -&gt; { x }
+    &apos;_           -&gt; { throw!(&quot;expected a pair!&quot;) }
+  )
+}
+
+&apos;x = Pair(Foo, Bar)
+
+print!(first(x))
+</code></pre><h2>Effectful</h2><p>Any symbol ending with <code>!</code> is an <em>effect</em>, which can be handled using an <em>effect handler</em>. An effect is like an exception that is <em>resumable:</em> Whenever an effect is called, it stops execution and walks up the call stack until it finds an effect handler that knows how to handle the effect. The effect handler can either abort the current execution (like an exception) or resume the execution with the result of the effect.</p><pre><code>// foo does not care how the read! effect is handled:
+&apos;foo() = {
+    &apos;input = read!()
+    match: input with: (
+        Ok(&apos;contents) -&gt; { contents }
+        &apos;_            -&gt; { &quot;&quot; }
+    )
+}
+
+// we can catch the effect and handle it:
+try: {
+    foo()
+} catch: read! as: (&apos;resume, &apos;arg) =&gt; {
+    resume(&quot;TestInput&quot;)
+}
+</code></pre><h2>Symbiotic</h2><p>Effects don't have to be handled inside of Kombucha, it is fine to just let an effect bubble up all the way to the Rust host, who can then handle it and resume the execution. This keeps Kombucha small, while also allowing it to easily hook into Rust's ecosystem.</p><pre><code>// read! and print! will be handled by the Rust host:
+&apos;file = read!(&quot;foo.txt&quot;)
+match: file with: (
+  Ok(&apos;contents) -&gt; { print!(contents) }
+  Err(&apos;_)       -&gt; { print!(&quot;Could not read file.&quot;) }
+)
+</code></pre><h2>Reasonable</h2><p>Kombucha is in many ways a very dynamic language and built with a fast iteration speed in mind, but it also aims to be easy to <em>statically reason about,</em> for both humans and compilers. Runtime reflection is limited by design and Kombucha explicitly distinguishes variables that are being <em>used</em> from variables that are being <em>bound</em> (which are prefixed with a single quote), which keeps Kombucha's macros easy to reason about.</p><pre><code>// x is being bound, f and y are being used:
+&apos;x = f(y)
+
+match: Pair(x, y) with: (
+  Pair(&apos;_, z)  -&gt; { &quot;pair with z as second element&quot; }
+  Pair(&apos;_, &apos;_) -&gt; { &quot;any pair&quot; }
+  &apos;_           -&gt; { &quot;any value&quot; }
+)
+</code></pre><h2>Reloadable</h2><p>This goal is still aspirational (and one of the topics that I want to focus on at Recurse Center). One of the ideas behind Kombucha is to be able to develop and modify a whole application without once stopping a running program, while at the same time ensuring that the source code remains at all times the single source of truth. This last requirement makes it different from REPL-driven development, where it is easy to get into a state where the state of the REPL does not correspond to the definitions in the source file.</p><p>Let's see how far I get!</p><footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer></body></html>

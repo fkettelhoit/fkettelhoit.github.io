@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="../styles/style.css" /><title>Minimal yet extensible modern syntax—(without (all (the (parentheses))))</title></head><body><p><a href="..#notes">Notes</a><br />2025/04/06</p><h1>Minimal yet extensible modern syntax—(without (all (the (parentheses))))</h1><p>This is a proposal for a programming language syntax that is both modern and familiar to anyone used to C/JS-style languages with curly braces, yet minimal and extensible enough that all control structures, including conditionals and variable declarations, can be implemented as normal functions and redefined at will.</p><p>It is similarly minimal and flexible as Lisp, but does not rely on macros and uses parentheses a lot more sparingly. Other approaches that I'm aware of include <a href="https://readable.sourceforge.io/">Sweet expressions</a> in Lisp, <a href="https://hexdocs.pm/elixir/main/optional-syntax.html">keyword lists</a> in Elixir and the <a href="https://koka-lang.github.io/koka/doc/book.html#why-mingen">minimal but general</a> syntax of Koka.</p><p>(This proposal builds on the idea of <a href="./2025-03-16.html">explicit bindings</a> and last week's <a href="./2025-03-29.html">note on syntax</a>, but is self-contained and links back where necessary.)</p><p>The end result looks like this:</p><pre><code>// user-defined variable declaration, `=` is just a function:
+&apos;x = &quot;foo&quot;
+&apos;y = &quot;bar&quot;
+f(x, y)
+
+// user-defined pattern matching, `match` and `-&gt;` are just functions:
+match (x) [
+    Pair(&apos;x, &apos;x) -&gt; { f(x) }
+    &apos;x           -&gt; { g() }
+]
+
+// user-defined if-else, `if` and `==` are just functions:
+if (x == y) {
+    f()
+} else {
+    g(x, y)
+}
+</code></pre><h2>The starting point: curried functions</h2><p>Let's start with a minimal functional language with variables, anonymous functions and function application. Basically lambda calculus, but with slightly different syntax:</p><pre><code>x           // variable x
+f(x)        // function f called with argument x
+{ &apos;x =&gt; x } // anonymous function with argument x, returning x
+</code></pre><p>Variables and function calls work just like in C/JS-like languages, while the syntax for anonymous functions is borrowed from <a href="https://kotlinlang.org/docs/lambdas.html#lambda-expressions-and-anonymous-functions">Kotlin's lambdas</a>, except with <code>=></code> instead of <code>-></code>, and the variable that is being bound is written as 'x instead of x.</p><p>Multi-argument functions can be simulated by <a href="https://en.wikipedia.org/wiki/Currying">currying</a>:</p><pre><code>f(a)(b)(c)
+</code></pre><h2>Tags: Foo, <code>foo</code>, <code>foo bar</code></h2><p>Right now there is no way to represent data, which might be enough for lambda calculus, but insufficient for a real programming language. Let's add <em>tags</em> (called <a href="https://hexdocs.pm/elixir/1.12/Atom.html">atoms</a>, <a href="https://clojure.org/reference/data_structures#Keywords">keywords</a> or <a href="https://docs.ruby-lang.org/en/3.4/syntax/literals_rdoc.html#label-Symbol+Literals">symbols</a> in other languages), which are <a href="https://en.wikipedia.org/wiki/String_interning">interned strings</a> / atomic values that just represent themselves, written like variables but starting with an uppercase letter. Data structures can be built by applying tags to values:</p><pre><code>Foo           // the tag Foo,
+              // an interned atomic value
+
+Foo(Bar)      // Foo applied to Bar,
+              // basically struct Foo with field Bar
+
+Foo(Bar)(Baz) // Foo applied to Bar, then applied to Baz,
+              // basically a struct Foo with fields Bar and Baz
+</code></pre><p>It is possible to have tags that do not start with an uppercase letter or that contain whitespace by explicitly wrapping a tag in <code>...</code>:</p><pre><code>`foo`
+`foo bar`
+`Foo` // same as `Foo`
+</code></pre><h2>Lists: ...]</h2><p>While tags make it possible to build arbitrary data structures, sometimes we simply want a collection of values without tagging it with an explicit name, so let's add syntax for lists:</p><pre><code>[Foo, Bar, Baz]
+</code></pre><h2>Side effects: (), f(), { ... }</h2><p>Right now there are no zero-argument functions, each call needs an explicit argument. But in a language with side effects, there might be functions that don't care about their argument, so let's define a special nil value <code>()</code> and define that <code>f()</code> is sugar for calling f with the nil value:</p><pre><code>()  // special nil tag
+f() // sugar for f(())
+</code></pre><p>Additionally, an anonymous function { ... } that does not declare a variable using "'x => ..." will be treated like a function that simply ignores its argument:</p><pre><code>{ f(y) } // sugar for `{ &apos;x =&gt; f(y) }`
+</code></pre><h2>Prefix calls: f(a, b, c) ...] {...}</h2><p>Calling a function f with three arguments a, b and c as <code>f(a)(b)(c)</code> is a bit unfamiliar coming from C/JS-like languages, so let's define some sugar that can be used both for functions and tags:</p><pre><code>f(a, b, c)     // sugar for `f(a)(b)(c)`
+Pair(Foo, Bar) // sugar for `Pair(Foo)(Bar)`
+</code></pre><p>Trailing arguments are allowed: Whenever ...] or {...} appear as arguments of a function call, they can be written _after_ the closing parenthesis instead. Trailing arguments cannot be followed by (...), only by further [...] or {...}. The parentheses after a function call can be omitted if all arguments are trailing arguments.</p><pre><code>f(a) { &apos;x =&gt; x }        // sugar for `f(a, { &apos;x =&gt; x })`
+f(a) [b, c] { &apos;x =&gt; x } // sugar for `f(a, [b, c], { &apos;x =&gt; x })`
+f [a, b]                // sugar for `f([a, b])`
+f { Bar } { Baz }       // sugar for `f({ Bar }, { Baz })`
+
+f { Bar }(x)  // not allowed, (x) appears after trailing arg
+</code></pre><h2>Piped calls: a.f(b, c) ...] {...}</h2><p>It is often natural to express computations as a chain of operations applied to a value, transforming the value step by step. Instead of a <a href="https://hexdocs.pm/elixir/enumerable-and-streams.html#the-pipe-operator">pipe operator</a> or <a href="https://clojure.org/guides/threading_macros">threading macro</a>, let's just use <a href="https://en.wikipedia.org/wiki/Uniform_Function_Call_Syntax">uniform function call syntax</a>:</p><pre><code>a.f1(b, c).f2(d) // sugar for `f2(f1(a, b, c), d)`
+</code></pre><p>Piped calls are just prefix calls whose first argument is written on the left of the function, so piped calls support ...] and {...} as trailing arguments.</p><h2>Infix calls: a f b</h2><p>It would be nice to be able to use infix functions without any parentheses, such as <code>a + b</code> or <code>a == b</code>. So let's add some sugar for that:</p><pre><code>a f b // sugar for `f(a, b)`
+</code></pre><p>How should we deal with chained infix calls such as "a + b + c"? Are infix calls left-associative, right-associative or can this be defined? Let's keep it simple and always require parentheses for chaining infix calls:</p><pre><code>(a - b) - c   // sugar for `-(-(a, b), c)`
+a -&gt; (b -&gt; c) // sugar for `-&gt;(a, -&gt;(b, c))`
+</code></pre><p>Let's also require that while the arguments a and b of can be arbitrary expressions (that might have to be wrapped in (...) if they are infix calls), the function f must be always be a <em>variable</em>, never a composite expression.</p><h2>Keyword calls: f (a) { ... } else { ... }</h2><p>Requiring infix functions to be variables makes it possible to have <em>keywords calls</em>, which are similar to Elixir's <a href="https://hexdocs.pm/elixir/main/keywords-and-maps.html#do-blocks-and-keywords">Optional keyword lists</a>: Whenever a <em>variable</em> f is followed by a (...), ...] or {...} (ensuring that it's not an infix call), all variables that follow are treated as keywords and passed to the function f as a list of tags and their argument(s). Let's look at an example:</p><pre><code>if (x) { // the variable `if` is followed by a non-variable `(x)`...
+    f()
+} elif (y) { //...so `elif` is treated as a keyword...
+    g()
+} else { // ...and so is `else`...
+    h()
+}
+
+// ...and the above is desugared to:
+if(
+    x,
+    { f() },
+    [
+        [&quot;elif&quot;, y, { g() }],
+        [&quot;else&quot;, { h() }]
+    ]
+)
+</code></pre><p>There is some ambiguity when it comes to an expression such as <code>f(x) g h(y)</code>, which we probably want to interpret as the infix expression corresponding to <code>g(f(x), h(y))</code>, but this would clash with keyword calls. There are two ways to resolve this: Either prefix calls are not allowed as arguments of infix calls, or the syntax explicitly distinguishes between <code>f(x)</code> and <code>f (x)</code>, with the former being treated as a prefix call (which can be an infix argument) and the latter being treated as a keyword call (which cannot be an infix argument).</p><p>Having 4 different ways to call functions (prefix call, piped call, infix call and keyword call) might seem excessive, but it's usually easy to know which one to pick:</p><ul><li>Prefix calls like f(a, b) make up most of the calls in a program and are the "bread and butter" calls, used whenever the other options don't apply.</li><li>Piped calls are useful whenever a value is transformed in multiple steps, as a pipeline of operations.</li><li>Infix calls should be more rarely used, usually only for "mathy" functions and core syntax like "->" and "=>".</li><li>Keyword calls should be even more sparingly used, usually only for control structures and core syntax.</li></ul><h2>Explicit bindings and {...}</h2><p>It might seem strange to make the bound variable of an anonymous function explicit by writing { 'x => x } instead of just { x => x }, but making bindings such as 'x explicit allows us to define => as a normal function instead of a built-in part of the syntax. Here's how:</p><pre><code>// the &quot;anonymous function&quot; syntax:
+{ &apos;x =&gt; x }
+// ...is sugar for:
+&apos;x =&gt; { x }
+// ...which is sugar for:
+=&gt;(&apos;x, { x })
+</code></pre><p>Bindings are made explicit by quoting a variable x as 'x. Any unquoted variable is resolved as normal, but a quoted variable is a binding, a "variable to be", which is not resolved in the current context, but will be bound in the nearest block, which is delimited by { ... }.</p><p>Blocks are just syntactic sugar for anonymous functions, whose parameters are defined by the explicit bindings that appear to their left in the code. In the above example, the block { x } would be translated to an anonymous function of one argument x that just returns x.</p><p>To separate "surface syntax" (which includes functions like => and { ... } blocks) and the anonymous functions that they are translated to, the following examples will use the non-surface syntax notation "x ===> x" for an anonymous function that returns its argument.</p><p>More explicitly, whenever a function f is called with a block as its argument, this function acts as a "binder": The block will consume all the bindings that occur as arguments of f (or as arguments to arguments of f and so forth) before the block. A block never receives bindings that come from "above" the binder f in the syntax tree, which makes binders act as scopes (more details <a href="./2025-03-16.html">here</a>):</p><pre><code>// this binds `x ===&gt; x + x` to f, then calls f(Y)
+let(&apos;f, &apos;x =&gt; { x + x }, { f(Y) })
+//   |   \____________/          |
+//   |     scope of x            |
+//   \___________________________/
+//           scope of f
+//
+// { x + x } is translated to `x ===&gt; x + x`
+// { f(Y) } is translated to `f ===&gt; f(Y)`
+</code></pre><h2>Nested blocks: {..., ...}</h2><p>Let's add a bit more syntactic sugar: Right now blocks always have to be used <em>after</em> the explicit bindings that the block is supposed to consume, but it makes sense to also allow blocks to consume bindings by <em>enclosing</em> bindings:</p><pre><code>{ &apos;x = y, f(x) }
+</code></pre><p>Whenever explicit bindings are declared inside a block but not consumed until the end of the block, the bindings will be consumed by the enclosing block, as if everything that follows the call with the explicit bindings had been passed as a block right then. The above example will be desugared to "=('x, y, { f(x) })". In other words, instead of passing a block as the last argument of a function call, we can just use that function inside the block. This is especially helpful for nested bindings:</p><pre><code>// desugars to: =(&apos;a, x, { =(&apos;b, y, { Pair(a, b) }) })
+{ &apos;a = x, &apos;b = y, Pair(a, b) }
+</code></pre><p>This assumes that every element in a block will be a binding construct that knows how to handle the block argument that is implicitly passed to it. But especially in a language with side effects it would be nice to allow block elements to not bind anything at all and just "do" something, like print(x).</p><p>To allow this, whenever a block element does not contain any explicit bindings that could be consumed by the enclosing block, the element will be evaluated (call-by-value) as an argument to an anonymous function, which when called will return the rest of the block:</p><pre><code>// binding construct, uses the binding &apos;x:
+{ &apos;x = Foo, ... } // translates to: `=(&apos;x, Foo, x ===&gt; ...)`
+
+// side effect, does not use the binding:
+{ f(), ... } // translates to: `(_ ===&gt; ...)(f())`
+</code></pre><p>This makes it easy to mix binding constructs and side effects:</p><pre><code>// translates to: =(&apos;a, x, { (_ ===&gt; f(a))(print(a)) })
+{ &apos;a = x, print(a), f(a) }
+</code></pre><p>Lastly, a program is treated as a {...} block without the "{" and "}" at the start/end:</p><pre><code>// sugar for `{ &apos;x = &quot;foo&quot;, &apos;y = &quot;bar&quot;, f(x, y) }`:
+&apos;x = &quot;foo&quot;
+&apos;y = &quot;bar&quot;
+f(x, y)
+</code></pre><h2>Separators: commas or newlines</h2><p>Functions calls, ...] and {...} all assume that their elements are separated by commas. Let's treat commas and newlines interchangeably as separators, let's allow separators at the beginning and end of calls, [...] and {...}, and let's treat multiple successive separators as a single separator:</p><pre><code>// sugar for `[Foo(Bar, { f, g }), Baz]`:
+[
+    Foo(
+        Bar
+        {
+            f
+            g
+        }
+    )
+    Baz
+]
+</code></pre><h2>Putting it all together</h2><p>Using all of this syntactic sugar, we can see how...</p><pre><code>match (x) [
+  Pair(&apos;x, &apos;x) -&gt; { f(x) }
+  &apos;x           -&gt; { g() }
+]
+</code></pre><p>...is sugar for...</p><pre><code>match(x)([
+    -&gt;(Pair(&apos;x)(&apos;x))({ &apos;x =&gt; f(x) }),
+    -&gt;(&apos;x)({ &apos;y =&gt; g(()) })
+])
+</code></pre><p>Using keyword calls, the code...</p><pre><code>// user-defined if-else, `if` and `==` are just functions:
+if (x == y) {
+    f()
+} else {
+    g(x, y)
+}
+</code></pre><p>...is sugar for...</p><pre><code>if(
+    ==(x)(y)
+)(
+    { &apos;x =&gt; f(()) }
+)([
+    [&quot;else&quot;, { &apos;z =&gt; g(x)(y) }]
+])
+</code></pre><h2>Possible extensions</h2><p>While the above syntax makes up the core of the proposal, there are a couple of extensions that could be added while keeping the syntax minmal yet extensible:</p><ul><li><strong>f a</strong>: Just like infix calls are a special case of function calls and cannot be chained, it would be possible to treat "f a" as the call "f(a)". Would save a couple of parentheses and doesn't conflict with other syntax, but maybe not worth the little bit of extra complexity.</li><li><strong>a: b</strong>: It is common to build data structures of keys and values, but right now there is no syntax for maps. A simple yet general addition in this direction could be "x: y" as sugar for "x, y]". Just like infix calls, pairs cannot be chained without explicit parentheses and cannot be used in infix calls, to avoid precedence issues in cases such as "a f x: y".</li><li><strong>f Foo Set(Bar, Baz)</strong>: Only ...] and {...} can currently be used as trailing arguments, which privileges lists compared to other data structures that are built using tags, such as "Set(Bar, Baz)". It is tempting to allow data structures as trailing arguments, which would however require treating parentheses after trailing arguments as being arguments to the trailing argument, not the function call. Another problem is that such a call looks too much like a keyword call.</li></ul><p>I'll keep experimenting with where to draw the line.</p><footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer></body></html>

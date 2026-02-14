@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="stylesheet" href="../styles/style.css" /><title>Custom binding constructs without macros, part 3: generalizable sugar</title></head><body><p><a href="..#notes">Notes</a><br />2025/03/29</p><h1>Custom binding constructs without macros, part 3: generalizable sugar</h1><p>(This is a continuation of <a href="./2025-03-22.html">last week's experiment</a>.)</p><p>How could a language look like that combines the minimalism and generality of Lisp with enough syntactic sugar to steer clear of Lisp's soup of parentheses? A language that is general and minimal enough that every language construct is a function (even control flow operators and binding constructs) which can be redefined and shadowed by user-defined functions, but also flexible enough that pattern matching syntax can look like this:</p><pre><code>match(x) [
+  Pair(&apos;x, &apos;x) -&gt; { f(x) }
+  &apos;x           -&gt; { g() }
+]
+</code></pre><p>Here's a proposal for enriching a minimal functional language step by step until it supports syntax like the above, using <a href="./2025-03-16.html">explicit bindings</a>.</p><h2>The starting point: curried functions + blocks</h2><p>Our base language will be a minimal functional language with variables, anonymous functions and function application. Basically lambda calculus, but with slightly different syntax:</p><pre><code>x    // variable x
+f(x) // function f called with argument x
+</code></pre><p>Multi-argument functions can be simulated by <a href="https://en.wikipedia.org/wiki/Currying">currying</a>, in other words by repeated function application:</p><pre><code>f(a)(b)(c)
+</code></pre><p>Anonymous functions are defined using <em>blocks,</em> written { ... }. A block is like the body of an anonymous function that does not specify its arguments. The arguments of a block are <a href="./2025-03-16.html">statically resolved</a> by looking for the nearest <em>binding:</em></p><pre><code>// &apos;x is an explicit binding, used in the nearest block { ... }
+fn(&apos;x)({ x })
+</code></pre><p>Bindings are made explicit in the syntax by quoting a variable x as 'x. Any unquoted variable is resolved as normal, but a quoted variable is a binding, a variable to be, which is not resolved in the current context, but will be bound in the nearest block, delimited by { ... }.</p><p>Blocks are thus just syntactic sugar for anonymous functions, whose parameters are defined by the explicit bindings that appear to their left in the code. In the above example, the block { x } would be desugared to the anonymous function of one argument x that just returns x.</p><p>The <code>fn</code> function is a predefined function that discards its first argument and returns its second argument. If the first argument is a binding and the second argument is a block, this has the effect of returning an anonymous function with one argument.</p><p>Now that we have variables, explicit bindings, function calls and anonymous functions (using blocks), we can enrich the language with a bit of syntactic sugar.</p><h2>Tags</h2><p>Right now there is no way to represent data, which might be enough for lambda calculus, where everything is a function, but insufficient for a real programming language. Let's add <em>tags</em> (called atoms, keywords or symbols in other languages), which are atomic values that just represent themselves, written like variables but starting with an uppercase letter. Data structures can be built by applying tags to other values:</p><pre><code>Foo           // the tag Foo
+Foo(Bar)      // Foo applied to Bar
+Foo(Bar)(Baz) // Foo applied to Bar, then applied to Baz
+</code></pre><h2>Prefix calls: f(a, b, c)</h2><p>Calling a function f with three arguments a, b and c as <code>f(a)(b)(c)</code> is quite annoying, so let's define some syntax which just desugars to repeated application, which can be used both for functions and tags:</p><pre><code>f(a, b, c)     // sugar for `f(a)(b)(c)`
+Pair(Foo, Bar) // sugar for `Pair(Foo)(Bar)`
+</code></pre><h2>Side effects: (), f()</h2><p>Right now there are no zero-argument functions, each function call needs an explicit argument. But in a language with side effects, it would be annoying to always have to call functions that only have a side effect with a bogus argument, so let's define a special nil tag <code>()</code> and define that <code>f()</code> is sugar for calling f with the nil value:</p><pre><code>()  // special nil tag
+f() // sugar for f(())
+</code></pre><h2>Infix calls: a f b, a f(b, c)</h2><p>Prefix calls of the form <code>f(a, b)</code> are great, but it would be nice to be able to define infix functions such as <code>a + b</code> or <code>a == b</code>. So let's add some sugar for that:</p><pre><code>a f b     // sugar for `f(a, b)`
+a f(b)    // sugar for `f(a, b)`
+a f(b, c) // sugar for `f(a, b, c)`
+</code></pre><p>How should a chain of infix calls such as <code>a f1 b f2 c</code> be parsed? We could simply disallow chained infix calls, but let's instead go with left-associativity here:</p><pre><code>a f1 b f2 c // sugar for `f2(f1(a, b), c)`
+</code></pre><p>This gives us a sort of <a href="https://en.wikipedia.org/wiki/Uniform_Function_Call_Syntax">uniform function call syntax</a> for free, because instead of <code>a.f(b, c).g(d, e)</code> we can just write <code>a f(b, c) g(d, e)</code>.</p><h2>Grouping: (a)</h2><p>Strictly speaking, we don't need grouping via parentheses to resolve precedence, because infix calls are left-associative and the right hand side of an infix call can already be wrapped in parentheses even for a single argument. But sometimes it can be helpful to be explicit about left-associativity, so let's allow parentheses even on the left hand side:</p><pre><code>(a + b) * c // sugar for `*(+(a, b), c)`
+</code></pre><p>(A code formatter / linter could always add explicit parentheses in cases where the infix functions have names such as <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>=</code>, <code>=></code> etc, where something other than left-associativity might be assumed.)</p><h2>Lists: ...]</h2><p>While tags and tags applied to other values make it possible to build arbitrary data structures, sometimes we simply want a collection of values without tagging it with an explicit name, so let's add another special tag to build lists and add some sugar for it:</p><pre><code>[Foo, Bar] // sugar for the list tag applied to Foo, then to Bar
+</code></pre><h2>Separators: commas + newlines</h2><p>Functions calls, lists and blocks all assume that their elements are separated by commas. Let's treat commas and newlines interchangeably as separators, let's allow separators at the beginning and end of calls, lists and blocks, and let's treat multiple successive separators as a single separator:</p><pre><code>// sugar for `[Foo(Bar, { f, g }), Baz]`:
+[
+    Foo(
+        Bar
+        {
+            f
+            g
+        }
+    )
+    Baz
+]
+</code></pre><h2>Trailing arguments: tags, bindings, ...], {...}</h2><p>Finally, let's allow trailing arguments: Whenever tags, bindings, lists or blocks appear as the last arguments of a function call, they can be written <em>after</em> the closing parenthesis instead. These trailing arguments can themselves have arguments that are wrapped in (...), but no trailing arguments. The parentheses after a function call can be omitted if all arguments are trailing arguments.</p><pre><code>f(a) { b }            // sugar for `f(a, { b })`
+f(a) Foo [b, c] { d } // sugar for `f(a, Foo, [b, c], { d })`
+f Foo Bar             // sugar for `f(Foo, Bar)`
+f Foo { Bar } { Baz } // sugar for `f(Foo, { Bar }, { Baz })`
+f Foo(Bar) { Bar }()  // sugar for `f(Foo(Bar), { Bar }())`
+</code></pre><h2>Putting it all together</h2><p>Using all of this syntactic sugar, we can see how...</p><pre><code>match(x) [
+  Pair(&apos;x, &apos;x) -&gt; { f(x) }
+  &apos;x           -&gt; { g() }
+]
+</code></pre><p>...is sugar for...</p><pre><code>match(x)(
+    LIST_TAG(
+        -&gt;(Pair(&apos;x)(&apos;x))({ f(x) })
+    )(
+        -&gt;(&apos;x)({ g(NIL_TAG) })
+    )
+)
+</code></pre><p>...which is further desugared using <a href="./2025-03-16.html">explicit bindings</a> into...</p><pre><code>// assuming a JS-like target language,
+// with `x =&gt; y` as syntax for anonymous functions
+match(x)(
+    LIST_TAG(
+        -&gt;(
+            Pair(BINDING_TAG(&quot;x&quot;))(BINDING_TAG(&quot;x&quot;))
+        )(
+            x =&gt; f(x)
+        )
+    )(
+        -&gt;(
+            BINDING_TAG(&quot;x&quot;)
+        )(
+            _ =&gt; g(NIL_TAG)
+        )
+    )
+)
+</code></pre><h2>Too much or too little sugar?</h2><p>The resulting language is syntactically quite flexible, but I'm not sure whether it might not be <em>too much</em> sugar. In many situations, there are several different ways to write a function call: Using either prefix or infix syntax, using either normal or trailing arguments:</p><pre><code>f(Foo, g(Bar, { h() }))
+f(Foo, g Bar { h() })
+Foo f g(Bar, { h() })
+Foo f g Bar { h() }
+</code></pre><p>In my first experiments, this flexibility definitely seemed to lead to a higher mental load of having to think about where infix calls and especially trailing arguments can be used to shorten the code. But maybe that's just a result of unfamiliarity and infix calls / trailing arguments will mostly be used by the core control flow structures of the language, whereas most normal functions will use prefix calls, at most with trailing blocks?</p><p>Perhaps having both infix calls <em>and</em> trailing arguments is too much and one construct is enough. Alternatively, trailing arguments could be made more restrictive, so that they only apply to blocks (or only blocks and lists), but not tags or bindings.</p><p>There is another bit of syntactic sugar that falls in the same category of sugar that is generally applicable to function calls but can be used to write control flow constructs with fewer parentheses: <a href="https://hexdocs.pm/elixir/main/keywords-and-maps.html#do-blocks-and-keywords">Optional keyword lists</a> as used in Elixir (and also explained in the <a href="https://hexdocs.pm/elixir/main/optional-syntax.html">optional syntax sheet</a>). These could be added to the language described here by using special syntax for pairs of tags and values:</p><pre><code>// sugar for `[Foo, Bar]`:
+foo: Bar
+
+// sugar for `if(x == y, [Do, { f(x) }], [Else, { f(y) }])`:
+if (x == y) do: {
+    f(x)
+} else: {
+    f(y)
+}
+</code></pre><h2>Next steps</h2><p>I'm generally happy with how these bits of sugar interact, even though it might be necessary to dial down the use of trailing arguments a bit. It's still too early to tell which of these bits of sugar really carry their weight, but the direction seems promising. (<a href="https://readable.sourceforge.io/">Sweet expressions</a> are a similar attempt, I'm sure there are others I've missed.)</p><p>The next step is to implement a few higher level control structures and binding constructs in this language, then work on the missing features related to explicit bindings.</p><footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer></body></html>
