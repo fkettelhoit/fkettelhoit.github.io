@@ -45,6 +45,22 @@ body {
     "ss13" 1;
 }
 
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+  --diameter: calc(max(60vw, 80vh) + 8rem);
+  width: var(--diameter);
+  height: var(--diameter);
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  background: white;
+  filter: blur(4rem);
+  border-radius: 50%;
+}
+
 nav > ul {
   display: flex;
   flex-wrap: wrap;
@@ -110,11 +126,11 @@ footer::before {
   left: calc(-1 * var(--dotgrid-offset));
   right: calc(-1 * var(--dotgrid-offset));
   bottom: -2.2rem;
-  background: radial-gradient(circle at center, #bbb 1px, transparent 1px);
+  background: radial-gradient(circle at center, black 1px, transparent 1px);
   background-size: 2rem 2rem;
   background-position: calc(var(--dotgrid-offset) - 1rem) 1.2rem;
   pointer-events: none;
-  z-index: -1;
+  z-index: -2;
 }
 
 h1,
