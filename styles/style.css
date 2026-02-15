@@ -291,8 +291,9 @@ a[href*="//"]:visited {
 
   &:hover,
   &:active {
-    padding: calc(0.375rem + var(--hover-padding)) var(--hover-padding);
-    margin: 0 calc(var(--hover-padding) * -1);
+    padding: calc(0.375rem + var(--line-thickness) / 2)
+      calc(var(--line-thickness) / 2);
+    margin: 0 calc(var(--line-thickness) / 2 * -1);
     text-decoration: none;
     color: black;
     background-color: var(--color-yellow);
