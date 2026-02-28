@@ -18,7 +18,16 @@
 }
 
 :root {
-  --color-yellow: #ffe100;
+  --color-sphere: #000;
+  --color-dotgrid: #000;
+  --color-text: #ccc;
+  --color-heading: #fff;
+  --color-border: #fff;
+  --color-footer: #777;
+  --color-link: #222;
+  --color-link-active: #000;
+  --color-link-bg: #fff;
+  --color-link-bg-active: #ffe100;
   --line-thickness: 2px;
   --max-width: 46rem;
   --hover-padding: 0.25rem;
@@ -28,6 +37,7 @@
 html {
   scroll-behavior: smooth;
   position: relative;
+  color: var(--color-text);
 }
 
 body {
@@ -50,14 +60,13 @@ body::after {
   position: fixed;
   pointer-events: none;
   z-index: -1;
-  --diameter: calc(max(60vw, 80vh) + 8rem);
+  --diameter: calc(max(100vw, 100vh) - 4rem);
   width: var(--diameter);
   height: var(--diameter);
   top: 50%;
   left: 50%;
   translate: -50% -50%;
-  background: white;
-  filter: blur(4rem);
+  background: var(--color-sphere);
   border-radius: 50%;
 }
 
@@ -83,9 +92,9 @@ section::before {
   top: 1rem;
   bottom: 1rem;
   width: 1rem;
-  border-top: var(--line-thickness) solid black;
-  border-left: var(--line-thickness) solid black;
-  border-bottom: var(--line-thickness) solid black;
+  border-top: var(--line-thickness) solid var(--color-heading);
+  border-left: var(--line-thickness) solid var(--color-heading);
+  border-bottom: var(--line-thickness) solid var(--color-heading);
 }
 
 @media (max-width: 48rem) {
@@ -126,11 +135,21 @@ footer::before {
   left: calc(-1 * var(--dotgrid-offset));
   right: calc(-1 * var(--dotgrid-offset));
   bottom: -2.2rem;
-  background: radial-gradient(circle at center, black 1px, transparent 1px);
+  background: radial-gradient(
+    circle at center,
+    var(--color-dotgrid) 1px,
+    transparent 1px
+  );
   background-size: 2rem 2rem;
   background-position: calc(var(--dotgrid-offset) - 1rem) 1.2rem;
   pointer-events: none;
   z-index: -2;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--color-heading);
 }
 
 h1,
@@ -178,7 +197,7 @@ h3::after {
   min-width: 50%;
   margin-left: 1rem;
   height: var(--line-thickness);
-  background-color: black;
+  background-color: var(--color-heading);
   margin-top: calc(1rem - (var(--line-thickness) / 2));
 }
 
@@ -199,8 +218,8 @@ footer {
 img {
   margin: 2rem 0 2rem 0;
   /* combine border and outline so that the line sits right on the dot grid */
-  border: calc(var(--line-thickness) / 2) solid black;
-  outline: calc(var(--line-thickness) / 2) solid black;
+  border: calc(var(--line-thickness) / 2) solid var(--color-border);
+  outline: calc(var(--line-thickness) / 2) solid var(--color-border);
   padding: 0;
   display: block;
   width: 100%;
@@ -209,8 +228,8 @@ img {
 pre {
   margin: 2rem -2rem 2rem -2rem;
   /* combine border and outline so that the line sits right on the dot grid */
-  border: calc(var(--line-thickness) / 2) solid black;
-  outline: calc(var(--line-thickness) / 2) solid black;
+  border: calc(var(--line-thickness) / 2) solid var(--color-border);
+  outline: calc(var(--line-thickness) / 2) solid var(--color-border);
   padding: 2rem;
   white-space: pre;
   overflow-x: auto;
@@ -227,7 +246,7 @@ code {
 }
 
 pre code {
-  line-height: 1.25rem;
+  line-height: 1.5rem;
   font-weight: 400;
   font-variation-settings: "MONO" 1;
 }
@@ -253,7 +272,7 @@ li::before {
   top: calc(1rem - var(--line-thickness));
   width: calc(var(--line-thickness) * 2);
   height: calc(var(--line-thickness) * 2);
-  background-color: black;
+  background-color: var(--color-text);
 }
 
 strong {
@@ -266,8 +285,7 @@ blockquote {
 
 footer {
   margin: 4rem 0 2rem 0;
-  font-style: italic;
-  color: #666;
+  color: var(--color-footer);
 }
 
 a,
@@ -280,8 +298,8 @@ a:visited {
 a:not([href*="//"]):not([href*="mailto:"]),
 a:not([href*="//"]):not([href*="mailto:"]):visited {
   text-decoration: none;
-  background-color: black;
-  color: #ddd;
+  color: var(--color-link);
+  background-color: var(--color-link-bg);
   padding: 0.375rem;
   /* to keep the padding consistent for line breaks: */
   -webkit-box-decoration-break: clone;
@@ -291,8 +309,8 @@ a:not([href*="//"]):not([href*="mailto:"]):visited {
   &:active {
     padding: calc(0.375rem + var(--hover-padding));
     margin: calc(var(--hover-padding) * -1);
-    color: black;
-    background-color: var(--color-yellow);
+    color: var(--color-link-active);
+    background-color: var(--color-link-bg-active);
     z-index: 999;
   }
 }
@@ -301,7 +319,7 @@ a[href*="mailto:"],
 a[href*="//"],
 a[href*="//"]:visited {
   padding: 0.375rem 0;
-  text-decoration: underline currentColor;
+  text-decoration: underline var(--color-heading);
   text-decoration-thickness: var(--line-thickness);
   text-underline-offset: calc(0.375rem * 2 - var(--line-thickness));
 
@@ -311,8 +329,8 @@ a[href*="//"]:visited {
       calc(var(--line-thickness) / 2);
     margin: 0 calc(var(--line-thickness) / 2 * -1);
     text-decoration: none;
-    color: black;
-    background-color: var(--color-yellow);
+    color: var(--color-link-active);
+    background-color: var(--color-link-bg-active);
     z-index: 999;
   }
 }
