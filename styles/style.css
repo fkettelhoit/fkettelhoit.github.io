@@ -18,15 +18,13 @@
 }
 
 :root {
-  --color-sphere: #000;
-  --color-dotgrid: #000;
-  --color-text: #ccc;
-  --color-heading: #fff;
-  --color-border: #fff;
-  --color-footer: #777;
-  --color-link: #222;
+  --color-text: #444;
+  --color-heading: #000;
+  --color-border: #000;
+  --color-footer: #aaa;
+  --color-link: #ddd;
   --color-link-active: #000;
-  --color-link-bg: #fff;
+  --color-link-bg: #000;
   --color-link-bg-active: #ffe100;
   --line-thickness: 2px;
   --max-width: 46rem;
@@ -55,21 +53,6 @@ body {
     "ss13" 1;
 }
 
-body::after {
-  content: "";
-  position: fixed;
-  pointer-events: none;
-  z-index: -1;
-  --diameter: calc(max(100vw, 100vh) - 4rem);
-  width: var(--diameter);
-  height: var(--diameter);
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  background: var(--color-sphere);
-  border-radius: 50%;
-}
-
 nav > ul {
   display: flex;
   flex-wrap: wrap;
@@ -89,8 +72,8 @@ section::before {
   content: "";
   position: absolute;
   left: calc(-1 * var(--line-thickness) / 2 - 2rem);
-  top: 1rem;
-  bottom: 1rem;
+  top: calc(1rem - (var(--line-thickness) / 2));
+  bottom: calc(1rem - (var(--line-thickness) / 2));
   width: 1rem;
   border-top: var(--line-thickness) solid var(--color-heading);
   border-left: var(--line-thickness) solid var(--color-heading);
@@ -112,40 +95,6 @@ section::before {
   }
 }
 
-p,
-h1,
-h2,
-h3,
-ul,
-blockquote,
-footer {
-  position: relative;
-}
-
-p::before,
-h1::before,
-h2::before,
-h3::before,
-ul::before,
-blockquote::before,
-footer::before {
-  content: "";
-  position: absolute;
-  top: -2.2rem;
-  left: calc(-1 * var(--dotgrid-offset));
-  right: calc(-1 * var(--dotgrid-offset));
-  bottom: -2.2rem;
-  background: radial-gradient(
-    circle at center,
-    var(--color-dotgrid) 1px,
-    transparent 1px
-  );
-  background-size: 2rem 2rem;
-  background-position: calc(var(--dotgrid-offset) - 1rem) 1.2rem;
-  pointer-events: none;
-  z-index: -2;
-}
-
 h1,
 h2,
 h3 {
@@ -159,19 +108,10 @@ h2 {
   font-style: italic;
 }
 
-h1::before {
-  top: -10.2rem;
-  bottom: -6.2rem;
-}
-
 h1 {
   font-size: 6rem;
   line-height: 6rem;
   margin: 10rem 0 6rem 0;
-}
-
-h2::before {
-  top: -6.2rem;
 }
 
 h2 {
@@ -319,7 +259,7 @@ a[href*="mailto:"],
 a[href*="//"],
 a[href*="//"]:visited {
   padding: 0.375rem 0;
-  text-decoration: underline var(--color-heading);
+  text-decoration: underline currentColor;
   text-decoration-thickness: var(--line-thickness);
   text-underline-offset: calc(0.375rem * 2 - var(--line-thickness));
 
