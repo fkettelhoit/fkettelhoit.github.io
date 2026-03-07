@@ -121,9 +121,9 @@ COPY
 MAKE_ARRAY { elems: 3, elem_size: 1 }
 </code></pre>
 <p>Conceptually:</p>
-<pre><code>        3 | |
-        4 | |
-+-+-+-&gt; __| |
+<pre><code>        3 |
+        4 |
++-+-+-&gt; __|
 | | +---@   +
 | +-----@   +
 +-------@   +
@@ -133,9 +133,9 @@ MAKE_ARRAY { elems: 3, elem_size: 1 }
 <p>Function arguments create copies in the same way: Atomic values are copied directly, pointers to boxed values are copied by increasing their ref count, tuples/arrays on the stack are copied by creating stack references. But this raises an important question: What happens when a reference to a value on the stack <em>outlives</em> the function call frame it was declared in, by being returned (either directly or as part of a data structure) from the function that created it?</p>
 <p>Each function return effectively creates a <em>threatened area</em> of values that will be deallocated from the stack, but which could be referenced by the return value of the function (since stack references can only point to older values on the stack, the values that existed before the current function was called cannot contain references to the function's call frame).</p>
 <p>Going back to our last example, let's assume that both the tuple <code>(3, 4)</code> and the array containing the tuple's three copies were created in the current function. We cannot directly return the array with the three copies of <code>(3, 4)</code> from the function, because the tuple is in the threatened area:</p>
-<pre><code>        3 | |   |
-        4 | |   |-- threatened area
-+-+-+-&gt; __| |   |
+<pre><code>        3 |     |
+        4 |     |-- threatened area
++-+-+-&gt; __|     |
 | | +---@   +      |
 | +-----@   +      |-- return value
 +-------@   +      |
