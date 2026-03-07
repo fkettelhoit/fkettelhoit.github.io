@@ -14,16 +14,16 @@
 <h2>Ghost data</h2>
 <p>Here's the main idea: stack references are only produced for tuples and arrays (all other values are atomic), and they can only appear <em>inside</em> tuples and arrays. If the return value itself is a reference, we can just treat it as returning the location it points to. So we're always dealing with structured data on both sides: the return value contains references, and they point to tuples/arrays in the threatened area.</p>
 <p>Instead of moving the threatened data onto the heap, we can keep the referenced data <em>on the stack</em>, right before the return value, as “ghost data”. The return value declares a larger size than it needs, wrapping around whatever ghost data it carries:</p>
-<pre><code>3 |     |              3 |       |
-4 |     |              4 |       |
-__|     |-- threat.    __|       |
-    |                      |     |-- return val. (enlarged)
-    |                      |     |
-@   |                  @   |     |
-    |-- return val.        |     |
-    |                      |     |
-@   |                  @   |     |
-____|                  ____|_____|
+<pre><code>3 |     |                   3 |       |
+4 |     |                   4 |       |
+__|     |-- threat.         __|       |
+    |                           |     |-- return val. (enlarged)
+    |                           |     |
+@   |                 =&gt;    @   |     |
+    |-- return val.             |     |
+    |                           |     |
+@   |                       @   |     |
+____|                       ____|_____|
 </code></pre>
 <p>The left side is the situation before the return: the return value (an array of two references) points into the threatened area. The right side is what we want: the threatened data has been compacted and put in front of the return value, and the whole thing is wrapped in a tuple that declares a <code>total_size</code> covering both the ghost data and the original return value.</p>
 <p>This is straightforward for tuples, which already declare a <code>total_size</code>. Arrays need to be wrapped in a 1-element tuple whose <code>total_size</code> is larger than the single element, to accommodate the ghost data.</p>
