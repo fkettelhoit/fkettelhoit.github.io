@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Flat and immutable lists (on the stack)</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/03/15</p>
+<h1>Flat and immutable lists (on the stack)</h1>
+<p>Continuing last week's note about a bytecode for <a href="./07.html">flat tuples and arrays on the stack</a>, I've been thinking about how to simplify and speed up the algorithm, but more importantly, about the <em>point</em> of the whole exercise.</p>
+<p>To recap, the motivating question was: What would a functional programming language with immutable values look like if we wanted to keep as many values as possible (even structs and arrays) entirely on the <em>stack</em>, without relying on a static type system? The main idea is to squint at bytecode <em>instructions</em> until we see them as a <em>value representation</em> on the stack, with stack-local references. The tuple <code>(3, 4)</code> would be represented as:</p>
+<pre><code>00: PUSH_INT(3)
+01: PUSH_INT(4)
+02: MAKE_TUPLE { elems: 2, total_size: 2 }
+</code></pre>
+<p>These three <em>instructions</em> occupy three slots on the stack, but they form one conceptual value, with the last instruction “wrapping around” the two ints on the stack:</p>
+<pre><code>3 |
+4 |
+__|
+</code></pre>
+<p>The idea of the last weekly note was that tuples can store elements of different size tightly packed next to each other, whereas <em>arrays</em> track the <em>size per element</em> and pad elements so that each element takes up the same amount of space, giving us <code>O(1)</code> element access for arrays (vs. <code>O(n)</code> for tuples). An array <code>[1, 2, (3, 4)]</code> would be represented as:</p>
+<pre><code>00: PUSH_INT(1)
+01: PUSH_INT(2)
+02: PUSH_INT(3)
+03: PUSH_INT(4)
+04: MAKE_TUPLE { elems: 2, total_size: 2 }
+05: MAKE_ARRAY { elems: 3, elem_size: 3 }
+</code></pre>
+<p>Conceptually:</p>
+<pre><code>    | // padding
+    | // padding
+1   +
+    | // padding
+    | // padding
+2   +
+3 | |
+4 | |
+__| +
+____|
+</code></pre>
+<h2>Unifying tuples and arrays</h2>
+<p>But what if we ensure that all elements in a tuple have a size of exactly one stack slot, either because the values are atomic (like ints) so that we directly store them, or because we store a <em>stack reference</em> to a data section that is stored before the tuple. The tuple <code>((3, 4), (3, 4), (3, 4))</code> would be represented as:</p>
+<pre><code>00: PUSH_INT(3)
+01: PUSH_INT(4)
+02: MAKE_TUPLE { elems: 2, total_size: 2 }
+03: REF(02)
+04: REF(02)
+05: REF(02)
+06: MAKE_TUPLE { elems: 3, total_size: 6 }
+</code></pre>
+<p>Conceptually:</p>
+<pre><code>        3 | +
+        4 | +
++-+-+-&gt; __| +
+| | +---@   |
+| +-----@   |
++-------@   |
+        ____|
+</code></pre>
+<p>This is how tuples can wrap around “ghost data” that they point to but which is not directly stored <em>inside</em> the tuple. (Maybe it would be more accurate to call it “adopted” data, because anything that is stored before the tuple gets turned into a child of the tuple through a stack reference.)</p>
+<p>But now that every tuple element is guaranteed to have a size of 1, there is no need for arrays anymore, because “tuples” support <code>O(1)</code> access if all elements are atomic or stack references. So let's drop the distinction and just talk about “lists” instead. Additionally, let's stop storing the total size and instead just track how much data is stored in the “adopted” section of the list. With these changes, our example <code>[1, 2, [3, 4]]</code> would be represented as:</p>
+<pre><code>00: PUSH_INT(3)
+01: PUSH_INT(4)
+02: MAKE_LIST { elems: 2, adopted: 0 }
+03: PUSH_INT(1)
+04: PUSH_INT(2)
+05: REF(02)
+06: MAKE_LIST { elems: 3, adopted: 3 }
+</code></pre>
+<p>Conceptually, with <code>1</code> and <code>2</code> being copied by value:</p>
+<pre><code>    3 | + // adopted
+    4 | + // adopted
++-&gt; __| + // adopted
+|   1   |
+|   2   |
++---@   |
+    ____|
+</code></pre>
+<p>Note how in the above example, we only use a reference for the list, while 1 and 2 are copied by value. Since atomic values like ints can always safely be copied by value, we will consider refs pointing to atomic values as invalid, which guarantees that refs will always point to lists, as lists are the only data with dynamic size.</p>
+<p>What if we try to create a list from elements that are not of size one, for example by creating a list from a <em>literal</em> list, instead of referencing it? Here's an example:</p>
+<pre><code>00: PUSH_INT(1)
+01: PUSH_INT(2)
+02: MAKE_LIST { elems: 2, adopted: 0 }
+03: MAKE_LIST { elems: ??, adopted: ?? } // how would this work?
+</code></pre>
+<p>The above would simply be invalid bytecode, because it breaks the assumption that the “input” bytecode can be used as an <em>efficient</em> output representation: We can only access the elements of a list in <code>O(1)</code> if we can guarantee that elements have a fixed size of 1 stack slot and all larger elements are stored “out of band” as adopted data.</p>
+<p>(This also highlights an inconsistency between input and output bytecode in last week's proposal for arrays: Arrays were assumed to always produce padded output for elements with different sizes, but there was no guarantee that the input bytecode actually padded the “operands” of a <code>MAKE_ARRAY</code> instruction. By instead enforcing operands of <code>MAKE_LIST</code> to always be of size 1, we can unify tuples and arrays while also guaranteeing that input and output representations guarantee the same invariants.)</p>
+<h2>Marking-and-compacting powers of 2</h2>
+<p>The previous note described a 4 pass mark-and-compact algorithm that runs on return:</p>
+<ul><li>Walk from the end of the return value to the start of the call frame. Treat the entire return value as reachable. For each reference inside a reachable list, mark the stack slot it's pointing to (which must be another list) as reachable by setting a <em>mark bit</em> in the <code>adopted</code> field. This will walk the entire call frame and mark all reachable values transitively with the mark bit.</li><li>Walk from the start of the call frame to the end of the return value. Track the gap by which the current stack slot needs to be shifted after compaction, initialized to 0. For each list (reachable or not), set its <code>adopted</code> field to the current value of the gap counter. For each list not marked as reachable, increase the gap counter by the total size of the list (<code>elems</code> + <code>adopted</code> + 1) and set <code>elems</code> to 0.</li><li>Walk from the end of the return value to the start of the call frame. For each reference, look up the list that it points to (which now stores the gap by which it will be moved in its <code>adopted</code> field) and subtract the gap from the reference, guaranteeing that all references will be valid after compaction.</li><li>Walk from the start of the call frame to the end of the return value. Track the current gap by reading the <code>adopted</code> field of each list we encounter and move each list by that amount. Garbage lists will automatically be overwritten, but we can also skip copying them (by skipping lists with 0 <code>elems</code>). Recompute the <code>adopted</code> field based on the size of the elements.</li></ul>
+<p>Since we want to be able to efficient access lists in <code>O(1)</code>, we store both the number of elements and the size of the adopted data. But there is redundancy here and the size of the adopted data can be recomputed from the number of elements: If we know the number of elements (and all child elements have had their <code>adopted</code> field restored transitively, which we can do using a linear bottom up pass), we can calculate the size of the <code>adopted</code> data by summing up the size of all the referenced child elements.</p>
+<p>One possible optimization is to set the <code>adopted</code> field of all lists in the threatened area to 0 and set the <code>adopted</code> field of the return value to the length of the threatened area after compaction. This effectively treats the threatened area as a single block that is adopted by the return value.</p>
+<p>Last week's note assumed that this compaction would run on every return, but this could lead to a significant slowdown, for example if we recursively return a growing list of values, because the entire return value would be scanned and moved every single time.</p>
+<p>Instead, let's amortize the cost of compacting the return values over multiple operations by only running the mark-and-compact algorithm if the size of the threatened area exceeds the size of the return value. If not, we simply keep the stack as it is and let the return value adopt the entire threatened area. This way, we compact the stack whenever there's an opportunity to reclaim a lot of space in the threatened area relative to the return value. But the bigger the return value gets (and the more expensive the reachability analysis and move would become), the less frequently we run the compaction and instead end up with a bit of garbage on the stack (which will be cleaned up the next time we run the mark-and-compact on that value).</p>
+<h2>What's the point?</h2>
+<p>Why put so much effort into keeping things on the stack, instead of boxing lists on the heap, like most other functional programming languages do? To be clear, this is an experiment and it's unclear whether such a mark-and-compact-on-return algorithm is viable. But there are three main reasons that motivate this approach:</p>
+<ul><li>Keeping sequential data tightly packed together on the stack likely leads to better cache locality and hopefully significant performance improvements over boxed data for deeply nested tree structures. (After all, this is why using bytecode is often more efficient than tree-walking an AST that relies on extensive boxing.)</li><li>Not having to rely on boxing for lists makes using such a language potentially viable for environments where heap allocation and GC is either not possible or very expensive, such as for operating systems, embedded environments or soft realtime situations.</li><li>Most importantly, keeping data that outlives a call frame on the stack opens the door for closures that are entirely on the stack, which in turn means that closures can entirely be represented in bytecode without boxing.</li></ul>
+<p>The last point sounds a bit academic, but is actually the main driver for this experiment, because I want to explore whether bytecode could be used as a viable <em>input and output</em> format for staged evaluation using a bytecode VM. Guaranteeing that the output of evaluating and creating closures can still live on the stack would make it possible to use the output of comptime evaluation as the input for the VM at runtime.</p>
+<p>As a finishing touch, we can make this double use as input and output explicit in how we name instructions. Instead of “pushing” ints or “making” lists, we can just as well adopt an output perspective and see them as <em>being</em> ints and lists:</p>
+<pre><code>00: INT(1)
+01: INT(2)
+02: LIST { elems: 2, adopted: 0 }
+03: REF(02)
+04: REF(02)
+05: LIST { elems: 2, adopted: 3 }
+</code></pre>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
