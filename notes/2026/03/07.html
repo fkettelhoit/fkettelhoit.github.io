@@ -6,7 +6,7 @@
 <title>Ghost data: compacting escaped values on the stack</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2026/03/07</p>
+<p><a href="../../..#notes">notes</a>/2026/03/07</p>
 <h1>Ghost data: compacting escaped values on the stack</h1>
 <p>(Related to <a href="../../2026/02/28.html">flat tuples and arrays</a>, <a href="../../2026/01/17.html">explicit boxing</a>.)</p>
 <p>Here's a problem with keeping data flat on the stack: when a function returns, any data it created gets thrown away. But the return value might reference some of that data via references to the stack. We need to keep the referenced data alive somehow.</p>
@@ -97,4 +97,5 @@ ____|                  ____|  &lt;-- heap location `y`
 <p>What's appealing about using ghost data for function returns is that it keeps the stack as the default home for data. Heap allocation only happens when the programmer explicitly asks for it via boxing. The four-pass compaction is more complex than a simple heap move, but it preserves the property that most data never leaves the stack (which was the whole point of flat tuples and arrays to begin with).</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

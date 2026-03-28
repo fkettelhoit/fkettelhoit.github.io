@@ -6,12 +6,18 @@
 <title>A programming language as a series of experiments</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/10/12</p>
+<p><a href="../../..#notes">notes</a>/2025/10/12</p>
 <h1>A programming language as a series of experiments</h1>
 <p>I've recently been reflecting on my goals for building <a href="https://github.com/fkettelhoit/kombucha">Kombucha</a>. On the one hand, the goal hasn't changed: I want to build a <em>minimal and malleable</em> programming language for <em>symbiotic</em> end-user programming in Rust. But if that were the only goal, success would be solely measured by Kombucha's practical use (and I'm barely using it yet), in other words by how useful its implementation is. Is that all a programming language is?</p>
 <p>Many programming languages, Kombucha included, have a meta goal: To explore the <em>language design space</em> through a series of <em>experiments.</em> They might explore novel individual features (and Kombucha does, for example in its macro system), but most often the contribution of a language is an exploration of how different features <em>interact.</em></p>
 <p>Kombucha is exploring a specific interaction of the following areas:</p>
-<ul><li>Minimal syntax</li><li>Reasonable macros</li><li>Effect handlers</li><li>Currying vs. fixed arity</li><li>Live reload</li></ul>
+<ul>
+<li>Minimal syntax</li>
+<li>Reasonable macros</li>
+<li>Effect handlers</li>
+<li>Currying vs. fixed arity</li>
+<li>Live reload</li>
+</ul>
 <h2>Minimal syntax</h2>
 <p>Kombucha is designed as a Lisp-like language without the parentheses. To achieve this, Kombucha supports prefix call syntax, infix call syntax, as well as trailing arguments and keyword arguments. Kombucha's syntax tries to be as <em>general as possible,</em> so that no language constructs need to be privileged.</p>
 <p>Out of all the experiments, Kombucha's syntax experiment is currently the most promising and complete, but it is also the most heavily dependent on other language features (most notably macros).</p>
@@ -29,4 +35,5 @@
 <p>This experiment is still in the design phase.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

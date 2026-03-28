@@ -6,7 +6,7 @@
 <title>RC week 5: hot reload with replay semantics?</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/06/21</p>
+<p><a href="../../..#notes">notes</a>/2025/06/21</p>
 <h1>RC week 5: hot reload with replay semantics?</h1>
 <p>For the past week at the <a href="https://www.recurse.com">Recurse Center</a> I've been thinking about how to implement hot reload as part of a programming language in such a way that the language can guarantee the absence of <em>stale state.</em></p>
 <h2>Hot reload</h2>
@@ -18,7 +18,7 @@
 <p>A (live) state that wouldn't be reachable by restarting the program (no matter how the program interacts with the outside world) is <em>stale,</em> it is an observable effect of reloading (and thus changing) some code.</p>
 <p>If a live system reaches a stale state, the best thing we can do (if we want to avoid the disadvantages that might result from stale state) is to restart the parts of the program that have caused the stale state. In the most extreme case (and in the absence of a sufficiently smart compiler that could just &quot;patch up&quot; stale state) this might be equivalent to restarting the entire program.</p>
 <h2>Replay semantics</h2>
-<p>A language that supports hot reload but prohibits stale state supports what I call <em>replay semantics:</em>A language with replay semantics guarantees that the live state of a program after a hot reload is the same state that would have resulted if the program had been restarted and <em>replayed</em> with the new code from the beginning (ignoring any differences that resulted from side effects).</p>
+<p>A language that supports hot reload but prohibits stale state supports what I call <em>replay semantics:_A language with replay semantics guarantees that the live state of a program after a hot reload is the same state that would have resulted if the program had been restarted and _replayed</em> with the new code from the beginning (ignoring any differences that resulted from side effects).</p>
 <p>The last part about side effects is important to ensure that replay semantics remain possible in practice: If a program reads from a file and the contents of the file change either between reloads or between running the program the first time and restarting it later, there is no way to &quot;roll back&quot; the world and get the previous file contents back. Replay semantics do not guarantee that restarting a program will always lead to the same results, they only guarantee that a difference in program behavior cannot have been caused by old state left over after hot reloading.</p>
 <p>A little bit more formally, replay semantics guarantee that if a program (or fragment of a program) <code>p_0</code> is first executed in the presence of a sequence of side effects <code>e_0...e_m</code> producing the state <code>s_0</code>, then after hot reloading a new version <code>p_1</code> and continuing to run the program in the presence of a sequence of effects <code>e_m+1...e_n</code> producing the state <code>s_1</code> this state is identical to the state <code>s_2</code> that would have resulted from running the program <code>p_1</code> in the presence of the sequence of effects <code>e_0...e_n</code>, for all possible sequences of effects.</p>
 <h2>A chain of modules</h2>
@@ -35,4 +35,5 @@
 <p>It still seems unclear to me what the best option is or whether replay semantics are even worth the considerable effort. Using some form of static analysis seems to be the most appealing but also the most complex option. For now, my plan is to implement a module system without replay semantics first and to explore the approaches mentioned here at a later point.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

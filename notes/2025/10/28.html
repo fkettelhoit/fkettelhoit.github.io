@@ -6,7 +6,7 @@
 <title>RC week 22: paradoxical values as unordered time loop maps</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/10/28</p>
+<p><a href="../../..#notes">notes</a>/2025/10/28</p>
 <h1>RC week 22: paradoxical values as unordered time loop maps</h1>
 <p>This continues the exploration from <a href="../../2025/09/13.html">week 18</a> and <a href="../../2025/09/20.html">week 19</a> about a calculus for dealing with paradoxical fixed points. The previous approach used ordered sequences with explicit step counters and phases to manage shifts. This week, I've simplified the design by switching to <strong>unordered maps</strong> that track relationships between values rather than temporal sequences.</p>
 <h2>The map-based approach</h2>
@@ -14,7 +14,12 @@
 <p>Internally, this is stored as a <strong>time loop map:</strong> <code>('x': 'x', 'y': 'y')</code>. This might look redundant at first. After all, why map each value to itself? This will become clear when we look at nested examples, because associating values with their <em>origins</em> is crucial for reasoning about paradoxical sub-expressions.</p>
 <h2>How to read time loop maps</h2>
 <p>Before diving into examples, let's clarify the notation:</p>
-<ul><li><code>('x' &amp; 'y')</code> is shorthand for the time loop map <code>('x': 'x', 'y': 'y')</code></li><li>A map like <code>('x': 'y', 'y': 'x')</code> shows transformations: the key <code>'x'</code> produces the value <code>'y'</code>, and the key <code>'y'</code> produces the value <code>'x'</code></li><li>When all keys equal their corresponding values after normalization (like <code>('x': 'x', 'y': 'y')</code>), we have a fixed point</li><li>A normal value like <code>'x'</code> has no map structure—it's just <code>'x'</code></li></ul>
+<ul>
+<li><code>('x' &amp; 'y')</code> is shorthand for the time loop map <code>('x': 'x', 'y': 'y')</code></li>
+<li>A map like <code>('x': 'y', 'y': 'x')</code> shows transformations: the key <code>'x'</code> produces the value <code>'y'</code>, and the key <code>'y'</code> produces the value <code>'x'</code></li>
+<li>When all keys equal their corresponding values after normalization (like <code>('x': 'x', 'y': 'y')</code>), we have a fixed point</li>
+<li>A normal value like <code>'x'</code> has no map structure—it's just <code>'x'</code></li>
+</ul>
 <p>The keys track where each value came from, which is crucial for reasoning about how values transform through function application.</p>
 <h2>The simple liar and normalization</h2>
 <p>Let's trace through the simple liar's paradox to see how the map-based approach works:</p>
@@ -31,7 +36,10 @@ else:
 <pre><code>('x': true, 'y': false)
 </code></pre>
 <p>When this map of booleans is applied to the two branches <code>'y'</code> and <code>'x'</code>, each function selects the appropriate branch:</p>
-<ul><li>For key <code>'x'</code>: <code>true('y', 'x')</code> selects <code>'y'</code></li><li>For key <code>'y'</code>: <code>false('y', 'x')</code> selects <code>'x'</code></li></ul>
+<ul>
+<li>For key <code>'x'</code>: <code>true('y', 'x')</code> selects <code>'y'</code></li>
+<li>For key <code>'y'</code>: <code>false('y', 'x')</code> selects <code>'x'</code></li>
+</ul>
 <p>This gives us <code>('x': 'y', 'y': 'x')</code> as the intermediate result. Notice how the keys track where each result came from: the <code>'x'</code> case produced <code>'y'</code>, and the <code>'y'</code> case produced <code>'x'</code>. This is why the map structure associates values with their <strong>origins</strong>—it's crucial for tracking transformations.</p>
 <p>But we're not done yet. The key insight is <strong>normalization</strong>. After evaluating an expression, we check whether the resulting map represents a loop back to the original values. We simply check whether the keys and values of the map are the same set—just potentially reordered.</p>
 <p>For our simple liar, we have <code>('x': 'y', 'y': 'x')</code>. The normalization process detects that this is a loop: the set <code>{'x', 'y'}</code> appears as both keys and values. When a loop is detected, the map is transformed so each key maps to itself: <code>('x': 'x', 'y': 'y')</code>, which is just <code>('x' &amp; 'y')</code>.</p>
@@ -48,9 +56,15 @@ else:
     'x'
 </code></pre>
 <p>The left side has rank 2, the right side has rank 1. We lift the right side and compare each entry:</p>
-<ul><li><code>'y'</code> compared to <code>('x' &amp; 'y')</code> produces <code>('x': false, 'y': true)</code></li><li><code>('x' &amp; 'y')</code> compared to <code>('x' &amp; 'y')</code> produces <code>('x': true, 'y': true)</code>, which simplifies to just <code>true</code></li></ul>
+<ul>
+<li><code>'y'</code> compared to <code>('x' &amp; 'y')</code> produces <code>('x': false, 'y': true)</code></li>
+<li><code>('x' &amp; 'y')</code> compared to <code>('x' &amp; 'y')</code> produces <code>('x': true, 'y': true)</code>, which simplifies to just <code>true</code></li>
+</ul>
 <p>This gives us a nested structure: <code>('y': ('x': false, 'y': true), ('x' &amp; 'y'): true)</code>. We can now apply this to the branches:</p>
-<ul><li>For the <code>'y'</code> key: <code>('x': false, 'y': true)</code> applied to <code>('y', 'x')</code> gives <code>('x': 'x', 'y': 'y')</code></li><li>For the <code>('x' &amp; 'y')</code> key: <code>true</code> applied to <code>('y', 'x')</code> gives <code>'y'</code></li></ul>
+<ul>
+<li>For the <code>'y'</code> key: <code>('x': false, 'y': true)</code> applied to <code>('y', 'x')</code> gives <code>('x': 'x', 'y': 'y')</code></li>
+<li>For the <code>('x' &amp; 'y')</code> key: <code>true</code> applied to <code>('y', 'x')</code> gives <code>'y'</code></li>
+</ul>
 <p>This produces <code>('y': ('x': 'x', 'y': 'y'), ('x' &amp; 'y'): 'y')</code>, which is equivalent to <code>('y': ('x' &amp; 'y'), ('x' &amp; 'y'): 'y')</code>. After normalization, each key maps back to itself, <code>('y': 'y', ('x' &amp; 'y'): ('x' &amp; 'y'))</code>, giving us our original value <code>v</code>, <code>('y' &amp; ('x' &amp; 'y'))</code>.</p>
 <h2>The escaped liar</h2>
 <p>This example shows how nested conditionals interact with time loops:</p>
@@ -66,7 +80,10 @@ else:
 <p>Following the same pattern of rank-based lifting and evaluation, the outer comparison produces <code>('x': ('x': true, 'y': false), ('x' &amp; 'y'): true)</code>, and the inner comparison produces <code>('x': true, ('x' &amp; 'y'): ('x': true, 'y': false))</code>.</p>
 <p>The inner conditional evaluates to <code>('x': 'y', ('x' &amp; 'y'): ('x': 'y', 'y': 'x'))</code>.</p>
 <p>The outer conditional then selects between <code>'x'</code> and the inner result, which is zipped together with the outer map:</p>
-<ul><li>For the <code>'x'</code> key: the boolean map <code>('x': true, 'y': false)</code> selects between <code>'x'</code> and <code>'y'</code>, giving <code>('x': 'x', 'y': 'y')</code></li><li>For the <code>('x' &amp; 'y')</code> key: <code>true</code> selects <code>'x'</code> without needing to look at the inner conditional</li></ul>
+<ul>
+<li>For the <code>'x'</code> key: the boolean map <code>('x': true, 'y': false)</code> selects between <code>'x'</code> and <code>'y'</code>, giving <code>('x': 'x', 'y': 'y')</code></li>
+<li>For the <code>('x' &amp; 'y')</code> key: <code>true</code> selects <code>'x'</code> without needing to look at the inner conditional</li>
+</ul>
 <p>After normalization, we get back <code>('x' &amp; ('x' &amp; 'y'))</code>.</p>
 <h2>The liar's twin</h2>
 <p>This example demonstrates compositional reasoning:</p>
@@ -80,7 +97,10 @@ else:
         'x'
 </code></pre>
 <p>Even though <code>('x' &amp; 'y')</code> appears twice as <code>v</code>, the synchronized evaluation ensures consistent behavior. Both comparisons produce the same map <code>('x': true, 'y': false)</code>:</p>
-<ul><li>For the <code>'x'</code> key: both conditionals see <code>true</code>, so we take the outer then-branch, returning <code>'y'</code></li><li>For the <code>'y'</code> key: both conditionals see <code>false</code>, so we take the outer else-branch, then the inner else-branch, returning <code>'x'</code></li></ul>
+<ul>
+<li>For the <code>'x'</code> key: both conditionals see <code>true</code>, so we take the outer then-branch, returning <code>'y'</code></li>
+<li>For the <code>'y'</code> key: both conditionals see <code>false</code>, so we take the outer else-branch, then the inner else-branch, returning <code>'x'</code></li>
+</ul>
 <p>The result is <code>('x': 'y', 'y': 'x')</code>, which normalizes to <code>('x': 'x', 'y': 'y')</code>. The middle branch (inner then-branch returning <code>'z'</code>) is never visited because the conditions are synchronized by zipping together the inner and outer conditionals via their keys.</p>
 <h2>Why maps instead of sequences?</h2>
 <p>The map-based approach eliminates the need to track explicit step counters and phases. Instead of thinking about &quot;time step 0&quot; versus &quot;time step 1,&quot; we think about the relationships between values: when we have <code>'x'</code>, we get <code>'y'</code>, and when we have <code>'y'</code>, we get <code>'x'</code>.</p>
@@ -95,4 +115,5 @@ else:
 <p>Another obvious next step is to work on an actual decision procedure for deriving paradoxical fixed points, which should be possible at least for the finitely paradoxical fixed points discussed here.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

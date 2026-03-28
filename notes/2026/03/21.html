@@ -6,14 +6,15 @@
 <title>Staged programming and the principle of least power</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2026/03/21</p>
+<p><a href="../../..#notes">notes</a>/2026/03/21</p>
 <h1>Staged programming and the principle of least power</h1>
 <p>I've recently been thinking about how to design a bytecode virtual machine that uses the same flat bytecode representation for both its input (so far, so normal) and also its output representation (with data structures represented as a flat bytecode tree). Why? Because going from bytecode to bytecode makes it possible to do <em>staged programming</em>, where a program's output is again an executable program that can be evaluated by the VM.</p>
 <p>From a concrete implementation perspective, this is interesting for compiling away the overhead of macros. This could be done with a binary split into comptime evaluation and runtime evaluation. Using the same bytecode format for input and output is then merely a way to use the same VM for both.</p>
 <h2>The principle of least power</h2>
 <p>But once we use the same format for input and output, why stop at just two stages? Why not go for an arbitrary number of stages at comptime and then leave the last stage for runtime? Or maybe even multiple stages at comptime, and then multiple stages at runtime, similar to just-in-time compiling code at runtime?</p>
 <p>Why go with just two stages, when we could have <em>more</em> power? As tempting as that sounds, remember the <a href="https://www.w3.org/DesignIssues/Principles.html#PLP">principle of least power</a>:</p>
-<blockquote><p>The choice of language is a common design choice. The low power end of the scale is typically simpler to design, implement and use, but the high power end of the scale has all the attraction of being an open-ended hook into which anything can be placed: a door to uses bounded only by the imagination of the programmer.</p>
+<blockquote>
+<p>The choice of language is a common design choice. The low power end of the scale is typically simpler to design, implement and use, but the high power end of the scale has all the attraction of being an open-ended hook into which anything can be placed: a door to uses bounded only by the imagination of the programmer.</p>
 </blockquote>
 <p>As our friendly neighborhood language designer likes to remind us, more power never comes without tradeoffs. Why not use late binding and dynamic dispatch everywhere? Why not use multi-shot coroutines instead of boring one-shot coroutines? (Why not use lambda calculus for everything, where you can do anything. Anything at all. The only limit is yourself.) Because more powerful languages are both harder to implement and use, because they provide fewer guarantees and affordances. Limiting the power of a language increases our power of reasoning <em>about</em> the language and its programs.</p>
 <h2>Symbiotic programming, staged programming</h2>
@@ -28,4 +29,5 @@
 <p>The main benefit of staged programming is that it allows us to <em>choose</em> where and how we need more power, so that the remaining stages can operate with fewer assumptions and in a less powerful environment.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

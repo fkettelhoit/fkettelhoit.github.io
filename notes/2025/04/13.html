@@ -6,20 +6,17 @@
 <title>What makes a programming language powerful?</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/04/13</p>
+<p><a href="../../..#notes">notes</a>/2025/04/13</p>
 <h1>What makes a programming language powerful?</h1>
 <p>What makes one programming language more powerful than another one? Is the power of programming languages a clear concept or are there several orthogonal notions of what we mean by power? Is it even desirable to make a programming language as powerful as possible?</p>
 <p>I want to argue that there are several different notions of programming language power and only one of them, computational power, is usually explicitly discussed and measured. The different notions of power are sometimes confused, which makes it hard to see that each notion of power comes with its own tradeoffs and that making a language more powerful has both advantages and disadvantages. As with all tradeoffs, however, there are points in the design space that are worse than others. Clarifying the different notions of power can help identify these points.</p>
 <h2>More power is not always better</h2>
 <p>While it might be natural to think that a more powerful language is always better, because it can <em>do more,</em> this ignores that a less powerful language is easier to understand and manipulate for both humans and computers.</p>
 <p>Here's what Tim Berners-Lee had to say about this in 1998:</p>
-<blockquote><p>The choice of language is a common design choice. The low power end of the scale is typically <em>simpler to design, implement and use,</em> but the high power end of the scale has all the attraction of being an open-ended hook into which anything can be placed: a door to uses bounded only by the imagination of the programmer.</p>
-</blockquote>
-<p>&gt;</p>
-<blockquote><p>Computer Science in the 1960s to 80s spent a lot of effort making languages which were as powerful as possible. Nowadays we have to appreciate the reasons for picking not the most powerful solution but the least powerful. The reason for this is that the less powerful the language, <em>the more you can do with the data stored in that language.</em> If you write it in a simple declarative from, anyone can write a program to analyze it in many ways.</p>
-</blockquote>
-<p>&gt;</p>
-<blockquote><p>— <a href="https://www.w3.org/DesignIssues/Principles.html#PLP">Principle of Least Power, Tim Berners-Lee</a> (emphasis mine)</p>
+<blockquote>
+<p>The choice of language is a common design choice. The low power end of the scale is typically <em>simpler to design, implement and use,</em> but the high power end of the scale has all the attraction of being an open-ended hook into which anything can be placed: a door to uses bounded only by the imagination of the programmer.</p>
+<p>Computer Science in the 1960s to 80s spent a lot of effort making languages which were as powerful as possible. Nowadays we have to appreciate the reasons for picking not the most powerful solution but the least powerful. The reason for this is that the less powerful the language, <em>the more you can do with the data stored in that language.</em> If you write it in a simple declarative from, anyone can write a program to analyze it in many ways.</p>
+<p>— <a href="https://www.w3.org/DesignIssues/Principles.html#PLP">Principle of Least Power, Tim Berners-Lee</a> (emphasis mine)</p>
 </blockquote>
 <p>In other words, a more powerful language can do more <em>in</em> the language, but if we restrict ourselves to a less powerful language we can do more <em>with</em> the language (if we reason about it or manipulate it as data).</p>
 <p>According to the principle of least power, we should always choose the least powerful language that we can get away with, because it is &quot;simpler to design, implement and use&quot;. What we can get away with will depend on the specific situation, but the emphasis on designing, implementing and using a language is a good reminder of the disadvantages of too much power.</p>
@@ -70,4 +67,5 @@
 <p>The notions discussed here are neither complete nor rigorous, but why should they be? Language design involves balancing a lot of different tensions and tradeoffs, all we can do is try to make our concepts more explicit, then start experimenting.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

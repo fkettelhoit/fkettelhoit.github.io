@@ -6,7 +6,7 @@
 <title>RC week 17: test cases for paradoxical fixed points</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/09/20</p>
+<p><a href="../../..#notes">notes</a>/2025/09/20</p>
 <h1>RC week 17: test cases for paradoxical fixed points</h1>
 <p>Continuing <a href="../../2025/09/13.html">last week's thoughts</a> about paradoxical solutions for recursive loops that show similarities to the halting problem, here are a couple of “test cases” that any attempted solution should be able to handle.</p>
 <p>The following code snippets all assume that the language provides some kind of paradoxical values, such as <code>&quot;x&quot; &amp; &quot;y&quot;</code>, which are <em>both</em> <code>&quot;x&quot;</code> and <code>&quot;y&quot;</code> <em>at the same time.</em> When the paradoxical value <code>&quot;x&quot; &amp; &quot;y&quot;</code> is compared to the normal value <code>&quot;x&quot;</code> using an if-then-else construct, the paradoxical value matches <em>both</em> the then-branch and the else-branch.</p>
@@ -144,4 +144,5 @@ def f():
 <p>The lesson here is that we need to be careful how we substitute equal values in the presence of recursion, because fixed points implicitly have a notion of “scope” due to being recursive.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

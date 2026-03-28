@@ -6,7 +6,7 @@
 <title>Custom binding constructs without macros, part 1: explicit bindings</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/03/16</p>
+<p><a href="../../..#notes">notes</a>/2025/03/16</p>
 <h1>Custom binding constructs without macros, part 1: explicit bindings</h1>
 <p>Programming languages face a tension between the ability to extend them <em>dynamically</em> and the ability to reason about them <em>statically.</em> We take it for granted that constructs that <em>bind variables</em>, such as function definitions or pattern matching, are a fixed part of a language's core syntax, unless we go for <a href="https://en.wikipedia.org/wiki/Lisp_%28programming_language%29#List_structure_of_program_code;_exploitation_by_macros_and_compilers">Lisp-like macros</a>, which are powerful but hard to reason about.</p>
 <p>There is an unexplored middle ground, however, of allowing binding constructs to be defined and extended, while ensuring that all variables are lexically bound and that their scope can be determined statically. What follows is an exploration of this middle ground, while respecting a single guiding principle:</p>
@@ -16,7 +16,10 @@
 <p>The more a language is defined in terms of static constructs that cannot be redefined, the easier it is to reason about (both for humans and compilers), because we can be sure that certain constructs always mean the same thing and cannot be rebound. But the more dynamic a language is (by aggressively using late binding such as <a href="https://en.wikipedia.org/wiki/Self_%28programming_language%29">Self</a> and <a href="https://en.wikipedia.org/wiki/Io_%28programming_language%29">Io</a>, or by using Lisp-like macros), the more it can be molded for a particular usecase that the original language designers might not have had in mind.</p>
 <p>This tension is quite visible for <em>binding constructs</em>, in other words constructs that involve binding one or more variables in the scope of a function or block. Even heavily dynamic languages usually only support variables to be bound by special constructs, for example assignment operators like <code>=</code>, in function definition or at the beginning of lambdas/blocks/closures.</p>
 <p>This makes it hard to define new constructs that bind variables, such as a pattern matching construct in a language that doesn't provide it, because a pattern matching construct needs to take a <em>pattern</em>, which might include fresh variables, and then <em>bind</em> these variables to their matched values in the scope of a body, but only execute the body if the match actually succeeds. There seem to be two different ways to deal with such a situation in a language:</p>
-<ul><li>Just accept that binding constructs are fixed (and that language designers need to be lobbied to add new bindings constructs, such as a pattern matching construct).</li><li>Use macros to operate on expressions <em>before they are resolved as variables</em>, effectively adding a meta level to the language that can decide whether to treat the <code>x</code> in <code>foo(x)</code> as a bound symbol, a fresh variable or something else entirely.</li></ul>
+<ul>
+<li>Just accept that binding constructs are fixed (and that language designers need to be lobbied to add new bindings constructs, such as a pattern matching construct).</li>
+<li>Use macros to operate on expressions <em>before they are resolved as variables</em>, effectively adding a meta level to the language that can decide whether to treat the <code>x</code> in <code>foo(x)</code> as a bound symbol, a fresh variable or something else entirely.</li>
+</ul>
 <p>Lisp macros are the best example for the second option. They are definitely powerful enough to add any construct we could possibly think of, and then some! But this power comes at a price. Let's take a look at the following Lisp code:</p>
 <pre><code>(foo (bar a b) (baz x y))
 </code></pre>
@@ -94,7 +97,11 @@ a = b // the variable a is being bound
 <p>So far we have looked at how binding constructs can be <em>used,</em> but how can they actually be <em>defined?</em> Let's say we wanted to define our own let binding construct, called <code>def</code>, which can be called as def('x, value, { x }). How would we implement def?</p>
 <p>We already know that the second argument, value, is just a normally evaluated function argument. We also know that blocks are just syntactic sugar and get translated into anonymous functions, with the number of arguments determined by the bindings to its left. In the case of def('x, value, { x }), the block { x } is translated to the function ('x =&gt; x). But what about the first argument, 'x? If explicit bindings are purely syntactical and get desugared into a functional language without macros, how are explicit bindings translated?</p>
 <p>The exact representation of a binding at runtime depends on the specific host language, but any representation of a binding-as-value must meet a couple of criteria:</p>
-<ul><li>A binding-as-value cannot be created at runtime by a user of the language, the only way to create a binding-as-value is to declare it explicitly using single-quoting in the syntax, ensuring that the number of bindings can be tracked statically.</li><li>The name of a binding-as-value cannot be inspected at runtime, ensuring that any bindings <a href="https://en.wikipedia.org/wiki/Lambda_calculus#Alpha_equivalence">can be renamed</a> in the source code without affecting any runtime behavior.</li><li>A binding-as-value can be compared with another binding-as-value for equality, ensuring that Pair('x, 'x) can be distinguished from Pair('x, 'y).</li></ul>
+<ul>
+<li>A binding-as-value cannot be created at runtime by a user of the language, the only way to create a binding-as-value is to declare it explicitly using single-quoting in the syntax, ensuring that the number of bindings can be tracked statically.</li>
+<li>The name of a binding-as-value cannot be inspected at runtime, ensuring that any bindings <a href="https://en.wikipedia.org/wiki/Lambda_calculus#Alpha_equivalence">can be renamed</a> in the source code without affecting any runtime behavior.</li>
+<li>A binding-as-value can be compared with another binding-as-value for equality, ensuring that Pair('x, 'x) can be distinguished from Pair('x, 'y).</li>
+</ul>
 <p>Returning to the example of defining a custom let binding, our def function needs to check that its first argument (the binding-as-value) is a single binding, in which case we know it's safe to call the third argument (the block) as a function with a single argument.</p>
 <pre><code>// assuming the following built-in functions:
 // `=&gt;`, infix binding construct, for single argument functions,
@@ -124,8 +131,12 @@ a = b // the variable a is being bound
 }
 </code></pre>
 <p>How can this be solved? I see two options, neither of which seems ideal:</p>
-<ul><li>Explicit bindings can be used more than once if an enclosing block is found synactically <em>immediately</em> above where a binding is consumed in the AST. This would make the above example just work, but feels like too much magic.</li><li>There is a way to explictly mark bindings as being used more than once, for example ''x to signal that the binding can be consumed twice, whereas '''x can be consumed three times.</li></ul>
+<ul>
+<li>Explicit bindings can be used more than once if an enclosing block is found synactically <em>immediately</em> above where a binding is consumed in the AST. This would make the above example just work, but feels like too much magic.</li>
+<li>There is a way to explictly mark bindings as being used more than once, for example ''x to signal that the binding can be consumed twice, whereas '''x can be consumed three times.</li>
+</ul>
 <p>Either way, more exploration is needed. Nevertheless, explicit bindings and user-defined binding constructs seem to be an interesting direction that I haven't encountered in any programming language before, especially when combined with flexible but general syntax, such as infix calls.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

@@ -6,7 +6,7 @@
 <title>Flat bytecode as lists and arrays</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/12/29</p>
+<p><a href="../../..#notes">notes</a>/2025/12/29</p>
 <h1>Flat bytecode as lists and arrays</h1>
 <p>As outlined in a note on <a href="../../2025/12/27.html">bytecode as a flat AST</a>, bytecode can be seen as a flat representation of tree-like data. A list of cons cells of the form <code>(x, (y, (z, ())))</code> could be represented as the following flat bytecode:</p>
 <pre><code>x y z () CONS CONS CONS
@@ -28,4 +28,5 @@ x y z CONS&lt;3, m&gt; // (x, (y, (z, ())))
 <p>Could this be a viable runtime representation for a bytecode evaluator? At the very least, it sounds like an idea worth exploring to see where it breaks. At best, it might result in bytecode that supports efficient random access traversal.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

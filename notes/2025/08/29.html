@@ -6,14 +6,17 @@
 <title>RC week 13: reasonable macros through explicit bindings, part 3</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/08/29</p>
+<p><a href="../../..#notes">notes</a>/2025/08/29</p>
 <h1>RC week 13: reasonable macros through explicit bindings, part 3</h1>
 <p>This is a proposal for <strong>explicit bindings</strong> in a programming language, which lead to macros that can be <strong>reasoned about statically</strong>, by distinguishing variables that are being <strong>bound</strong> from variables that are being <strong>used</strong>.</p>
 <p>(This note continues the explorations of <a href="../../2025/07/06.html">part 1</a> and <a href="../../2025/08/05.html">part 2</a> but is self-contained. There's also a <a href="../../../papers/reasonable-macros-through-explicit-bindings-v2.pdf">paper</a> that goes into more technical detail.)</p>
 <h2>Reasoning about macros</h2>
 <p>Let's assume that we want to build a programming language where every function or control structure can be redefined and reimplemented, including something as fundamental as variable assignment. Our language might have a built-in way of expressing something like <code>a = 5</code>, but we want to ensure that user-defined functions can do the same, for example by defining a function <code>let</code> that is used as <code>let(a, 5)</code>.</p>
 <p>One option is to use Lisp-like macros: In a language like Lisp, <code>let</code> can be a macro, which does not evaluate <code>a</code> but instead treats it as a symbol, evaluates <code>5</code> and then calls the built-in <code>=</code> function to set the symbol <code>a</code> to the value <code>5</code>. This has two disadvantages:</p>
-<ul><li>It introduces quite a bit of language complexity, because macro systems aren't trivial, especially when it comes to <a href="https://en.wikipedia.org/wiki/Hygienic_macro">macro hygiene</a>.</li><li>Looking at an expression such as <code>foo(2 + 2)</code>, we can no longer be sure that this can be simplified to <code>foo(4)</code>, because foo could be a macro, which can <a href="https://citeseerx.ist.psu.edu/document?repid=rep1&amp;type=pdf&amp;doi=dc9cdd51c6e02c45ab267c9973e5c4af9fb11e44">observe the syntactic difference</a> between <code>2 + 2</code> and <code>4</code>, even though they might evaluate to the same value. This is why macros must usually be resolved at compile time, <em>before</em> any optimizations can take place.</li></ul>
+<ul>
+<li>It introduces quite a bit of language complexity, because macro systems aren't trivial, especially when it comes to <a href="https://en.wikipedia.org/wiki/Hygienic_macro">macro hygiene</a>.</li>
+<li>Looking at an expression such as <code>foo(2 + 2)</code>, we can no longer be sure that this can be simplified to <code>foo(4)</code>, because foo could be a macro, which can <a href="https://citeseerx.ist.psu.edu/document?repid=rep1&amp;type=pdf&amp;doi=dc9cdd51c6e02c45ab267c9973e5c4af9fb11e44">observe the syntactic difference</a> between <code>2 + 2</code> and <code>4</code>, even though they might evaluate to the same value. This is why macros must usually be resolved at compile time, <em>before</em> any optimizations can take place.</li>
+</ul>
 <p>Is there another option? An option that gives us the flexibility of macros (allowing us to define our own control structures), while preserving our ability to reason about a program statically (without first resolving all macros)? Yes, if we distinguish variables that are being <em>bound</em> from variables that are being <em>used</em>. Here's our guiding principle:</p>
 <p><em>Every construct in the language can be redefined, there are no privileged language constructs. But the scope of variables remains immediately obvious, just by looking at the source code, without evaluating any function or macro.</em></p>
 <h2>Explicit bindings</h2>
@@ -55,7 +58,10 @@ a = b // the variable a is being bound
 </code></pre>
 <p>In the pattern <code>(x, y)</code>, both <code>x</code> and <code>y</code> are being bound: they're fresh variables that will be available inside the <code>{ ... }</code> block. But in <code>(x, ^z)</code>, the <code>^z</code> means &quot;use the variable <code>z</code> from the outer scope&quot; rather than binding a fresh variable.</p>
 <p>We can tell that <code>(x, y)</code> is a pattern just by looking at the syntax. The <code>-&gt;</code> infix function uses an explicit block <code>{ ... }</code> as an argument and thus behaves like a macro, without us needing to know how <code>-&gt;</code> is defined. We've now seen how macros are distinguished from regular functions:</p>
-<ul><li>If a function <code>f</code> is called with an explicit binding like <code>:x</code> as an argument, then <code>f</code> is considered to be a macro that binds <code>x</code> in the <em>enclosing scope</em>.</li><li>If a function <code>f</code> is called with an explicit block <code>{ ... }</code> as an argument, then <code>f</code> is considered to be a macro that binds all the variables not explicitly pinned using <code>^</code> in the <em>explicit block argument</em>.</li></ul>
+<ul>
+<li>If a function <code>f</code> is called with an explicit binding like <code>:x</code> as an argument, then <code>f</code> is considered to be a macro that binds <code>x</code> in the <em>enclosing scope</em>.</li>
+<li>If a function <code>f</code> is called with an explicit block <code>{ ... }</code> as an argument, then <code>f</code> is considered to be a macro that binds all the variables not explicitly pinned using <code>^</code> in the <em>explicit block argument</em>.</li>
+</ul>
 <p>This dual syntax makes the intent clear: when you see <code>:x</code> in the enclosing scope, you know a variable is being bound. When you see <code>^x</code> in the arguments of a function with an explicit block argument, you know a variable is being used. Everything else follows the natural default for its context.</p>
 <h2>How Macros See Structure</h2>
 <p>Here's the key insight that makes this all work: when a function is called with explicit bindings (like <code>:x</code>) or block arguments (like <code>{ ... }</code>), the system automatically treats it as a macro and wraps the arguments so the function can observe their syntactic structure.</p>
@@ -74,10 +80,16 @@ factorial(5)
 </code></pre>
 <p>Here, <code>:factorial(n)</code> creates a binding in the enclosing scope through the <code>:factorial</code> syntax (so we can call <code>factorial(5)</code> afterward), while the <code>{ ... }</code> block receives <code>factorial</code> and <code>n</code> as parameters (so we can make the recursive call <code>factorial(n - 1)</code>).</p>
 <p>This works because <code>=</code> is implemented as a macro that:</p>
-<ul><li>Sees the binding pattern <code>:factorial(n)</code></li><li>Binds <code>factorial</code> in the enclosing scope</li><li>Passes both <code>factorial</code> and <code>n</code> as bindings to the block</li><li>Evaluates the right-hand side normally</li></ul>
+<ul>
+<li>Sees the binding pattern <code>:factorial(n)</code></li>
+<li>Binds <code>factorial</code> in the enclosing scope</li>
+<li>Passes both <code>factorial</code> and <code>n</code> as bindings to the block</li>
+<li>Evaluates the right-hand side normally</li>
+</ul>
 <h2>The bigger picture</h2>
 <p>What we've built is a macro system where the scope and binding behavior is always statically visible, but individual constructs can still be completely redefined. You can implement your own assignment operator, your own pattern matching, your own control flow, all while preserving the compiler's (and your) ability to reason about and optimize your code.</p>
 <p>The key insight is that macros only need to observe syntactic structure when you explicitly mark it with binding syntax. Everything else can be evaluated and optimized normally, giving us the best of both worlds: the flexibility of macros with the reasoning power of static analysis.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

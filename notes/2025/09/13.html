@@ -6,7 +6,7 @@
 <title>RC week 16: the halting problem, time loops and paradoxes</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/09/13</p>
+<p><a href="../../..#notes">notes</a>/2025/09/13</p>
 <h1>RC week 16: the halting problem, time loops and paradoxes</h1>
 <p>Here's a sketch for a two-player game: One person writes a function in a simple programming language with nothing but strings and if-then-else statements, the other person then looks at the program and has to come up with a value that, if used as the argument of the function, is also the return value of the function. If it's not possible to come up with such a value, the person who wrote the function wins.</p>
 <p>For example, let's say player 1 came up with the following function:</p>
@@ -38,7 +38,8 @@
 <p>(The above is just a sketch of the proof, an actual proof usually proceeds by diagonalization, so that no explicit self-reference is necessary. Still, it uses the same principle of constructing a case that we could describe as similar to our adversarial <code>&quot;foo&quot;</code>/<code>&quot;bar&quot;</code> function above.)</p>
 <h2>The grandfather paradox</h2>
 <p>Making a prediction about a function that self-recursively refers to this very prediction leads to similar paradoxes as time travel, such as the <a href="https://en.wikipedia.org/wiki/Temporal_paradox#Consistency_paradox">grandfather paradox</a>:</p>
-<blockquote><p>A common example given is a time traveler killing their grandfather before their parents' conception, thus preventing the conception of themselves. If the traveler were not born, they could not kill their grandfather; therefore, the grandfather proceeds to beget the traveler's ancestor who begets the traveler. This scenario is self-contradictory.</p>
+<blockquote>
+<p>A common example given is a time traveler killing their grandfather before their parents' conception, thus preventing the conception of themselves. If the traveler were not born, they could not kill their grandfather; therefore, the grandfather proceeds to beget the traveler's ancestor who begets the traveler. This scenario is self-contradictory.</p>
 </blockquote>
 <p>If we squint a bit, we can view our prediction game as a game about time travel, because a winning value <code>x</code> must form a closed time loop in respect to <code>f</code> so that “sending” the value into the past and “through” <code>f</code> returns the same value <code>x</code> in the future.</p>
 <p>The example function that returns <code>&quot;bar&quot;</code> if <code>x</code> is <code>&quot;foo&quot;</code> and else <code>&quot;foo&quot;</code> is thus similar to the grandfather paradox, because neither <code>&quot;foo&quot;</code> nor <code>&quot;bar&quot;</code> are valid predictions on their own. But could we change the rules of the language in such a way that a prediction is made possible?</p>
@@ -73,4 +74,5 @@ else:
 <p>So that's the point of stating it as a game. One that is superficially about taking turns and making predictions, but actually about recursion and how inconsistent solutions to fixed points could look like.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

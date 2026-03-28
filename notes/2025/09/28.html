@@ -6,14 +6,17 @@
 <title>RC week 19: a sketch for a time loop calculus, part 2</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/09/28</p>
+<p><a href="../../..#notes">notes</a>/2025/09/28</p>
 <h1>RC week 19: a sketch for a time loop calculus, part 2</h1>
 <p>This continues the exploration from <a href="../../2025/09/27.html">last week</a> about a calculus for dealing with paradoxical solutions for recursive loops. This week's note focuses on how time loops are shifted to achieve true fixed points and walks through a few concrete examples of paradoxical solutions.</p>
 <h2>The shifting mechanism</h2>
 <p>Last week's sketch left us with an important gap: our proposed time loops weren't quite fixed points because function application would shift them. <code>['x'; 'y']</code> would become <code>['y'; 'x']</code> after applying our liar function, giving us the right pattern but shifted by one position.</p>
 <p>The key insight is that time loops need to track both their current <em>step</em> and their <em>phase</em>. Each time the time loop is applied to a value, it counts as a <em>step</em>. The <em>phase</em> is fixed and specifies after how many steps a time loop is shifted by one position. The notation <code>['x'; 'y']@0/2</code> represents a time loop at step 0 with a phase of 2.</p>
 <p>Concretely, shifts can happen when a time loop is used as an argument or as a function:</p>
-<ul><li>When a time loop with a non-zero phase is used as an argument, it gets rotated left by one position and its step is set to the phase value.</li><li>When a time loop is applied to an argument, the step counter increments, and when the step counter equals the phase, the result gets rotated right, and the step counter resets to 0.</li></ul>
+<ul>
+<li>When a time loop with a non-zero phase is used as an argument, it gets rotated left by one position and its step is set to the phase value.</li>
+<li>When a time loop is applied to an argument, the step counter increments, and when the step counter equals the phase, the result gets rotated right, and the step counter resets to 0.</li>
+</ul>
 <p>“Normal” values have a phase of 0, which just means that they are never shifted in either direction. If the phase is 0, the step-and-phase annotation is omitted.</p>
 <p>This shifting mechanism ensures that after a complete function application cycle, we get back to the original time loop configuration, returning true fixed points rather than shifted versions.</p>
 <p>Let's examine how this works with concrete examples from our implementation.</p>
@@ -62,4 +65,5 @@ else:
 <p>Future work might explore how this approach scales to more complex programming constructs and whether similar techniques can be applied to other forms of self-reference beyond the boolean paradoxes examined here.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

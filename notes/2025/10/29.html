@@ -6,7 +6,7 @@
 <title>RC week 23: Slayerfest — in every generation there is a conference</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/10/29</p>
+<p><a href="../../..#notes">notes</a>/2025/10/29</p>
 <h1>RC week 23: Slayerfest — in every generation there is a conference</h1>
 <p>After long days of pairing sessions spread out over multiple months at the <a href="https://www.recurse.com">Recurse Center</a>, the result of my collaboration with <a href="https://www.victoriaritvo.com">Victoria Ritvo</a> is finally live:</p>
 <p><a href="https://slayerfest.org">slayerfest.org</a></p>
@@ -28,10 +28,18 @@
 <p>The key to the degraded photocopy look of the website came from SVG displacement filters applied to our typography. We used two primary open source typefaces: <em>Xanh Mono</em> for headings and <em>Nimbus Mono</em> for body text, and ran them through custom filters that simulate the way toner spreads and warps on photocopied paper.</p>
 <p>The magic happens in the <code>feDisplacementMap</code> element, which pushes pixels around based on the turbulence pattern. (We are using different filters for headings and body, as well as for high-res and low-res displays.) It's the digital equivalent of a photocopier's toner bleeding and shifting as it heats the paper.</p>
 <p>The papers themselves needed to feel like physical documents: slightly crooked, a bit noisy, with that characteristic barrel distortion from scanning equipment that's seen better days. This is where a simple bash script using <code>imagemagick</code> comes in, which...</p>
-<ul><li>Converts each PDF page to a high-res PNG (200 DPI)</li><li>Randomly rotates each page between -0.9° and 0.9° (just enough to look hand-scanned, not enough to be annoying)</li><li>Adds multiplicative noise with random intensity to simulate paper texture</li><li>Applies a wave distortion to create that ripple effect from pages that weren't perfectly flat</li><li>Adds barrel distortion (that subtle fisheye effect from scanner optics)</li><li>Converts to grayscale because of course these would have been printed on a black-and-white copier in 2003</li></ul>
+<ul>
+<li>Converts each PDF page to a high-res PNG (200 DPI)</li>
+<li>Randomly rotates each page between -0.9° and 0.9° (just enough to look hand-scanned, not enough to be annoying)</li>
+<li>Adds multiplicative noise with random intensity to simulate paper texture</li>
+<li>Applies a wave distortion to create that ripple effect from pages that weren't perfectly flat</li>
+<li>Adds barrel distortion (that subtle fisheye effect from scanner optics)</li>
+<li>Converts to grayscale because of course these would have been printed on a black-and-white copier in 2003</li>
+</ul>
 <p>The rotation varies per page, so even within a single paper, no two pages sit at quite the same angle. It's the kind of detail that hopefully sells the fiction. These documents have been handled, copied, scanned, and archived by people who had better things to do than ensure perfect alignment.</p>
 <h2>Explore the conference</h2>
 <p>You can explore the full conference at <a href="https://slayerfest.org">slayerfest.org</a>, where all eight accepted papers are available for download (complete with scanned authenticity and peer review history, of course).</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

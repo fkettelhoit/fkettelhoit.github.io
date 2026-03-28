@@ -6,7 +6,7 @@
 <title>A stack-based bytecode VM for Kombucha</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/05/06</p>
+<p><a href="../../..#notes">notes</a>/2025/05/06</p>
 <h1>A stack-based bytecode VM for Kombucha</h1>
 <p>This weekly note is a bit less self-contained than most of the previous ones, as it is about implementing a simple bytecode virtual machine for the language I'm experimenting with, <a href="https://github.com/fkettelhoit/kombucha">Kombucha</a>. The VM is not particularly novel, so this note is more of a summary for me than an article with a central argument.</p>
 <h2>Desugaring into lambda calculus</h2>
@@ -38,7 +38,11 @@
 }
 </code></pre>
 <p>The VM uses 3 stacks:</p>
-<ul><li>A stack of variables, corresponding to function arguments: A function can access the variable with de Bruijn index 0 at the top of the variable stack, the variable with de Bruijn index 1 is one lower on the stack, etc.</li><li>A stack of temporaries, which are used for the operands and results of Rec, Apply, Return, Pop and If. A PushVar instruction copies a value from the variable stack and pushes it onto the stack of temporaries.</li><li>A stack of call frames, which store both how many captured variables a closure has pushed onto the variable stack (which will all be popped once the closure returns) and which instruction in the list of bytecodes should be used as the return address when the function / closure returns.</li></ul>
+<ul>
+<li>A stack of variables, corresponding to function arguments: A function can access the variable with de Bruijn index 0 at the top of the variable stack, the variable with de Bruijn index 1 is one lower on the stack, etc.</li>
+<li>A stack of temporaries, which are used for the operands and results of Rec, Apply, Return, Pop and If. A PushVar instruction copies a value from the variable stack and pushes it onto the stack of temporaries.</li>
+<li>A stack of call frames, which store both how many captured variables a closure has pushed onto the variable stack (which will all be popped once the closure returns) and which instruction in the list of bytecodes should be used as the return address when the function / closure returns.</li>
+</ul>
 <p>Call frames are stored as pairs of unsigned numbers, whereas the stacks for variables and temporaries both store values, which are of the following form:</p>
 <pre><code>pub enum V {
     Fn(usize, usize, usize),
@@ -67,4 +71,5 @@
 </code></pre>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

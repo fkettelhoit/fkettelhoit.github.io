@@ -6,7 +6,7 @@
 <title>Flat tuples and arrays without pointer soup</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2026/02/28</p>
+<p><a href="../../..#notes">notes</a>/2026/02/28</p>
 <h1>Flat tuples and arrays without pointer soup</h1>
 <p>(Related to <a href="../../2025/12/27.html">bytecode as flat ASTs</a>, <a href="../../2025/12/29.html">flat bytecode lists</a>, <a href="../../2026/01/17.html">exposing boxing</a>.)</p>
 <p>Here's an idea I've been talking about with <a href="https://jspha.com/">Joseph</a>: Let's say we want to avoid the pointer soup of Lisp-like linked lists as the fundamental building block of a dynamically typed functional programming language. Instead, we want to keep data structures <em>on the stack</em> without requiring manual memory management or sacrificing memory safety. What are our options?</p>
@@ -143,10 +143,15 @@ MAKE_ARRAY { elems: 3, elem_size: 1 }
 </code></pre>
 <p>However, we can scan the return value for the minimum and maximum stack reference into the threatened area, which gives us the smallest slice that we need to keep alive to preserve all stack references. In our exampe above, there's only a single stack reference, so the slice is a single element. We then need to take that slice and move it onto the heap, while changing all the affected stack references to point to a location on the heap (conceptually to a heap-allocated stack fragment on the heap + offset into this fragment).</p>
 <p>While this sounds simple, there are a few subtleties and potential knobs to tweak:</p>
-<ul><li>If a function returns a data structure that references both values that were created very early and very late on the function's stack, the stack fragment that needs to be moved onto the heap can include the entire call frame. A smarter collection algorithm (e.g. compacting the stack fragment before moving it) might make sense in such a situation. There are a lot of similarities with garbage collection strategies here.</li><li>How should boxed values be treated? If stack references can be stored in boxed values, checking the return value of a function might require recursively walking boxed data structures, which could be expensive. An alternative might be to let boxed data structure trigger the move from stack to heap for all of its affected stack references, but this would potentially copy also data that never outlives the enclosing function. Recursively walking boxed data structure might thus be the better option.</li><li>Determining the min/max stack references of the threatened area requires scanning the return value, but then the return value's stack references also need to be updated so that they point at the newly allocated stack fragment on the heap, which requires walking the return value again and fixing all the pointers. Is there a better way to do this?</li></ul>
+<ul>
+<li>If a function returns a data structure that references both values that were created very early and very late on the function's stack, the stack fragment that needs to be moved onto the heap can include the entire call frame. A smarter collection algorithm (e.g. compacting the stack fragment before moving it) might make sense in such a situation. There are a lot of similarities with garbage collection strategies here.</li>
+<li>How should boxed values be treated? If stack references can be stored in boxed values, checking the return value of a function might require recursively walking boxed data structures, which could be expensive. An alternative might be to let boxed data structure trigger the move from stack to heap for all of its affected stack references, but this would potentially copy also data that never outlives the enclosing function. Recursively walking boxed data structure might thus be the better option.</li>
+<li>Determining the min/max stack references of the threatened area requires scanning the return value, but then the return value's stack references also need to be updated so that they point at the newly allocated stack fragment on the heap, which requires walking the return value again and fixing all the pointers. Is there a better way to do this?</li>
+</ul>
 <p>Cleaning up stack references in such a way is effectively a weird mix between Rust's ownership model and standard garbage collection: Just like in Rust, references are allowed as long as the borrowed data is alive. But in contrast to Rust, this guarantee is enforced dynamically, which requires GC-like clean up operations for the threatened part of the stack.</p>
 <p>Lastly, all of the above sounds pretty similar to what happens for closures, because both cases are about keeping referenced data alive longer than the call frame the data was created in. Is the above idea just an extension of closures to all data?</p>
 <p>I'm not aware of languages with this memory management model, so I'm hoping to build a small prototype to see how such a language performs in practice.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

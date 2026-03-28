@@ -6,7 +6,7 @@
 <title>Sketching out Kombucha's type system</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/11/30</p>
+<p><a href="../../..#notes">notes</a>/2025/11/30</p>
 <h1>Sketching out Kombucha's type system</h1>
 <p>I've recently been thinking about how to add a type system to <a href="https://github.com/fkettelhoit/kombucha">Kombucha</a>. This has been on the roadmap for a while, even though Kombucha deliberately started its life as a dynamically typed language.</p>
 <p>Type systems are notoriously hard to add to a language designed without types in mind, but Kombucha was also meant to feel very light on types and more like a dynamically typed language. Although the pendulum seems to be swinging back in the direction of static types, Kombucha has been very influenced by Clojure and shares Clojure's view that having static types is not a panacea but a tradeoff.</p>
@@ -24,7 +24,10 @@
 <p>Annotating only function parameters and return types seems to be a good balance in practice. This is more challenging in Kombucha, which doesn't have a single privileged construct to create functions, but is still applicable if we require type annotations in all cases where bindings aren't immediately assigned values and would thus have redundant types. This then boils down to only annotating function parameters.</p>
 <h2>Type aliases</h2>
 <p>Once type annotations are introduced, especially in the presence of structural types with potentially large unions or intersections, it becomes annoying to repeat the same complicated type over and over again. Type aliases are an obvious solution, but they are non-trivial for two reasons:</p>
-<ul><li>They introduce a mini-language that must be statically evaluated and thus cannot support the full power of the programming language that is to be typed. Compile time evaluation might be a way to use the full power of the object language as the meta language, but then type aliases only exist “before” type checking.</li><li>It is not immediately clear which type alias to pick when type errors are reported, because a structural type system could lead to a type <code>A | B | C</code> in the presence of the two aliases <code>T1 = A | B</code> and <code>T2 = B | C</code>. Should the type <code>A | B | C</code> be reported as is, or as <code>T1 | C</code>, or as <code>A | T2</code>?</li></ul>
+<ul>
+<li>They introduce a mini-language that must be statically evaluated and thus cannot support the full power of the programming language that is to be typed. Compile time evaluation might be a way to use the full power of the object language as the meta language, but then type aliases only exist “before” type checking.</li>
+<li>It is not immediately clear which type alias to pick when type errors are reported, because a structural type system could lead to a type <code>A | B | C</code> in the presence of the two aliases <code>T1 = A | B</code> and <code>T2 = B | C</code>. Should the type <code>A | B | C</code> be reported as is, or as <code>T1 | C</code>, or as <code>A | T2</code>?</li>
+</ul>
 <p>In Kombucha, which doesn't really have the notion of a “top level” block, there's also the issue of scope: If type aliases are supposed to mirror other definitions, they should only be valid within a scope. But then how are type aliases reported if some values with that type alias outlive the scope of the type alias? And where are type aliases allowed to be defined? Only as elements of <code>{ ... }</code> blocks?</p>
 <h2>Types and macros</h2>
 <p>There is an interesting way in which a type system could make Kombucha's existing syntax simpler: As part of its macro system, Kombucha syntactically distinguishes <em>bindings</em> (which are variables to be bound) from <em>values</em> (variables that are used):</p>
@@ -54,4 +57,5 @@ bar? = &quot;World&quot;
 <p>These are just initial sketches of how a type system might fit into Kombucha's design philosophy. The challenge is finding the right balance between static guarantees and dynamic flexibility. But nobody said bolting a type system onto an existing language would be easy, did they?</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

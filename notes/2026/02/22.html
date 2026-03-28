@@ -6,7 +6,7 @@
 <title>Symbiotic Effect Handling</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2026/02/22</p>
+<p><a href="../../..#notes">notes</a>/2026/02/22</p>
 <h1>Symbiotic Effect Handling</h1>
 <p>How can you jump-start a programming language in an age of batteries-included standard libraries? One idea that I want to explore is what I call “symbiotic programming”, basically the idea of designing a programming language specifically to interact <em>symbiotically</em> with a host environment or ecosystem.</p>
 <p>This idea isn't exactly new, many languages have been designed with interop in mind, for example embedded languages like Lua or languages targeting existing VMs like Clojure or Scala. But these languages still build a lot of functionality into their own standard libraries, because interacting with the host language or VM can feel foreign. What if a language were designed to do as little as possible, and just yield control back to the host whenever it needs to do anything non-trivial?</p>
@@ -37,10 +37,16 @@
 <p>Control could of course be passed back to the host <em>every time</em> an effect is called with an argument, with the host being expected to resume the (partially applied) effect until the host has enough arguments, but that leads to a very awkward API. Another option is to keep regular functions single-argument and curried, but use fixed arity for effects. The easiest and cleanest option is to diverge from lambda calculus by giving both functions and effects a fixed arity. (Should effect handlers be allowed to overload effects with multiple arities? It's probably easiest to raise an error in such a case, so that calling an effect with the wrong number of arguments fails in the same way as calling a regular function with the wrong number of arguments.)</p>
 <h2>Benchmarking symbiotic effects using natural numbers</h2>
 <p>Here's a proposal for how to benchmark such a tiny language implementation: Let's give the language integers, but implement them in four different ways, both symbiotically and fully within the guest language:</p>
-<ul><li>Ints of a fixed size, for example 64 bits, and the standard operations <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, and <code>%</code> as part of the bytecode (in other words built into the VM).</li><li>Ints as an opaque blob of bytes, for example also 64 bits, with all arithmetic operations implemented by the <em>host environment</em> through effect handling (for example as <code>add!(2, 2)</code>).</li><li>Ints using Peano arithmetic, built using algebraic data types and without any special support from either the guest bytecode or the host environment.</li><li>Ints in the form of binary numerals as algebraic data types, in other words still without guest bytecode or host support, but with a more efficient encoding than Peano arithmetic.</li></ul>
+<ul>
+<li>Ints of a fixed size, for example 64 bits, and the standard operations <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, and <code>%</code> as part of the bytecode (in other words built into the VM).</li>
+<li>Ints as an opaque blob of bytes, for example also 64 bits, with all arithmetic operations implemented by the <em>host environment</em> through effect handling (for example as <code>add!(2, 2)</code>).</li>
+<li>Ints using Peano arithmetic, built using algebraic data types and without any special support from either the guest bytecode or the host environment.</li>
+<li>Ints in the form of binary numerals as algebraic data types, in other words still without guest bytecode or host support, but with a more efficient encoding than Peano arithmetic.</li>
+</ul>
 <p>The efficiency of the bytecode operations (built into the VM) can then be benchmarked against the overhead of the host interop and the much higher overhead of matching on binary or even Peano encodings.</p>
 <p>In my initial micro benchmarks using factorial and fibonacci, using host interop to handle arithmetic (with a Rust host) takes about twice the time as using built-in arithmetic instructions (while Peano arithmetic is 1000 times slower or worse). Taking twice the time is not great, but it's a decent start and could make it viable to implement arithmetic fully through the host if numeric performance isn't the primary goal of the language.</p>
 <p>How feasible would it be to offload even core operations like arithmetic to the host? I'm not aware of a language that goes as far as this, but it might be an interesting experiment to run.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

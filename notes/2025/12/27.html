@@ -6,7 +6,7 @@
 <title>Bytecode as a flat AST (and run time value representation)</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/12/27</p>
+<p><a href="../../..#notes">notes</a>/2025/12/27</p>
 <h1>Bytecode as a flat AST (and run time value representation)</h1>
 <p>Thanks to a <a href="https://bernsteinbear.com/blog/pl-writing/">post</a> by Max Bernstein (where he links to a <a href="https://old.reddit.com/r/ProgrammingLanguages/comments/mrifdr/treewalking_interpreters_and_cachelocality/gumsi2v/">comment</a> by Bob Nystrom), I've been thinking about the relationship between bytecode and ASTs, especially in relation to comptime evaluation / partial evaluation.</p>
 <p>In a nutshell, the observation is that a tree structure with pointers to its child nodes can not only be represented as a flat structure in an array by using array indices instead of pointers, but pointers/indices can even be omitted completely if we represent nodes as operations that manipulate their child nodes as elements on a stack.</p>
@@ -15,7 +15,10 @@
 <h2>Bytecode to bytecode</h2>
 <p>What would it take for the compile time partial evaluator to operate on bytecode? The current run time evaluator turns bytecode into run time <em>values</em> (like strings, closures, cons lists, etc), but using bytecode for the compile time partial evaluation step would require turning bytecode into <em>bytecode</em>, for later use by the run time evaluator. This is clearly doable, because transforming a (boxed) AST into a (boxed) AST is routinely done as part of compiler passes and using (flat) bytecode would amount to just using a different representation of such an AST.</p>
 <p>The more interesting part is the shift in perspective that comes with turning bytecode into bytecode, instead of turning it into a run time value representation. Let's compare a bytecode-to-bytecode evaluator that operates exclusively on flat bytecode to a traditional bytecode evaluator that turns it into a run time value:</p>
-<ul><li>Most Lisp-like languages use <em>boxed</em> cons-lists as their run time representation for composite values, but the resulting bytecode “value” would be <em>flat</em>.</li><li>Most run time representations have some notion of <em>sharing</em> parts of data structures, e.g. using some form of reference counting or more advanced GC techniques, but bytecode “values” would be <em>copied</em>.</li></ul>
+<ul>
+<li>Most Lisp-like languages use <em>boxed</em> cons-lists as their run time representation for composite values, but the resulting bytecode “value” would be <em>flat</em>.</li>
+<li>Most run time representations have some notion of <em>sharing</em> parts of data structures, e.g. using some form of reference counting or more advanced GC techniques, but bytecode “values” would be <em>copied</em>.</li>
+</ul>
 <p>Let's look at each of these differences in turn:</p>
 <h2>Boxed vs. flat</h2>
 <p>The most interesting aspect of using a bytecode representation as the <em>output</em> of an evaluator (be it a partial evaluator or otherwise) is that the output is flat and tightly packed. Lists wouldn't be represented as cons cells, but rather as a sequence of values followed by one or more <code>CONS</code> instructions (or similar).</p>
@@ -31,4 +34,5 @@
 <p>Whether using a bytecode-like representation for run time values is a good idea remains to be seen. (Well, it's probably not.) However, at the very least it could lead to a clean and unified architecture that shares a lot of code between the compile time partial evaluator and the run time bytecode interpreter. At best it could lead to a bytecode instruction set that cleanly exposes the distinctions between boxed and flat values as well as sharing and copying (and moving) values.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

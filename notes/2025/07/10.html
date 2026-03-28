@@ -6,7 +6,7 @@
 <title>RC week 8: an efficient VM for a functional language</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/07/10</p>
+<p><a href="../../..#notes">notes</a>/2025/07/10</p>
 <h1>RC week 8: an efficient VM for a functional language</h1>
 <p>Over the past weeks at the <a href="https://www.recurse.com/">Recurse Center</a> I've increasingly been thinking about how to implement an efficient bytecode VM for <a href="https://github.com/fkettelhoit/kombucha">Kombucha</a>, a minimal and malleable programming language for symbiotic end-user programming. Kombucha is a strict, functional language (supporting side effects and effect handlers) that is desugared to an intermediate language similar to lambda calculus.</p>
 <p>I have tried to leave optimizations for later, but it turns out that the semantics of a functional language are in some regards closely tied to the nature of the instruction set of a functional bytecode VM, which is why it makes sense to put some thought into the instruction set before writing large parts of the standard library.</p>
@@ -36,4 +36,5 @@
 <p>What I find appealing about MVS is that the basic data structure could be (dynamic) arrays. Could that lead to a working instruction set for a functional bytecode VM? Well, let's see!</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

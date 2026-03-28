@@ -6,7 +6,7 @@
 <title>RC week 2: pattern matching, VM instruction set</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/06/01</p>
+<p><a href="../../..#notes">notes</a>/2025/06/01</p>
 <h1>RC week 2: pattern matching, VM instruction set</h1>
 <p>Another week has flown by at the <a href="https://www.recurse.com/">Recurse Center</a>, where I managed to tie up a couple of loose threads related to <a href="../../2025/05/24.html">Kombucha</a>, the programming language I'm building.</p>
 <p>Kombucha is now in a state where I can use it to write programs with a syntax close to what I'm eventually envisioning. This requires a bit of bootstrapping, as Kombucha's core language does not provide any operator for deep equality, let alone anything resembling pattern matching. This is by design, however, because one of the goals is to be extensible enough that such language constructs can be added in the language using macros.</p>
@@ -37,7 +37,19 @@
 | UNWIND     | TAG | -- |
 </code></pre>
 <p>Here's what the instructions do:</p>
-<ul><li>LOAD<em>FN looks up a function in the bytecode stream (using a 20 bit FN</em>INDEX), associates it with the number of variables (VARS, up to 255) that the function might capture as a closure, then pushes the function onto the intermediate stack.</li><li>LOAD<em>STR looks up a string in the string section of the bytecode (using a 20 bit STRING</em>INDEX) and pushes it onto the intermediate stack.</li><li>LOAD<em>EFF looks up the name of an effect in the string section of the bytecode (using a 20 bit STRING</em>INDEX) and pushes it onto the intermediate stack.</li><li>LOAD_VAR clones a variable from the variable stack (using a 12 bit index) and pushes it onto the intermediate stack.</li><li>APPLY_PRE pops an argument from the intermediate stack, pops a function from the intermediate stack, then applies the function to the argument.</li><li>APPLY_POST pops a function from the intermediate stack, pops an argument from the intermediate stack, then applies the function to the argument.</li><li>RETURN marks the end of the current function, pops the current call frame and jumps to the return address stored there.</li><li>CMP pops an if-false branch, pops an if-true branch, pops two values (all from the intermediate stack) and then applies if-true to the nil value if the two values are the same strings, otherwise applies if-false to the nil value. (This acts as a simple if-then-else without deep equality.)</li><li>UNPACK pops an if-false branch, pops an if-true branch, pops a compound value (all from the intermediate stack), then applies the if-true branch to the compound value split into its last part and everything before it (as two separate arguments), or applies if-false to the nil value if the value is not a compound value.</li><li>TRY pops an effect handler, an effect and a function (all from the intermediate stack), pushes the effect handler to the handler stack, then applies the function to the nil value (while the handler is active).</li><li>UNWIND pops an effect handler from the handler stack.</li></ul>
+<ul>
+<li>LOAD_FN looks up a function in the bytecode stream (using a 20 bit FN_INDEX), associates it with the number of variables (VARS, up to 255) that the function might capture as a closure, then pushes the function onto the intermediate stack.</li>
+<li>LOAD_STR looks up a string in the string section of the bytecode (using a 20 bit STRING_INDEX) and pushes it onto the intermediate stack.</li>
+<li>LOAD_EFF looks up the name of an effect in the string section of the bytecode (using a 20 bit STRING_INDEX) and pushes it onto the intermediate stack.</li>
+<li>LOAD_VAR clones a variable from the variable stack (using a 12 bit index) and pushes it onto the intermediate stack.</li>
+<li>APPLY_PRE pops an argument from the intermediate stack, pops a function from the intermediate stack, then applies the function to the argument.</li>
+<li>APPLY_POST pops a function from the intermediate stack, pops an argument from the intermediate stack, then applies the function to the argument.</li>
+<li>RETURN marks the end of the current function, pops the current call frame and jumps to the return address stored there.</li>
+<li>CMP pops an if-false branch, pops an if-true branch, pops two values (all from the intermediate stack) and then applies if-true to the nil value if the two values are the same strings, otherwise applies if-false to the nil value. (This acts as a simple if-then-else without deep equality.)</li>
+<li>UNPACK pops an if-false branch, pops an if-true branch, pops a compound value (all from the intermediate stack), then applies the if-true branch to the compound value split into its last part and everything before it (as two separate arguments), or applies if-false to the nil value if the value is not a compound value.</li>
+<li>TRY pops an effect handler, an effect and a function (all from the intermediate stack), pushes the effect handler to the handler stack, then applies the function to the nil value (while the handler is active).</li>
+<li>UNWIND pops an effect handler from the handler stack.</li>
+</ul>
 <h2>Fixed-point combinator + recursion</h2>
 <p>I got rid of a special instruction for recursion. There is still a recursion combinator in the intermediate (lambda-like) calculus, but the combinator is then compiled into a simple fixed-point function using the following code, which is guaranteed to be placed at offset 0 in the list of operators:</p>
 <pre><code>// fix = f =&gt; x =&gt; f(fix(f))(x)
@@ -58,8 +70,14 @@ let mut bytecode = vec![
 </code></pre>
 <h2>Next steps</h2>
 <p>Next week I want to...</p>
-<ul><li>implement closure optimizations,</li><li>implement tail call optimization,</li><li>build a static site generator in Kombucha,</li><li>write an article about reasonable macros and publish it here.</li></ul>
+<ul>
+<li>implement closure optimizations,</li>
+<li>implement tail call optimization,</li>
+<li>build a static site generator in Kombucha,</li>
+<li>write an article about reasonable macros and publish it here.</li>
+</ul>
 <p>We'll see how it goes.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>

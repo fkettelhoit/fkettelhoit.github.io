@@ -6,7 +6,7 @@
 <title>Partial evaluation in Kombucha</title>
 </head>
 <body>
-<p><a href="../../..#notes">Notes</a><br />2025/11/28</p>
+<p><a href="../../..#notes">notes</a>/2025/11/28</p>
 <h1>Partial evaluation in Kombucha</h1>
 <p>I've recently been thinking about how Kombucha's two-stage execution model works and whether it makes sense to keep both stages separate or try to unify them. This came up because Kombucha now has both a partial evaluator and a bytecode VM, and the relationship between these two systems is worth exploring.</p>
 <h2>Why partial evaluation matters for macros</h2>
@@ -16,13 +16,20 @@
 <p>This is particularly important in a language like Kombucha where macros are a first-class feature and are even used for variable assignments and function definitions. If every use of a macro carried runtime overhead, Kombucha's syntactic flexibility would come at a pretty steep price. (In fact, this is why I avoided relying on previous definitions in the current Kombucha prelude, which makes the code really ugly and hard to follow.)</p>
 <h2>Two evaluators</h2>
 <p>I'm currently experimenting with two separate systems for executing code:</p>
-<ul><li>The partial evaluator, which specializes code based on known values during compile time</li><li>The bytecode compiler and VM, which execute the final compiled program at run time</li></ul>
+<ul>
+<li>The partial evaluator, which specializes code based on known values during compile time</li>
+<li>The bytecode compiler and VM, which execute the final compiled program at run time</li>
+</ul>
 <p>These two systems are conceptually doing the same thing (evaluating Kombucha expressions), but they do it in different ways. The partial evaluator works directly on the intermediate language representation, while the bytecode VM executes a lower-level instruction set.</p>
 <p>Having two evaluators means maintaining two separate implementations of Kombucha's semantics. Any change to the language needs to be reflected in both places.</p>
 <p>Could these two evaluation strategies be unified? Could we have a single interpreter that handles both partial evaluation and runtime execution?</p>
 <p>There's a certain appeal to this idea. If we had one interpreter, we'd only need to implement language semantics once. Partial evaluation would just be running the interpreter on code where some inputs are known and some aren't. The interpreter would evaluate what it can and leave the rest as expressions to be evaluated later.</p>
 <p>However, there are good reasons to keep them separate:</p>
-<ul><li>The bytecode VM exists for performance. Bytecode is a low-level representation that's designed to be executed quickly. If we tried to use the same representation for both partial evaluation and runtime execution, we'd have to compromise on either the expressiveness needed for partial evaluation or the performance needed for runtime execution.</li><li>Partial evaluation and runtime execution have different goals. Partial evaluation wants to simplify code by evaluating what it can and preserving the structure of what it can't. Runtime execution just wants to compute a result as quickly as possible. These different goals lead to different implementation strategies.</li><li>The separation provides a clean boundary. The partial evaluator produces simplified intermediate code, the compiler turns that into bytecode, and the VM executes the bytecode. Each component has a clear responsibility and a clear interface to the others.</li></ul>
+<ul>
+<li>The bytecode VM exists for performance. Bytecode is a low-level representation that's designed to be executed quickly. If we tried to use the same representation for both partial evaluation and runtime execution, we'd have to compromise on either the expressiveness needed for partial evaluation or the performance needed for runtime execution.</li>
+<li>Partial evaluation and runtime execution have different goals. Partial evaluation wants to simplify code by evaluating what it can and preserving the structure of what it can't. Runtime execution just wants to compute a result as quickly as possible. These different goals lead to different implementation strategies.</li>
+<li>The separation provides a clean boundary. The partial evaluator produces simplified intermediate code, the compiler turns that into bytecode, and the VM executes the bytecode. Each component has a clear responsibility and a clear interface to the others.</li>
+</ul>
 <p>For now, I'm keeping the two systems separate. The partial evaluator handles macro expansion and other compile-time optimizations, producing simplified code. The bytecode compiler then translates this simplified code into an efficient instruction set, and the VM executes it.</p>
 <h2>The current challenges</h2>
 <p>Unfortunately, the current partial evaluator doesn't actually work. It has a tendency to overflow the stack during compilation, which is a pretty fundamental problem. The issue is that recursive partial evaluation is really hard to get right. When you're trying to partially evaluate recursive functions, you can easily end up in situations where the evaluation blows up exponentially.</p>
@@ -34,4 +41,5 @@
 <p>This approach sacrifices some of the potential power of partial evaluation. Ideally, the compiler would automatically figure out what can be evaluated at compile time and do it without any annotations. But given the difficulties in making that work reliably, explicit annotations might be a reasonable compromise. It would at least make macro expansion work correctly, which is the main reason for having partial evaluation in the first place.</p>
 <footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
 
-</body></html>
+</body>
+</html>
