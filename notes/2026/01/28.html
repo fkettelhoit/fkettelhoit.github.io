@@ -16,7 +16,7 @@
 <li>(except for the same infix operators, like <code>x + y + z</code>, which don't need parens),</li>
 <li>but there are also trailing arguments and keyword arguments for “core” constructs.</li>
 </ul>
-<p>The idea of minimal-but-general syntax and trailing arguments are borrowed from Koka (where you can write <code>foo { ... }</code> without needing to wrap the block as <code>foo({...})</code>), while keyword arguments such as <code>if (condition) do: { ... } else: { ... }</code> are borrowed from Elixir (via Ruby) and desugar to <code>if(condition, [[&quot;do&quot;, {...}], [&quot;else&quot;, {...}]])</code>.</p>
+<p id="11">The idea of minimal-but-general syntax and trailing arguments are borrowed from Koka (where you can write <code>foo { ... }</code> without needing to wrap the block as <code>foo({...})</code>), while keyword arguments such as <code>if (condition) do: { ... } else: { ... }</code> are borrowed from Elixir (via Ruby) and desugar to <code>if(condition, [[&quot;do&quot;, {...}], [&quot;else&quot;, {...}]])</code>.</p>
 <p>In Elixir, keywords such as <code>do:</code> and <code>else:</code> don't need postfix colons in most situations, which leads to pretty nice syntax, but raises the question of how to disambiguate a combination of infix calls and keyword arguments (in a language like Kombucha which doesn't restrict infix operators to a fixed set).</p>
 <h2>Trailing arguments, keywords arguments</h2>
 <p>Here are two options for keyword arguments:</p>

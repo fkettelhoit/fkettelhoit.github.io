@@ -19,7 +19,7 @@
 <p>Lists in Kombucha are written as <code>[Foo, Bar]</code> and are merely syntactic sugar for applying the atom <code>Nil</code> to a bunch of arguments. In other words, <code>[Foo, Bar]</code> is sugar for <code>Nil(Foo, Bar)</code>, <code>[Foo, [Bar, Baz], Qux]</code> is sugar for <code>Nil(Foo, Nil(Bar, Baz), Qux)</code>.</p>
 <p>Since lists are just sugar, the are only special from the perspective of the parser and the pretty printer, but the compiler and virtual machine can be completely oblivious to this special treatment, all they see are atoms and composite data structures built out of atoms.</p>
 <h2>Maps</h2>
-<p>Kombucha currently does not provide any associative maps. Instead, lists of pairs are used, for example <code>[[One, Foo], [Two, Bar]]</code> for the association of <code>One</code> with <code>Foo</code> and <code>Two</code> with <code>Bar</code>.</p>
+<p id="24">Kombucha currently does not provide any associative maps. Instead, lists of pairs are used, for example <code>[[One, Foo], [Two, Bar]]</code> for the association of <code>One</code> with <code>Foo</code> and <code>Two</code> with <code>Bar</code>.</p>
 <p>This leads to a problem when serializing/deserializing to/from other data structures such as JSON: While something like JSON's <code>null</code> can just be mapped to/from some Kombucha atom such as <code>Null</code> or <code>None</code>, the same is not possible for the empty JSON object <code>{}</code>, because both <code>{}</code> and <code>[]</code> in JSON would map to the empty list <code>[]</code> in Kombucha, which makes the conversion between JSON and Kombucha lossy.</p>
 <p>There are three ways to solve this:</p>
 <ul>

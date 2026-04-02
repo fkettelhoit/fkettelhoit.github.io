@@ -147,7 +147,12 @@ let('f, 'x =&gt; { x + x }, { f(Y) })
 // { f(Y) } is translated to `f ===&gt; f(Y)`
 </code></pre>
 <h2>Nested blocks: {..., ...}</h2>
-<p>Let's add a bit more syntactic sugar: Right now blocks always have to be used <em>after</em> the explicit bindings that the block is supposed to consume, but it makes sense to also allow blocks to consume bindings by <em>enclosing</em> bindings:</p>
+<p id="209">Let's add a bit more syntactic sugar: Right now blocks always have to be used <em>after</em> the explicit bindings that the block is supposed to consume, but it makes sense to also allow blocks to consume bindings by <em>enclosing</em> bindings:</p>
+<aside>
+<ul>
+<li><a href="../03/16.html#94">Custom binding constructs without macros, part 1: explicit bindings: Step 3: nesting bindings and blocks</a></li>
+</ul>
+</aside>
 <pre><code>{ 'x = y, f(x) }
 </code></pre>
 <p>Whenever explicit bindings are declared inside a block but not consumed until the end of the block, the bindings will be consumed by the enclosing block, as if everything that follows the call with the explicit bindings had been passed as a block right then. The above example will be desugared to &quot;=('x, y, { f(x) })&quot;. In other words, instead of passing a block as the last argument of a function call, we can just use that function inside the block. This is especially helpful for nested bindings:</p>
@@ -162,7 +167,12 @@ let('f, 'x =&gt; { x + x }, { f(Y) })
 // side effect, does not use the binding:
 { f(), ... } // translates to: `(_ ===&gt; ...)(f())`
 </code></pre>
-<p>This makes it easy to mix binding constructs and side effects:</p>
+<p id="234">This makes it easy to mix binding constructs and side effects:</p>
+<aside>
+<ul>
+<li><a href="../03/16.html#128">Custom binding constructs without macros, part 1: explicit bindings: Step 3: nesting bindings and blocks</a></li>
+</ul>
+</aside>
 <pre><code>// translates to: =('a, x, { (_ ===&gt; f(a))(print(a)) })
 { 'a = x, print(a), f(a) }
 </code></pre>
@@ -187,7 +197,12 @@ f(x, y)
 ]
 </code></pre>
 <h2>Putting it all together</h2>
-<p>Using all of this syntactic sugar, we can see how...</p>
+<p id="270">Using all of this syntactic sugar, we can see how...</p>
+<aside>
+<ul>
+<li><a href="../03/29.html#141">Custom binding constructs without macros, part 3: generalizable sugar: Putting it all together</a></li>
+</ul>
+</aside>
 <pre><code>match (x) [
   Pair('x, 'x) -&gt; { f(x) }
   'x           -&gt; { g() }

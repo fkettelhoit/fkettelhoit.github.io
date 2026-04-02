@@ -48,7 +48,12 @@ else:
 <p>Like the sequential approach, the map-based approach uses a notion of &quot;rank&quot; (or depth) to handle nested time loops. A regular value has rank 0, a simple time loop like <code>('x' &amp; 'y')</code> has rank 1, and a nested time loop has rank 2 or higher.</p>
 <p>When comparing two time loop maps of the same rank, we zip them together key by key. When comparing values of different ranks, the lower-rank value is lifted into the structure of the higher-rank value. This ensures compositional reasoning about nested paradoxes.</p>
 <p>Now that we've seen the basic mechanism, let's explore what happens when we compare against a time loop instead of a simple value.</p>
-<h2>The captured liar</h2>
+<h2 id="66">The captured liar</h2>
+<aside>
+<ul>
+<li><a href="../../2026/03/28.html#6">Hyperscraps: implicitly linked hypertext</a></li>
+</ul>
+</aside>
 <pre><code>v = ('y' &amp; ('x' &amp; 'y'))
 if v == ('x' &amp; 'y'):
     'y'

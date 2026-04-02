@@ -90,7 +90,12 @@ f Foo { Bar } { Baz } // sugar for `f(Foo, { Bar }, { Baz })`
 f Foo(Bar) { Bar }()  // sugar for `f(Foo(Bar), { Bar }())`
 </code></pre>
 <h2>Putting it all together</h2>
-<p>Using all of this syntactic sugar, we can see how...</p>
+<p id="141">Using all of this syntactic sugar, we can see how...</p>
+<aside>
+<ul>
+<li><a href="../04/06.html#270">Minimal yet extensible modern syntax—(without (all (the (parentheses)))): Putting it all together</a></li>
+</ul>
+</aside>
 <pre><code>match(x) [
   Pair('x, 'x) -&gt; { f(x) }
   'x           -&gt; { g() }

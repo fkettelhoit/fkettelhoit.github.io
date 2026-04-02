@@ -7,15 +7,25 @@
 </head>
 <body>
 <p><a href="../../..#notes">notes</a>/2026/03/21</p>
-<h1>Staged programming and the principle of least power</h1>
+<h1 id="0">Staged programming and the principle of least power</h1>
+<aside>
+<ul>
+<li><a href="28.html#4">Hyperscraps: implicitly linked hypertext</a></li>
+</ul>
+</aside>
 <p>I've recently been thinking about how to design a bytecode virtual machine that uses the same flat bytecode representation for both its input (so far, so normal) and also its output representation (with data structures represented as a flat bytecode tree). Why? Because going from bytecode to bytecode makes it possible to do <em>staged programming</em>, where a program's output is again an executable program that can be evaluated by the VM.</p>
 <p>From a concrete implementation perspective, this is interesting for compiling away the overhead of macros. This could be done with a binary split into comptime evaluation and runtime evaluation. Using the same bytecode format for input and output is then merely a way to use the same VM for both.</p>
 <h2>The principle of least power</h2>
 <p>But once we use the same format for input and output, why stop at just two stages? Why not go for an arbitrary number of stages at comptime and then leave the last stage for runtime? Or maybe even multiple stages at comptime, and then multiple stages at runtime, similar to just-in-time compiling code at runtime?</p>
 <p>Why go with just two stages, when we could have <em>more</em> power? As tempting as that sounds, remember the <a href="https://www.w3.org/DesignIssues/Principles.html#PLP">principle of least power</a>:</p>
 <blockquote>
-<p>The choice of language is a common design choice. The low power end of the scale is typically simpler to design, implement and use, but the high power end of the scale has all the attraction of being an open-ended hook into which anything can be placed: a door to uses bounded only by the imagination of the programmer.</p>
+<p id="12">The choice of language is a common design choice. The low power end of the scale is typically simpler to design, implement and use, but the high power end of the scale has all the attraction of being an open-ended hook into which anything can be placed: a door to uses bounded only by the imagination of the programmer.</p>
 </blockquote>
+<aside>
+<ul>
+<li><a href="../../2025/08/30.html#6">RC week 14: layered programming, symbiotic programming</a></li>
+</ul>
+</aside>
 <p>As our friendly neighborhood language designer likes to remind us, more power never comes without tradeoffs. Why not use late binding and dynamic dispatch everywhere? Why not use multi-shot coroutines instead of boring one-shot coroutines? (Why not use lambda calculus for everything, where you can do anything. Anything at all. The only limit is yourself.) Because more powerful languages are both harder to implement and use, because they provide fewer guarantees and affordances. Limiting the power of a language increases our power of reasoning <em>about</em> the language and its programs.</p>
 <h2>Symbiotic programming, staged programming</h2>
 <p>What the principle of least power doesn't talk about, however, is that in practice most languages grow and accumulate power, because having a powerful language is really useful when you just want to ship this one feature at 10pm on a Friday night and yes I do want my language to be a Turing-complete mess and no I don't care about the philosophical implications of it thank you very much. At the end of the day, power is <em>useful</em>, and power is very hard to <em>take away</em> once you've tasted it. Exhibit A: modern (Turing-complete) CSS. Exhibit B: modern JavaScript.</p>
