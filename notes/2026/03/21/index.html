@@ -10,7 +10,7 @@
 <h1 id="0">Staged programming and the principle of least power</h1>
 <aside>
 <ul>
-<li><a href="../28/index.html#4">Hyperscraps: implicitly linked hypertext</a></li>
+<li><a href="../28/#4">Hyperscraps: implicitly linked hypertext</a></li>
 </ul>
 </aside>
 <p>I've recently been thinking about how to design a bytecode virtual machine that uses the same flat bytecode representation for both its input (so far, so normal) and also its output representation (with data structures represented as a flat bytecode tree). Why? Because going from bytecode to bytecode makes it possible to do <em>staged programming</em>, where a program's output is again an executable program that can be evaluated by the VM.</p>
@@ -23,7 +23,7 @@
 </blockquote>
 <aside>
 <ul>
-<li><a href="../../../2025/08/30/index.html#6">RC week 14: layered programming, symbiotic programming</a></li>
+<li><a href="../../../2025/08/30/#6">RC week 14: layered programming, symbiotic programming</a></li>
 </ul>
 </aside>
 <p>As our friendly neighborhood language designer likes to remind us, more power never comes without tradeoffs. Why not use late binding and dynamic dispatch everywhere? Why not use multi-shot coroutines instead of boring one-shot coroutines? (Why not use lambda calculus for everything, where you can do anything. Anything at all. The only limit is yourself.) Because more powerful languages are both harder to implement and use, because they provide fewer guarantees and affordances. Limiting the power of a language increases our power of reasoning <em>about</em> the language and its programs.</p>
