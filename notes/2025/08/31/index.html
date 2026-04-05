@@ -6,7 +6,7 @@
 <title>RC week 15: Kombucha's fundamental data types</title>
 </head>
 <body>
-<p><a href="../../../..#notes">notes</a>/2025/08/31</p>
+<p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2025">2025</a>/<a href="../../../../#notes-2025-08">08</a>/31</p>
 <h1>RC week 15: Kombucha's fundamental data types</h1>
 <p>I've recently been thinking a bit more about the fundamental data types in <a href="https://github.com/fkettelhoit/kombucha">Kombucha</a>. For context, Kombucha started as an attempt to build a programming language that stays as close as possible to lambda calculus while avoiding to be a <a href="https://en.wikipedia.org/wiki/Turing_tarpit">Turing tarpit</a>. In contrast to other languages, which take it for granted that numbers, lists and hashmaps are built into the language, I wanted to explore the middle ground between lambda calculus and traditional languages.</p>
 <p>Kombucha's minimalism isn't just an end in itself, but also relevant because Kombucha is meant to be used <em>symbiotically</em> in combination with a host platform that implements Kombucha's bytecode virtual machine. Since the goal is to keep Kombucha small and simple enough that its virtual machine can be implemented in just a few hundred lines of code (so that I can easily host it for example both in Rust and in JS), every data type that is built in increases the instruction set of the virtual machine.</p>

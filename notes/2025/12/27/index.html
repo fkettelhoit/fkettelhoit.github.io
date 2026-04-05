@@ -6,7 +6,7 @@
 <title>Bytecode as a flat AST (and run time value representation)</title>
 </head>
 <body>
-<p><a href="../../../..#notes">notes</a>/2025/12/27</p>
+<p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2025">2025</a>/<a href="../../../../#notes-2025-12">12</a>/27</p>
 <h1>Bytecode as a flat AST (and run time value representation)</h1>
 <p>Thanks to a <a href="https://bernsteinbear.com/blog/pl-writing/">post</a> by Max Bernstein (where he links to a <a href="https://old.reddit.com/r/ProgrammingLanguages/comments/mrifdr/treewalking_interpreters_and_cachelocality/gumsi2v/">comment</a> by Bob Nystrom), I've been thinking about the relationship between bytecode and ASTs, especially in relation to comptime evaluation / partial evaluation.</p>
 <p>In a nutshell, the observation is that a tree structure with pointers to its child nodes can not only be represented as a flat structure in an array by using array indices instead of pointers, but pointers/indices can even be omitted completely if we represent nodes as operations that manipulate their child nodes as elements on a stack.</p>

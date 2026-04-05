@@ -6,7 +6,7 @@
 <title>Reasonable macros</title>
 </head>
 <body>
-<p><a href="../../../..#notes">notes</a>/2025/04/20</p>
+<p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2025">2025</a>/<a href="../../../../#notes-2025-04">04</a>/20</p>
 <h1>Reasonable macros</h1>
 <p>Over the past couple of weeks I've been experimenting with a restricted form of metaprogramming that supports user-defined control structures and <a href="https://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg01539.html">binding constructs</a> such as pattern matching and let statements without the need for full Lisp-like macros. By restricting macros slightly, it is possible to reason about them statically, without giving up most of the power that full macros provide.</p>
 <p>The key idea is to make <em>bindings explicit.</em> This basically means explicitly distinguishing between <em>using</em> a variable and <em>binding</em> a value to it. Whenever a variable x is used, it is simply written as x, but when a variable is meant to be bound to a value (which can happen in a lambda expression, in a let statement, as part of pattern matching or anything else we could come up with) it is prefixed with a single quote and written as 'x.</p>

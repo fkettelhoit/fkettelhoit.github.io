@@ -6,7 +6,7 @@
 <title>Flat tuples and arrays without pointer soup</title>
 </head>
 <body>
-<p><a href="../../../..#notes">notes</a>/2026/02/28</p>
+<p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2026">2026</a>/<a href="../../../../#notes-2026-02">02</a>/28</p>
 <h1>Flat tuples and arrays without pointer soup</h1>
 <p>(Related to <a href="../../../2025/12/27/">bytecode as flat ASTs</a>, <a href="../../../2025/12/29/">flat bytecode lists</a>, <a href="../../../2026/01/17/">exposing boxing</a>.)</p>
 <p>Here's an idea I've been talking about with <a href="https://jspha.com/">Joseph</a>: Let's say we want to avoid the pointer soup of Lisp-like linked lists as the fundamental building block of a dynamically typed functional programming language. Instead, we want to keep data structures <em>on the stack</em> without requiring manual memory management or sacrificing memory safety. What are our options?</p>

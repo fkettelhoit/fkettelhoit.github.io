@@ -6,7 +6,7 @@
 <title>Custom binding constructs without macros, part 1: explicit bindings</title>
 </head>
 <body>
-<p><a href="../../../..#notes">notes</a>/2025/03/16</p>
+<p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2025">2025</a>/<a href="../../../../#notes-2025-03">03</a>/16</p>
 <h1>Custom binding constructs without macros, part 1: explicit bindings</h1>
 <p>Programming languages face a tension between the ability to extend them <em>dynamically</em> and the ability to reason about them <em>statically.</em> We take it for granted that constructs that <em>bind variables</em>, such as function definitions or pattern matching, are a fixed part of a language's core syntax, unless we go for <a href="https://en.wikipedia.org/wiki/Lisp_%28programming_language%29#List_structure_of_program_code;_exploitation_by_macros_and_compilers">Lisp-like macros</a>, which are powerful but hard to reason about.</p>
 <p>There is an unexplored middle ground, however, of allowing binding constructs to be defined and extended, while ensuring that all variables are lexically bound and that their scope can be determined statically. What follows is an exploration of this middle ground, while respecting a single guiding principle:</p>

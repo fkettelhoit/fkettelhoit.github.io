@@ -1,298 +1,156 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Frederic Kettelhoit</title>
-    <link rel="stylesheet" href="styles/style.css" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/favicon/apple-touch-icon.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="/favicon/favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="/favicon/favicon-16x16.png"
-    />
-    <link rel="manifest" href="/favicon/site.webmanifest" />
-    <script
-      src="https://raw.githack.com/Qwuke/recurse-ring/main/static/ring.js"
-      type="text/javascript"
-    ></script>
-  </head>
-  <body>
-    <p>
-      <br />
-      <br />
-      <br />
-      Hi, I'm Fred.
-      <a href="https://github.com/fkettelhoit">I build software.</a>
-    </p>
-    <p>
-      I'm interested in programming languages, language games, and how smaller
-      and simpler approaches to programming can turn computers into creative
-      tools for thought. Also, I like Wittgenstein and Buffy.
-    </p>
-    <p>
-      <a href="mailto:kettelhoit@gmail.com">kettelhoit@gmail.com</a>
-    </p>
-    <nav>
-      <ul>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#experiments">Experiments</a></li>
-        <li><a href="#notes">Notes</a></li>
-        <li><a href="#archive">Archive</a></li>
-      </ul>
-    </nav>
-    <h2 id="projects">Projects</h2>
-    <p>
-      Long-running obsessions that I'm actively working on. Emphasis on building
-      and shipping code. Occasionally useful. Think home-cooked software.
-    </p>
-    <section>
-      <h3>Kombucha</h3>
-      <p>A minimal and malleable programming language.</p>
-      <p>
-        <a href="https://github.com/fkettelhoit/kombucha">Kombucha</a> is a
-        minimal functional programming language that is meant to be used
-        symbiotically within a larger ecosystem and in cooperation with a host
-        language. It prioritizes malleability through flexible syntax and effect
-        handlers.
-      </p>
-      <p>
-        It is an exploration of building a programming language as home-cooked
-        software, small and personal, yet also useful. (Well, being useful is
-        still a work in progress.)
-      </p>
-    </section>
-    <section>
-      <h3>Slayerfest</h3>
-      <p>Simulating academia by writing Buffy papers.</p>
-      <p>
-        <a href="https://slayerfest.org/">Slayerfest</a> (in collaboration with
-        <a href="https://victoriaritvo.com/">Victoria Ritvo</a>) is a fully
-        automated conference made up of fully automated academic labs — staffed
-        entirely by AI bots — dedicated to interpreting private conversations
-        about <em>Buffy the Vampire Slayer</em> and turning them into
-        “publishable” scholarship.
-      </p>
-      <p>
-        The driving philosophy is:
-        <em>If there's a problem... add another bot.</em> The source material:
-        thousands of lines of Buffy-theorizing from a real chat log. The goal:
-        remove the humans who wrote those messages from the interpretive process
-        — entirely. Except as raw data.
-      </p>
-    </section>
-    <h2 id="experiments">Experiments</h2>
-    <p>
-      (programming |)language(s| games) and weird tangents. Emphasis on
-      sketching out and poking at novel concepts in isolation. Think half-baked
-      ideas.
-    </p>
-    <section>
-      <h3>Symbiotic effect handling</h3>
-      <p>
-        <a
-          href="https://github.com/fkettelhoit/programming-language-games/tree/main/symbiotic-effect-handling"
-          >Let the host do your math</a
-        >
-        — How can you jump-start a programming language? What if instead of
-        building your own standard library you just “symbiotically” depend on a
-        host even for basic operations like arithmetic?
-      </p>
-    </section>
-    <section>
-      <h3>Reasonable macros</h3>
-      <p>
-        <a
-          href="https://github.com/fkettelhoit/programming-language-games/tree/main/reasonable-macros"
-          >Pattern matching as a library</a
-        >
-        — Can a language allow everything to be redefined (even variable
-        assignment and pattern matching) while keeping the scope of variables
-        immediately obvious? Without evaluating any macros?
-      </p>
-    </section>
-    <section>
-      <h3>Minimal modern syntax</h3>
-      <p>
-        <a
-          href="https://github.com/fkettelhoit/programming-language-games/tree/main/minimal-modern-syntax"
-          >Lispy minimalism meets prefix/infix/keyword calls</a
-        >
-        — Can a language be as minimal and general as Lisp (where control
-        structures are just functions) while using fewer parentheses and feeling
-        like C/JS-style languages?
-      </p>
-    </section>
-    <section>
-      <h3>Time loop maps</h3>
-      <p>
-        <a
-          href="https://github.com/fkettelhoit/programming-language-games/tree/main/time-loop-maps"
-          >Programming with paradoxical loop values</a
-        >
-        — A language for exploring paradoxical fixed points: values that are
-        both true and false. Like solving time travel paradoxes by going back in
-        time and not going back in time, at the same time.
-      </p>
-    </section>
-    <h2 id="notes">Notes</h2>
-    <p>Weekly notes, mostly as a way to collect and clarify my thoughts.</p>
-    <!-- begin notes -->
-<h3>2026/03</h3>
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../styles/style.css" />
+<title>Hi, I'm Fred. [I build software.](https://github.com/fkettelhoit)</title>
+<script src="https://raw.githack.com/Qwuke/recurse-ring/main/static/ring.js" type="text/javascript"></script>
+</head>
+<body>
+<p><br><br><br><p>Hi, I'm Fred. <a href="https://github.com/fkettelhoit">I build software.</a></p>
+<p>I'm interested in programming languages, language games, and how smaller and simpler approaches to programming can turn computers into creative tools for thought. Also, I like Wittgenstein and Buffy.</p>
+<p><a href="mailto:kettelhoit@gmail.com">kettelhoit@gmail.com</a></p>
 <ul>
-<li><a href="notes/2026/03/21.html">Staged programming and the principle of least power</a></li>
-<li><a href="notes/2026/03/15.html">Flat and immutable lists (on the stack)</a></li>
-<li><a href="notes/2026/03/07.html">Ghost data: compacting escaped values on the stack</a></li>
+<li><a href="#projects">Projects</a></li>
+<li><a href="#experiments">Experiments</a></li>
+<li><a href="#notes">Notes</a></li>
+<li><a href="#archive">Archive</a></li>
 </ul>
-<h3>2026/02</h3>
+<h2>Projects</h2>
+<p>Long-running obsessions that I'm actively working on. Emphasis on building and shipping code. Occasionally useful. Think home-cooked software.</p>
+<section id="projects">
+<h3><a href="projects/kombucha/">Kombucha</a></h3>
+<p>A minimal and malleable programming language.</p>
+</section>
+<section>
+<h3><a href="projects/slayerfest/">Slayerfest</a></h3>
+<p>Simulating academia by writing Buffy papers.</p>
+</section>
+<h2>Experiments</h2>
+<p>(programming |)language(s| games) and weird tangents. Emphasis on sketching out and poking at novel concepts in isolation. Think half-baked ideas.</p>
+<section id="experiments">
+<h3><a href="experiments/04-symbiotic-effect-handling/">Symbiotic effect handling</a></h3>
+<p><a href="https://github.com/fkettelhoit/programming-language-games/tree/main/symbiotic-effect-handling">Let the host do your math</a> — How can you jump-start a programming language? What if instead of building your own standard library you just &quot;symbiotically&quot; depend on a host even for basic operations like arithmetic?</p>
+</section>
+<section>
+<h3><a href="experiments/03-reasonable-macros/">Reasonable macros</a></h3>
+<p><a href="https://github.com/fkettelhoit/programming-language-games/tree/main/reasonable-macros">Pattern matching as a library</a> — Can a language allow everything to be redefined (even variable assignment and pattern matching) while keeping the scope of variables immediately obvious? Without evaluating any macros?</p>
+</section>
+<section>
+<h3><a href="experiments/02-minimal-modern-syntax/">Minimal modern syntax</a></h3>
+<p><a href="https://github.com/fkettelhoit/programming-language-games/tree/main/minimal-modern-syntax">Lispy minimalism meets prefix/infix/keyword calls</a> — Can a language be as minimal and general as Lisp (where control structures are just functions) while using fewer parentheses and feeling like C/JS-style languages?</p>
+</section>
+<section>
+<h3><a href="experiments/01-time-loop-maps/">Time loop maps</a></h3>
+<p><a href="https://github.com/fkettelhoit/programming-language-games/tree/main/time-loop-maps">Programming with paradoxical loop values</a> — A language for exploring paradoxical fixed points: values that are both true and false. Like solving time travel paradoxes by going back in time and not going back in time, at the same time.</p>
+</section>
+<h2>Notes</h2>
+<p>Weekly notes, mostly as a way to collect and clarify my thoughts.</p>
+<h3 id="notes"><span id="notes-2026">2026</span>/<span id="notes-2026-03">03</span></h3>
 <ul>
-<li><a href="notes/2026/02/28.html">Flat tuples and arrays without pointer soup</a></li>
-<li><a href="notes/2026/02/22.html">Symbiotic Effect Handling</a></li>
-<li><a href="notes/2026/02/08.html">Projects vs. experiments</a></li>
-<li><a href="notes/2026/02/07.html">Against the web's grain</a></li>
+<li><a href="notes/2026/03/28/">Hyperscraps: implicitly linked hypertext</a></li>
+<li><a href="notes/2026/03/21/">Staged programming and the principle of least power</a></li>
+<li><a href="notes/2026/03/15/">Flat and immutable lists (on the stack)</a></li>
+<li><a href="notes/2026/03/07/">Ghost data: compacting escaped values on the stack</a></li>
 </ul>
-<h3>2026/01</h3>
+<h3>2026/<span id="notes-2026-02">02</span></h3>
 <ul>
-<li><a href="notes/2026/01/30.html">Implicit vs. explicit macro bindings for recursive definitions</a></li>
-<li><a href="notes/2026/01/28.html">Trailing arguments, keyword arguments, infix grouping, and tuples</a></li>
-<li><a href="notes/2026/01/17.html">Why don't functional languages expose boxing, layout, and ownership?</a></li>
-<li><a href="notes/2026/01/16.html">Do you need records for flow-sensitive typing?</a></li>
+<li><a href="notes/2026/02/28/">Flat tuples and arrays without pointer soup</a></li>
+<li><a href="notes/2026/02/22/">Symbiotic Effect Handling</a></li>
+<li><a href="notes/2026/02/08/">Projects vs. experiments</a></li>
+<li><a href="notes/2026/02/07/">Against the web's grain</a></li>
 </ul>
-<h3>2025/12</h3>
+<h3>2026/<span id="notes-2026-01">01</span></h3>
 <ul>
-<li><a href="notes/2025/12/29.html">Flat bytecode as lists and arrays</a></li>
-<li><a href="notes/2025/12/28.html">Radically simple structural types (with comptime)</a></li>
-<li><a href="notes/2025/12/27.html">Bytecode as a flat AST (and run time value representation)</a></li>
-<li><a href="notes/2025/12/07.html">Colons for bindings, macros, types and keywords</a></li>
+<li><a href="notes/2026/01/30/">Implicit vs. explicit macro bindings for recursive definitions</a></li>
+<li><a href="notes/2026/01/28/">Trailing arguments, keyword arguments, infix grouping, and tuples</a></li>
+<li><a href="notes/2026/01/17/">Why don't functional languages expose boxing, layout, and ownership?</a></li>
+<li><a href="notes/2026/01/16/">Do you need records for flow-sensitive typing?</a></li>
 </ul>
-<h3>2025/11</h3>
+<h3><span id="notes-2025">2025</span>/<span id="notes-2025-12">12</span></h3>
 <ul>
-<li><a href="notes/2025/11/30.html">Sketching out Kombucha's type system</a></li>
-<li><a href="notes/2025/11/28.html">Partial evaluation in Kombucha</a></li>
-<li><a href="notes/2025/11/16.html">Hypertext: hubs instead of bridges</a></li>
-<li><a href="notes/2025/11/15.html">Hypertext: space without center and margins</a></li>
+<li><a href="notes/2025/12/29/">Flat bytecode as lists and arrays</a></li>
+<li><a href="notes/2025/12/28/">Radically simple structural types (with comptime)</a></li>
+<li><a href="notes/2025/12/27/">Bytecode as a flat AST (and run time value representation)</a></li>
+<li><a href="notes/2025/12/07/">Colons for bindings, macros, types and keywords</a></li>
 </ul>
-<h3>2025/10</h3>
+<h3>2025/<span id="notes-2025-11">11</span></h3>
 <ul>
-<li><a href="notes/2025/10/31.html">RC week 24: Recurse Center return statement</a></li>
-<li><a href="notes/2025/10/29.html">RC week 23: Slayerfest — in every generation there is a conference</a></li>
-<li><a href="notes/2025/10/28.html">RC week 22: paradoxical values as unordered time loop maps</a></li>
-<li><a href="notes/2025/10/12.html">A programming language as a series of experiments</a></li>
-<li><a href="notes/2025/10/01.html">High contrast, it's cool</a></li>
+<li><a href="notes/2025/11/30/">Sketching out Kombucha's type system</a></li>
+<li><a href="notes/2025/11/28/">Partial evaluation in Kombucha</a></li>
+<li><a href="notes/2025/11/16/">Hypertext: hubs instead of bridges</a></li>
+<li><a href="notes/2025/11/15/">Hypertext: space without center and margins</a></li>
 </ul>
-<h3>2025/09</h3>
+<h3>2025/<span id="notes-2025-10">10</span></h3>
 <ul>
-<li><a href="notes/2025/09/28.html">RC week 19: a sketch for a time loop calculus, part 2</a></li>
-<li><a href="notes/2025/09/27.html">RC week 18: a sketch for a time loop calculus</a></li>
-<li><a href="notes/2025/09/20.html">RC week 17: test cases for paradoxical fixed points</a></li>
-<li><a href="notes/2025/09/13.html">RC week 16: the halting problem, time loops and paradoxes</a></li>
+<li><a href="notes/2025/10/31/">RC week 24: Recurse Center return statement</a></li>
+<li><a href="notes/2025/10/29/">RC week 23: Slayerfest — in every generation there is a conference</a></li>
+<li><a href="notes/2025/10/28/">RC week 22: paradoxical values as unordered time loop maps</a></li>
+<li><a href="notes/2025/10/12/">A programming language as a series of experiments</a></li>
+<li><a href="notes/2025/10/01/">High contrast, it's cool</a></li>
 </ul>
-<h3>2025/08</h3>
+<h3>2025/<span id="notes-2025-09">09</span></h3>
 <ul>
-<li><a href="notes/2025/08/31.html">RC week 15: Kombucha's fundamental data types</a></li>
-<li><a href="notes/2025/08/30.html">RC week 14: layered programming, symbiotic programming</a></li>
-<li><a href="notes/2025/08/29.html">RC week 13: reasonable macros through explicit bindings, part 3</a></li>
-<li><a href="notes/2025/08/11.html">RC week 12: tail call statement (Recurse Center in numbers)</a></li>
-<li><a href="notes/2025/08/05.html">RC week 11: reasonable macros through explicit bindings, part 2</a></li>
+<li><a href="notes/2025/09/28/">RC week 19: a sketch for a time loop calculus, part 2</a></li>
+<li><a href="notes/2025/09/27/">RC week 18: a sketch for a time loop calculus</a></li>
+<li><a href="notes/2025/09/20/">RC week 17: test cases for paradoxical fixed points</a></li>
+<li><a href="notes/2025/09/13/">RC week 16: the halting problem, time loops and paradoxes</a></li>
 </ul>
-<h3>2025/07</h3>
+<h3>2025/<span id="notes-2025-08">08</span></h3>
 <ul>
-<li><a href="notes/2025/07/26.html">RC week 10: reasonable macros through explicit bindings</a></li>
-<li><a href="notes/2025/07/21.html">RC week 9: live reload with replay semantics</a></li>
-<li><a href="notes/2025/07/10.html">RC week 8: an efficient VM for a functional language</a></li>
-<li><a href="notes/2025/07/06.html">RC week 7: introduction to live reloading with replay semantics</a></li>
+<li><a href="notes/2025/08/31/">RC week 15: Kombucha's fundamental data types</a></li>
+<li><a href="notes/2025/08/30/">RC week 14: layered programming, symbiotic programming</a></li>
+<li><a href="notes/2025/08/29/">RC week 13: reasonable macros through explicit bindings, part 3</a></li>
+<li><a href="notes/2025/08/11/">RC week 12: tail call statement (Recurse Center in numbers)</a></li>
+<li><a href="notes/2025/08/05/">RC week 11: reasonable macros through explicit bindings, part 2</a></li>
 </ul>
-<h3>2025/06</h3>
+<h3>2025/<span id="notes-2025-07">07</span></h3>
 <ul>
-<li><a href="notes/2025/06/30.html">RC week 6: a game of life for language evolution?</a></li>
-<li><a href="notes/2025/06/21.html">RC week 5: hot reload with replay semantics?</a></li>
-<li><a href="notes/2025/06/14.html">RC week 4: building a language to write a blog post</a></li>
-<li><a href="notes/2025/06/08.html">RC week 3: a gentle introduction to Kombucha</a></li>
-<li><a href="notes/2025/06/01.html">RC week 2: pattern matching, VM instruction set</a></li>
+<li><a href="notes/2025/07/26/">RC week 10: reasonable macros through explicit bindings</a></li>
+<li><a href="notes/2025/07/21/">RC week 9: live reload with replay semantics</a></li>
+<li><a href="notes/2025/07/10/">RC week 8: an efficient VM for a functional language</a></li>
+<li><a href="notes/2025/07/06/">RC week 7: introduction to live reloading with replay semantics</a></li>
 </ul>
-<h3>2025/05</h3>
+<h3>2025/<span id="notes-2025-06">06</span></h3>
 <ul>
-<li><a href="notes/2025/05/24.html">RC week 1: Kombucha—a minimal and malleable language</a></li>
-<li><a href="notes/2025/05/13.html">12 weeks of lab notes</a></li>
-<li><a href="notes/2025/05/11.html">Throw away the compiler, but keep the tests</a></li>
-<li><a href="notes/2025/05/06.html">A stack-based bytecode VM for Kombucha</a></li>
+<li><a href="notes/2025/06/30/">RC week 6: a game of life for language evolution?</a></li>
+<li><a href="notes/2025/06/21/">RC week 5: hot reload with replay semantics?</a></li>
+<li><a href="notes/2025/06/14/">RC week 4: building a language to write a blog post</a></li>
+<li><a href="notes/2025/06/08/">RC week 3: a gentle introduction to Kombucha</a></li>
+<li><a href="notes/2025/06/01/">RC week 2: pattern matching, VM instruction set</a></li>
 </ul>
-<h3>2025/04</h3>
+<h3>2025/<span id="notes-2025-05">05</span></h3>
 <ul>
-<li><a href="notes/2025/04/29.html">One must imagine Sisyphus happy: throwing away all code, every day</a></li>
-<li><a href="notes/2025/04/20.html">Reasonable macros</a></li>
-<li><a href="notes/2025/04/13.html">What makes a programming language powerful?</a></li>
-<li><a href="notes/2025/04/06.html">Minimal yet extensible modern syntax—(without (all (the (parentheses))))</a></li>
+<li><a href="notes/2025/05/24/">RC week 1: Kombucha—a minimal and malleable language</a></li>
+<li><a href="notes/2025/05/13/">12 weeks of lab notes</a></li>
+<li><a href="notes/2025/05/11/">Throw away the compiler, but keep the tests</a></li>
+<li><a href="notes/2025/05/06/">A stack-based bytecode VM for Kombucha</a></li>
 </ul>
-<h3>2025/03</h3>
+<h3>2025/<span id="notes-2025-04">04</span></h3>
 <ul>
-<li><a href="notes/2025/03/29.html">Custom binding constructs without macros, part 3: generalizable sugar</a></li>
-<li><a href="notes/2025/03/22.html">Custom binding constructs without macros, part 2: desugaring bindings</a></li>
-<li><a href="notes/2025/03/16.html">Custom binding constructs without macros, part 1: explicit bindings</a></li>
-<li><a href="notes/2025/03/08.html">A static site generator in lambda calculus with effect handlers</a></li>
-<li><a href="notes/2025/03/01.html">Turning lambda calculus into a minimal programming language</a></li>
+<li><a href="notes/2025/04/29/">One must imagine Sisyphus happy: throwing away all code, every day</a></li>
+<li><a href="notes/2025/04/20/">Reasonable macros</a></li>
+<li><a href="notes/2025/04/13/">What makes a programming language powerful?</a></li>
+<li><a href="notes/2025/04/06/">Minimal yet extensible modern syntax—(without (all (the (parentheses))))</a></li>
 </ul>
-<!-- end notes -->
-    <h2 id="archive">Archive</h2>
-    <p>Things I've built in the past. Not actively maintained.</p>
-    <ul>
-      <li>
-        <a href="archive/garble.html">statically-typed language</a>, Garble,
-        that compiles to boolean circuits.
-      </li>
-      <li>
-        <a href="archive/printable-maze.html">PostScript quine</a>
-        that draws itself as a random maze whenever it's printed.
-      </li>
-      <li>
-        <a href="archive/hypertext-explorations.html">hypertext system</a>
-        that is both a document and graph DB, written in Rust.
-      </li>
-      <li>
-        <a href="archive/wittgenstein-ebooks.html">md/pdf/epub pipeline</a>
-        and generative cover art for Wittgenstein ebooks.
-      </li>
-      <li>
-        <a href="archive/nachlass-visualization.html">visualization</a>
-        of connections in Wittgenstein's philosophical Nachlass.
-      </li>
-      <li>
-        <a href="archive/dissertation.html">PhD dissertation</a>
-        on Wittgenstein, diagonalization, Cantor, Gödel and Turing.
-      </li>
-    </ul>
-    <footer>
-      <p>
-        Want to become a better programmer?
-        <a
-          href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d"
-          >Join the Recurse Center!</a
-        >
-        <br />
-        <a
-          id="rc-ring-home"
-          data-rc-uuid="5457b180-8bae-412a-b489-440805856854"
-          href="https://ring.recurse.com/"
-          >ring.recurse.com</a
-        >(<a id="rc-ring-prev" href="https://ring.recurse.com/prev?id=68"
-          >/prev</a
-        >|<a id="rc-ring-rand" href="https://ring.recurse.com/rand">/rand</a>|<a
-          id="rc-ring-next"
-          href="https://ring.recurse.com/next?id=68"
-          >/next</a
-        >)
-      </p>
-    </footer>
-  </body>
+<h3>2025/<span id="notes-2025-03">03</span></h3>
+<ul>
+<li><a href="notes/2025/03/29/">Custom binding constructs without macros, part 3: generalizable sugar</a></li>
+<li><a href="notes/2025/03/22/">Custom binding constructs without macros, part 2: desugaring bindings</a></li>
+<li><a href="notes/2025/03/16/">Custom binding constructs without macros, part 1: explicit bindings</a></li>
+<li><a href="notes/2025/03/08/">A static site generator in lambda calculus with effect handlers</a></li>
+<li><a href="notes/2025/03/01/">Turning lambda calculus into a minimal programming language</a></li>
+</ul>
+<h2>Archive</h2>
+<p>Things I've built in the past. Not actively maintained.</p>
+<ul>
+<li><a href="../archive/garble/">statically-typed language</a>, Garble, that compiles to boolean circuits.</li>
+<li><a href="../archive/printable-maze/">PostScript quine</a> that draws itself as a random maze whenever it's printed.</li>
+<li><a href="../archive/hypertext-explorations/">hypertext system</a> that is both a document and graph DB, written in Rust.</li>
+<li><a href="../archive/wittgenstein-ebooks/">md/pdf/epub pipeline</a> and generative cover art for Wittgenstein ebooks.</li>
+<li><a href="../archive/nachlass-visualization/">visualization</a> of connections in Wittgenstein's philosophical Nachlass.</li>
+<li><a href="../archive/dissertation/">PhD dissertation</a> on Wittgenstein, diagonalization, Cantor, Gödel and Turing.</li>
+</ul>
+<footer><p>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a><br><a id="rc-ring-home" data-rc-uuid="5457b180-8bae-412a-b489-440805856854" href="https://ring.recurse.com/">ring.recurse.com</a>(<a id="rc-ring-prev" href="https://ring.recurse.com/prev?id=68">/prev</a>|<a id="rc-ring-rand" href="https://ring.recurse.com/rand">/rand</a>|<a id="rc-ring-next" href="https://ring.recurse.com/next?id=68">/next</a>)</p></footer>
+</body>
 </html>

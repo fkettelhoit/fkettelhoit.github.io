@@ -6,7 +6,7 @@
 <title>Why don't functional languages expose boxing, layout, and ownership?</title>
 </head>
 <body>
-<p><a href="../../../..#notes">notes</a>/2026/01/17</p>
+<p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2026">2026</a>/<a href="../../../../#notes-2026-01">01</a>/17</p>
 <h1>Why don't functional languages expose boxing, layout, and ownership?</h1>
 <p>What are the most fundamental ways of representing data in a minimal programming language? Let's assume a language with some model of computation (such as lambda calculus functions and variables), what are the most minimal ways to extend it so that we can specify arbitrary data types?</p>
 <p>There is of course the option of sidestepping the issue and pretending that computation and data are the same thing. This is what pure lambda calculus does. Another option is to add a single collection type to the language and build everything else out of it, for example using cons lists in Lisp, or using objects in a minimal OOP language like Self. Both of these options are quite abstract and hard to map to an efficient abstract machine model.</p>

@@ -6,7 +6,7 @@
 <title>Flat and immutable lists (on the stack)</title>
 </head>
 <body>
-<p><a href="../../../..#notes">notes</a>/2026/03/15</p>
+<p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2026">2026</a>/<a href="../../../../#notes-2026-03">03</a>/15</p>
 <h1>Flat and immutable lists (on the stack)</h1>
 <p>Continuing last week's note about a bytecode for <a href=".././07/">flat tuples and arrays on the stack</a>, I've been thinking about how to simplify and speed up the algorithm, but more importantly, about the <em>point</em> of the whole exercise.</p>
 <p>To recap, the motivating question was: What would a functional programming language with immutable values look like if we wanted to keep as many values as possible (even structs and arrays) entirely on the <em>stack</em>, without relying on a static type system? The main idea is to squint at bytecode <em>instructions</em> until we see them as a <em>value representation</em> on the stack, with stack-local references. The tuple <code>(3, 4)</code> would be represented as:</p>

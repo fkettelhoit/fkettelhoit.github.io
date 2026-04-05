@@ -6,7 +6,7 @@
 <title>Implicit vs. explicit macro bindings for recursive definitions</title>
 </head>
 <body>
-<p><a href="../../../..#notes">notes</a>/2026/01/30</p>
+<p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2026">2026</a>/<a href="../../../../#notes-2026-01">01</a>/30</p>
 <h1>Implicit vs. explicit macro bindings for recursive definitions</h1>
 <p>One of Kombucha's defining features is that no functions and no constructs are syntactically privileged, even core constructs such as assignment and pattern matching are implemented as user-defined functions, using a lightweight macro system. However, in contrast to languages like Lisp, Kombucha's macro system is entirely <em>syntactical</em>, meaning that no macros need to be evaluated to know where bindings come into scope.</p>
 <p>What that means in practice is that you can tell which names are <em>values</em> and which names are <em>bindings</em> just by looking at the source code, without having to execute any macros (in your head or by the compiler). A Python-style assignment such as <code>x = y</code> looks innocent enough, but the left hand side name <code>x</code> is a binding, whereas the right hand side name <code>y</code> is a value that is looked up in the environment. Kombucha distinguishes these concepts syntactically.</p>
