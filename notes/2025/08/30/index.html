@@ -16,12 +16,18 @@
 <aside>
 <ul>
 <li><a href="../../../2026/03/21/#12">Staged programming and the principle of least power: The principle of least power</a></li>
+<li><a href="../../04/13/#12">What makes a programming language powerful?: More power is not always better</a></li>
 </ul>
 </aside>
 <p>Only make a language as powerful as it has to be, because that makes it easier to understand and use. Seen from this perspective, being less powerful than a Turing-complete language like JS is not a deficiency, it's a <em>virtue</em>.</p>
 <blockquote>
-<p>Computer Science in the 1960s to 80s spent a lot of effort making languages which were as powerful as possible. Nowadays we have to appreciate the reasons for picking not the most powerful solution but the least powerful. The reason for this is that the less powerful the language, the more you can do with the data stored in that language. If you write it in a simple declarative from, anyone can write a program to analyze it in many ways.</p>
+<p id="10">Computer Science in the 1960s to 80s spent a lot of effort making languages which were as powerful as possible. Nowadays we have to appreciate the reasons for picking not the most powerful solution but the least powerful. The reason for this is that the less powerful the language, the more you can do with the data stored in that language. If you write it in a simple declarative from, anyone can write a program to analyze it in many ways.</p>
 </blockquote>
+<aside>
+<ul>
+<li><a href="../../04/13/#14">What makes a programming language powerful?: More power is not always better</a></li>
+</ul>
+</aside>
 <p>And yet the story of the web is a story of making its languages increasingly more powerful, turning the web from a collection of <em>documents</em> into a platform of <em>apps</em>.</p>
 <h2>The temptation of power</h2>
 <p>Being able to use the full power of JS instead of being restricted to HTML is of course great if you're trying to build apps: The modern web makes it possible to build apps that are as powerful and polished as their native counterparts. But this comes at a price: While the “old web” allowed anyone to figure out how a website worked by just looking at the source, the compiled output of modern apps isn't human-readable anymore, even less so when apps are compiled to a lower-level language like WebAssembly.</p>
