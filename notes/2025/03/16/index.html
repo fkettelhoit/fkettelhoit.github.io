@@ -64,7 +64,7 @@ a = b // the variable a is being bound
 <p id="94">Let's add a bit more syntactic sugar: Right now blocks always have to be used <em>after</em> the explicit bindings that the block is supposed to consume, but it makes sense to also allow blocks to consume bindings by <em>enclosing</em> bindings:</p>
 <aside>
 <ul>
-<li><a href="../../04/06/#209">Minimal yet extensible modern syntax—(without (all (the (parentheses)))): Nested blocks: {..., ...}</a></li>
+<li><a href="../../04/06/#209"><span class="title">Minimal yet extensible modern syntax—(without (all (the (parentheses))))</span><span class="sep"> – </span><span class="section">Nested blocks: {..., ...}</span></a></li>
 </ul>
 </aside>
 <pre><code>{
@@ -93,7 +93,7 @@ a = b // the variable a is being bound
 <p id="128">This makes it easy to mix binding constructs and side effects:</p>
 <aside>
 <ul>
-<li><a href="../../04/06/#234">Minimal yet extensible modern syntax—(without (all (the (parentheses)))): Nested blocks: {..., ...}</a></li>
+<li><a href="../../04/06/#234"><span class="title">Minimal yet extensible modern syntax—(without (all (the (parentheses))))</span><span class="sep"> – </span><span class="section">Nested blocks: {..., ...}</span></a></li>
 </ul>
 </aside>
 <pre><code>// desugars to: let('a, x, { (_ =&gt; f(a))(print(a)) })
