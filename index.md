@@ -13,13 +13,13 @@ I'm interested in programming languages, language games, and how smaller and sim
 
 Long-running obsessions that I'm actively working on. Emphasis on building and shipping code. Occasionally useful. Think home-cooked software.
 
-![embed](./projects)
+![](./projects)
 
 ## Experiments
 
 (programming |)language(s| games) and weird tangents. Emphasis on sketching out and poking at novel concepts in isolation. Think half-baked ideas.
 
-![embed desc](./experiments)
+![desc](./experiments)
 
 ## Notes
 

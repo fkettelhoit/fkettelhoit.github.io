@@ -2,7 +2,7 @@
 
 I built several prototypes of hypertext systems between 2019 and 2023, all focused on the idea of linking _snippets_ of text _implicitly_ and _bidirectionally_ when they appear in different contexts/documents, instead of creating explicit jump-links like on the web.
 
-The various experiments are attempts to reimagine and prototype a different vision of the web as connected and _overlapping_ documents/pages/media. The resulting system works similar to a wiki and shares a few similarities with Ted Nelson's [ZigZag](https://xanadu.com/zigzag/). It grew out of a hypertext system for Wittgenstein's philosophical Nachlass, a philosophical corpus of 20.000 pages with a strikingly non-linear structure. It is also vaguely inspired by Deleuze and Guattari's [rhizome](https://en.wikipedia.org/wiki/Rhizome_(philosophy)) and McLuhan's notion of acoustic space. One aim of the project was to explore how theoretical ideas about non-linear structure can be turned into software and used practically.
+The various experiments are attempts to reimagine and prototype a different vision of the web as connected and _overlapping_ documents/pages/media. The resulting system works similar to a wiki and shares a few similarities with Ted Nelson's [ZigZag](https://xanadu.com/zigzag/). It grew out of a hypertext system for Wittgenstein's philosophical Nachlass, a philosophical corpus of 20.000 pages with a strikingly non-linear structure. It is also vaguely inspired by Deleuze and Guattari's [rhizome](<https://en.wikipedia.org/wiki/Rhizome_(philosophy)>) and McLuhan's notion of acoustic space. One aim of the project was to explore how theoretical ideas about non-linear structure can be turned into software and used practically.
 
 ## Asterion (2023)
 
