@@ -10,7 +10,7 @@
 <h1>A stack-based bytecode VM for Kombucha</h1>
 <p>This weekly note is a bit less self-contained than most of the previous ones, as it is about implementing a simple bytecode virtual machine for the language I'm experimenting with, <a href="https://github.com/fkettelhoit/kombucha">Kombucha</a>. The VM is not particularly novel, so this note is more of a summary for me than an article with a central argument.</p>
 <h2>Desugaring into lambda calculus</h2>
-<p>All source code is first parsed, then desugared into a simple form that is similar to untyped lambda calculus. <a href="../../../2025/03/16/">Explicit bindings</a> are desugared into normal lambda abstractions. Expressions can either be lambda calculus forms (variables with de Bruijn indices, lambda abstractions or lambda applications), <a href="../../../2025/03/01/">string constants or recursion</a>, or one of two built-in primitives, <code>pop</code> or <code>if</code>:</p>
+<p>All source code is first parsed, then desugared into a simple form that is similar to untyped lambda calculus. <a href="../../03/16/">Explicit bindings</a> are desugared into normal lambda abstractions. Expressions can either be lambda calculus forms (variables with de Bruijn indices, lambda abstractions or lambda applications), <a href="../../03/01/">string constants or recursion</a>, or one of two built-in primitives, <code>pop</code> or <code>if</code>:</p>
 <pre><code>enum Expr {
     Var(usize), // variables (with de Bruijn indices)
     String(usize), // interned strings

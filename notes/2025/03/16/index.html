@@ -24,7 +24,7 @@
 <pre><code>(foo (bar a b) (baz x y))
 </code></pre>
 <p>Which functions are being called here? Well, without looking at the context of the program we wouldn't know, because foo could be a macro, in which case bar and baz might not be functions, but just symbols that might mean whatever the macro interprets them as. This is of course why macros should be used sparingly: They are extremely powerful, but might make it harder for humans to figure out what is happening, because macros can obscure the structure of code.</p>
-<p>Extensive use of macros violates the <a href="https://www.w3.org/DesignIssues/Principles.html#PLP">principle of least power</a>: Powerful language features can be enticing, but power isn't everything, or we would all be happily living in the <a href="../../../2025/03/01/">Turing tarpit of the lambda calculus</a>. Well-chosen restrictions and limitations help us reason more easily about code. Macros are powerful, but they come with almost no limitations.</p>
+<p>Extensive use of macros violates the <a href="https://www.w3.org/DesignIssues/Principles.html#PLP">principle of least power</a>: Powerful language features can be enticing, but power isn't everything, or we would all be happily living in the <a href="../01/">Turing tarpit of the lambda calculus</a>. Well-chosen restrictions and limitations help us reason more easily about code. Macros are powerful, but they come with almost no limitations.</p>
 <p>Can we do better?</p>
 <h2>Step 1: making bindings explicit</h2>
 <p>Let's start with an observation. Most languages do not visually distinguish between bound variables that are <em>used</em> and fresh variables that are <em>bound:</em></p>

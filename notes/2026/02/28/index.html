@@ -8,7 +8,7 @@
 <body>
 <p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2026">2026</a>/<a href="../../../../#notes-2026-02">02</a>/28</p>
 <h1>Flat tuples and arrays without pointer soup</h1>
-<p>(Related to <a href="../../../2025/12/27/">bytecode as flat ASTs</a>, <a href="../../../2025/12/29/">flat bytecode lists</a>, <a href="../../../2026/01/17/">exposing boxing</a>.)</p>
+<p>(Related to <a href="../../../2025/12/27/">bytecode as flat ASTs</a>, <a href="../../../2025/12/29/">flat bytecode lists</a>, <a href="../../01/17/">exposing boxing</a>.)</p>
 <p>Here's an idea I've been talking about with <a href="https://jspha.com/">Joseph</a>: Let's say we want to avoid the pointer soup of Lisp-like linked lists as the fundamental building block of a dynamically typed functional programming language. Instead, we want to keep data structures <em>on the stack</em> without requiring manual memory management or sacrificing memory safety. What are our options?</p>
 <h2>Flat bytecode tuples</h2>
 <p>In languages with static types, we can store data in <em>structs</em> and store these structs on the stack. So let's pretend that we have a struct-like thing in our language and let's call it a tuple (to make clear that it doesn't have a static type like structs). If, for example, we want to manipulate a point <code>(3, 4)</code> of two ints on the stack, we can first push the two ints onto the stack, then store the two topmost elements on the stack in a tuple:</p>

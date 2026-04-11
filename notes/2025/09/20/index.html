@@ -8,7 +8,7 @@
 <body>
 <p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2025">2025</a>/<a href="../../../../#notes-2025-09">09</a>/20</p>
 <h1>RC week 17: test cases for paradoxical fixed points</h1>
-<p>Continuing <a href="../../../2025/09/13/">last week's thoughts</a> about paradoxical solutions for recursive loops that show similarities to the halting problem, here are a couple of “test cases” that any attempted solution should be able to handle.</p>
+<p>Continuing <a href="../13/">last week's thoughts</a> about paradoxical solutions for recursive loops that show similarities to the halting problem, here are a couple of “test cases” that any attempted solution should be able to handle.</p>
 <p>The following code snippets all assume that the language provides some kind of paradoxical values, such as <code>&quot;x&quot; &amp; &quot;y&quot;</code>, which are <em>both</em> <code>&quot;x&quot;</code> and <code>&quot;y&quot;</code> <em>at the same time.</em> When the paradoxical value <code>&quot;x&quot; &amp; &quot;y&quot;</code> is compared to the normal value <code>&quot;x&quot;</code> using an if-then-else construct, the paradoxical value matches <em>both</em> the then-branch and the else-branch.</p>
 <p>What this means in practice depends on the implementation and on the logical laws that govern the behavior of paradoxical values.</p>
 <h2>Prologue: equality</h2>

@@ -8,7 +8,7 @@
 <body>
 <p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2026">2026</a>/<a href="../../../../#notes-2026-03">03</a>/07</p>
 <h1>Ghost data: compacting escaped values on the stack</h1>
-<p>(Related to <a href="../../../2026/02/28/">flat tuples and arrays</a>, <a href="../../../2026/01/17/">explicit boxing</a>.)</p>
+<p>(Related to <a href="../../02/28/">flat tuples and arrays</a>, <a href="../../01/17/">explicit boxing</a>.)</p>
 <p>Here's a problem with keeping data flat on the stack: when a function returns, any data it created gets thrown away. But the return value might reference some of that data via references to the stack. We need to keep the referenced data alive somehow.</p>
 <p>The obvious answer is to move it to the heap. But here's another option: compact the referenced data in place, throw away the unreferenced garbage, and put the surviving data in front of the return value as invisible “ghost data”.</p>
 <h2>Ghost data</h2>

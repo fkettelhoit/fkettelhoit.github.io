@@ -8,7 +8,7 @@
 <body>
 <p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2025">2025</a>/<a href="../../../../#notes-2025-06">06</a>/01</p>
 <h1>RC week 2: pattern matching, VM instruction set</h1>
-<p>Another week has flown by at the <a href="https://www.recurse.com/">Recurse Center</a>, where I managed to tie up a couple of loose threads related to <a href="../../../2025/05/24/">Kombucha</a>, the programming language I'm building.</p>
+<p>Another week has flown by at the <a href="https://www.recurse.com/">Recurse Center</a>, where I managed to tie up a couple of loose threads related to <a href="../../05/24/">Kombucha</a>, the programming language I'm building.</p>
 <p>Kombucha is now in a state where I can use it to write programs with a syntax close to what I'm eventually envisioning. This requires a bit of bootstrapping, as Kombucha's core language does not provide any operator for deep equality, let alone anything resembling pattern matching. This is by design, however, because one of the goals is to be extensible enough that such language constructs can be added in the language using macros.</p>
 <h2>Bootstrapping pattern matching</h2>
 <p>That's what I did this week, going from a level of abstraction similar to lambda calculus to pattern matching with unification. Here's the end result:</p>
@@ -21,7 +21,7 @@
 </code></pre>
 <p>The prelude (the small set of functions that are by default included in every Kombucha program) now defines the two functions <code>match-with</code> (which can be called using a Smalltalk-like keyword call syntax as <code>match: ... with: ...</code>) and <code>-&gt;</code> (which expects a pattern and a body and returns a function that takes a value and executes the body if the pattern matches the value).</p>
 <h2>Bytecode instruction format</h2>
-<p>I settled on an instruction set for Kombucha's <a href="../../../2025/05/06/">stack-based bytecode VM</a>. It's definitely not the most efficient one, but simple to implement, which is more important for my purposes. There are currently 11 instructions (with plans to stick to a maximum of 16 instructions in the long term) with variable lengths ranging from 1 to 4 bytes:</p>
+<p>I settled on an instruction set for Kombucha's <a href="../../05/06/">stack-based bytecode VM</a>. It's definitely not the most efficient one, but simple to implement, which is more important for my purposes. There are currently 11 instructions (with plans to stick to a maximum of 16 instructions in the long term) with variable lengths ranging from 1 to 4 bytes:</p>
 <pre><code>| NAME       | BYTE 1   | BYTE 2   | BYTE 3   | BYTE 4   |
 +------------+----------+----------+----------+----------+
 | LOAD_FN    | TAG | --FN_INDEX-------------- | --VARS-- |

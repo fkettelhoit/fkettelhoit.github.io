@@ -8,7 +8,7 @@
 <body>
 <p><a href="../../../../#notes">notes</a>/<a href="../../../../#notes-2025">2025</a>/<a href="../../../../#notes-2025-12">12</a>/29</p>
 <h1>Flat bytecode as lists and arrays</h1>
-<p>As outlined in a note on <a href="../../../2025/12/27/">bytecode as a flat AST</a>, bytecode can be seen as a flat representation of tree-like data. A list of cons cells of the form <code>(x, (y, (z, ())))</code> could be represented as the following flat bytecode:</p>
+<p>As outlined in a note on <a href="../27/">bytecode as a flat AST</a>, bytecode can be seen as a flat representation of tree-like data. A list of cons cells of the form <code>(x, (y, (z, ())))</code> could be represented as the following flat bytecode:</p>
 <pre><code>x y z () CONS CONS CONS
 </code></pre>
 <p>When the bytecode is evaluated, we can either view it as a sequence of stack operations that manipulate a separate value representation (such as boxed cons lists), or we can view the bytecode as the value representation itself.</p>
