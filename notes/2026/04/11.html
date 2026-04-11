@@ -1,0 +1,305 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Hypertext: branches and braids</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/04/11</p>
+<h1>Hypertext: branches and braids</h1>
+<p>Over the past week I've been experimenting with a hypertext system based on <a href="../../2025/11/16.html">implicit links</a>, where parts of a page are implicitly linked if they share paragraphs.</p>
+<p>While I think this could be an interesting hypertext model in general (because you don't need any special link syntax, your paragraphs <em>are</em> your links), I want to experiment with it specifically for non-linear writing and texts with many different versions, where some of the paragraphs might be the same, but some paragraphs differ between versions.</p>
+<p>Think of it like a subway map, where two lines (pages) can follow the same route for a few stops (paragraphs), but then diverge, either completely or for a few stops before arriving at the same stop again. There could also be lines that have the exact same route except that one stops at every station while another is an express line that skips stations. In terms of texts, the slow line might be a rough draft, whereas the express line is the final version.</p>
+<p>For example, we might start with the following draft:</p>
+<pre><code># A book (draft 1)
+
+This is the beginning of a story.
+
+The hero ventures into the unknown.
+
+There are many trials along the way.
+
+The hero returns changed.
+
+The end.
+</code></pre>
+<p>Now a second draft trims it a bit:</p>
+<pre><code># A book (draft 2)
+
+The hero ventures into the unknown.
+
+There are many trials along the way.
+
+The hero returns changed.
+</code></pre>
+<p>And the final version adds headings:</p>
+<pre><code># A book
+
+## Act 1
+
+The hero ventures into the unknown.
+
+## Act 2
+
+There are many trials along the way.
+
+## Act 3
+
+The hero returns changed.
+</code></pre>
+<p>How can we visualize this structure in a way that lets us read one of the pages while also giving us an immediate intuition for how they are braided together and where they branch off?</p>
+<h2>Linking shared paragraphs</h2>
+<p>It is not enough to just link from each shared paragraph to all the other paragraphs, because then we would just end up with a ton of meaningless links even when different “lines” share most of their route:</p>
+<pre><code># A book (draft 1)
+
+This is the beginning of a story.
+
+The hero ventures into the unknown.
+  +-------------------------------+
+  | -&gt; A book (draft 2)           |
+  | -&gt; A book -- Act 1            |
+  +-------------------------------+
+
+There are many trials along the way.
+  +-------------------------------+
+  | -&gt; A book (draft 2)           |
+  | -&gt; A book -- Act 2            |
+  +-------------------------------+
+
+The hero returns changed.
+  +-------------------------------+
+  | -&gt; A book (draft 2)           |
+  | -&gt; A book -- Act 3            |
+  +-------------------------------+
+
+The end.
+</code></pre>
+<pre><code># A book (draft 2)
+
+The hero ventures into the unknown.
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book -- Act 1            |
+  +-------------------------------+
+
+There are many trials along the way.
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book -- Act 2            |
+  +-------------------------------+
+
+The hero returns changed.
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book -- Act 3            |
+  +-------------------------------+
+</code></pre>
+<pre><code># A book
+
+## Act 1
+
+The hero ventures into the unknown.
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book (draft 2)           |
+  +-------------------------------+
+
+## Act 2
+
+There are many trials along the way.
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book (draft 2)           |
+  +-------------------------------+
+
+## Act 3
+
+The hero returns changed.
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book (draft 2)           |
+  +-------------------------------+
+</code></pre>
+<p>This gives us a way to jump back and forth between different versions, but makes it hard to see how they belong together. Can we do better?</p>
+<h2>Linking splits and joins</h2>
+<p>What we want to see at a glance is that the two drafts share the core structure (but the first draft has additional stations), whereas the final version is like the second draft but with additional headings.</p>
+<p>How do we do that? One option is to stop thinking of links as linking the same blocks together. Instead, we can use links to mark the points where two lines split or join together:</p>
+<pre><code># A book (draft 1)
+
+This is the beginning of a story.
+
+  +-------------------------------+
+  | -&gt; A book (draft 2)           |
+  | -&gt; A book -- Act 1            |
+  | /-----------------------------+
+  |/
+The hero ventures into the unknown.
+  |\
+  | \-----------------------------+
+  | -&gt; A book -- Act 2            |
+  | /-----------------------------+
+  |/
+There are many trials along the way.
+  |\
+  | \-----------------------------+
+  | -&gt; A book -- Act 3            |
+  | /-----------------------------+
+  |/
+The hero returns changed.
+  |\
+  | \-----------------------------+
+  | -&gt; A book (draft 2)           |
+  +-------------------------------+
+
+The end.
+</code></pre>
+<pre><code># A book (draft 2)
+
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book -- Act 1            |
+  | /-----------------------------+
+  |/
+The hero ventures into the unknown.
+  |\
+  | \-----------------------------+
+  | -&gt; A book -- Act 2            |
+  | /-----------------------------+
+  |/
+There are many trials along the way.
+  |\
+  | \-----------------------------+
+  | -&gt; A book -- Act 3            |
+  | /-----------------------------+
+  |/
+The hero returns changed.
+  |\
+  | \-----------------------------+
+  | -&gt; A book (draft 1)           |
+  +-------------------------------+
+</code></pre>
+<pre><code># A book
+
+## Act 1
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book (draft 2)           |
+  | /-----------------------------+
+  |/
+The hero ventures into the unknown.
+  |\
+  | \-----------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book (draft 2)           |
+  +-------------------------------+
+
+## Act 2
+
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book (draft 2)           |
+  | /-----------------------------+
+  |/
+There are many trials along the way.
+  |\
+  | \-----------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book (draft 2)           |
+  +-------------------------------+
+
+## Act 3
+
+  +-------------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book (draft 2)           |
+  | /-----------------------------+
+  |/
+The hero returns changed.
+  |\
+  | \-----------------------------+
+  | -&gt; A book (draft 1)           |
+  | -&gt; A book (draft 2)           |
+  +-------------------------------+
+</code></pre>
+<p>Just by looking at one page (and without having to follow any of the links), we immediately learn a lot more about the structure of the other linked pages. The drawback is that this form of linking is pretty verbose, because we end up with multiple links to the same part of a page.</p>
+<h2>Linking transfer hubs</h2>
+<p>What if we instead stick to the idea of linking between all shared paragraphs, but mark links differently based on whether they are just regular shared “stations” (where going from line to line wouldn't make a difference) or “transfer hubs” (where switching from line to line lets you go somewhere different)?</p>
+<p>Let's add <code>[...]</code> before or after a link text depending on whether the other page has different text before or after the shared paragraph (or both).</p>
+<p>We could then rank links in the following order:</p>
+<ul><li>links with different paragraphs before and after</li><li>links with a different paragraph before or after</li><li>links with the same paragraphs before and after</li></ul>
+<p>Let's draw the last category outside the box used by the other links. We might perhaps want to provide links to paragraphs with the same text before and after as a convenient way to jump to that part in the other document, but since they are much less useful than the other links, we can gray out these same-paragraphs-before-and-after links (or potentially even drop them completely), giving us our final result:</p>
+<pre><code># A book (draft 1)
+
+This is the beginning of a story.
+
+The hero ventures into the unknown.
+  +--------------------------------+
+  | -&gt; [...] A book -- Act 1 [...] |
+  | -&gt; [...] A book (draft 2)      |
+  +--------------------------------+
+
+There are many trials along the way.
+  +--------------------------------+
+  | -&gt; [...] A book -- Act 2 [...] |
+  +--------------------------------+
+    -&gt; A book (draft 2)
+
+The hero returns changed.
+  +--------------------------------+
+  | -&gt; [...] A book -- Act 3 [...] |
+  | -&gt; A book (draft 2) [...]      |
+  +--------------------------------+
+
+The end.
+</code></pre>
+<pre><code># A book (draft 2)
+
+The hero ventures into the unknown.
+  +--------------------------------+
+  | -&gt; [...] A book -- Act 1 [...] |
+  | -&gt; [...] A book (draft 1)      |
+  +--------------------------------+
+
+There are many trials along the way.
+  +--------------------------------+
+  | -&gt; [...] A book -- Act 2 [...] |
+  +--------------------------------+
+    -&gt; A book (draft 1)
+
+The hero returns changed.
+  +--------------------------------+
+  | -&gt; [...] A book -- Act 3 [...] |
+  | -&gt; A book (draft 1) [...]      |
+  +--------------------------------+
+</code></pre>
+<pre><code># A book
+
+## Act 1
+
+The hero ventures into the unknown.
+  +---------------------------------+
+  | -&gt; [...] A book (draft 1) [...] |
+  | -&gt; [...] A book (draft 2) [...] |
+  +---------------------------------+
+
+## Act 2
+
+There are many trials along the way.
+  +---------------------------------+
+  | -&gt; [...] A book (draft 1) [...] |
+  | -&gt; [...] A book (draft 2) [...] |
+  +---------------------------------+
+
+## Act 3
+
+The hero returns changed.
+  +---------------------------------+
+  | -&gt; [...] A book (draft 1) [...] |
+  | -&gt; [...] A book (draft 2) [...] |
+  +---------------------------------+
+</code></pre>
+<p>As succinct as the first version, but conveys considerably more structure.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
