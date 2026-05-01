@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Hypertext: decoupling links and markup</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/04/30</p>
+<h1>Hypertext: decoupling links and markup</h1>
+<p>Here's a sketch of a hypertext system implemented as a independent tools that work together. <a href="./13.html">Unix philosophy</a>, but for hypertext.</p>
+<p>All three of the following tools are file-based and line-based, which makes it possible to link to any line within any file. (It is also possible to link <em>from</em> a smaller unit than a line, e.g. using inline links, but it's not possible to link <em>to</em> a smaller unit than a line.)</p>
+<h2>Implicit links</h2>
+<p>At the lowest level, the first tool is in charge of two things: establishing <a href="./11.html">implicit links</a> between identical blocks and naming these blocks.</p>
+<p>A block can span one or more lines. A single configuration file specifies how blocks are delimited based on simple string matching, either using regexes (or perhaps even simpler, by just listing the start and end markers that delimit a block). The matching language can be minimal, but needs to support the following cases:</p>
+<ul><li>“Normal” blocks between blank lines, start and end with <code>\n\n</code></li><li>Headings, start with <code>\n\n#</code> or <code>\n\n##</code>, end with <code>\n\n</code></li><li>Block quotes, start with <code>\n\n&gt;</code>, end with <code>\n\n</code></li><li>Code blocks, start and end with <code>\n</code> + triple backticks + <code>\n</code></li><li>Wiki-style links, start with <code>[[</code>, end with <code>]]</code></li></ul>
+<p>(Wiki-style links might be handled in a special way by the markup tool, for example by displaying links as inline jump links if there is a single unambiguous link target. It might also make sense for the link tool to treat some links as irrelevant for ancestor relationships, so that it's possible to link to a text block from a “helper page”, see below.)</p>
+<p>Why do we need special handling for headings and block quotes instead of treating them like “normal” blocks? Because we want to be able to link a wiki link <code>[[A page]]</code> with a heading <code># A page</code> and ignore the <code># </code> prefix for equality.</p>
+<p>Other than that, the link tool doesn't need to care about markup, because it's not in charge of converting pages. And it's not tied to Markdown: A different configuration file could e.g. use <code>&lt;code&gt;</code> and <code>&lt;/code&gt;</code> as delimiters for code blocks.</p>
+<p>The second job of the link tool is to decide how to refer to links in other files. If a text block appears in two files, how should the link in file A to file B refer to file B? We need a <em>name</em> for the context of file B where the text block appears, ideally something that's better than just the title of the entire file.</p>
+<p>To do that, a configuration file specifies which parts of a file make up its context, for example its levels of headings, which start with <code>\n\n#</code> or <code>\n\n##</code> and end with <code>\n\n</code>, using the same matching language as before.</p>
+<p>Context markers are assumed to form a tree structure, so that a block that appears after <code>\n\n# A Page</code> and <code>\n\n## A Section</code> has the context <code>A Page: A Section</code> (and this is the name that will be shown as the link). Since context markers form a tree structure, markers of the same type override each other, so that a new heading “clears” the headings of the same level for all blocks that follow.</p>
+<p>Since the context of a linked block extends all the way up to its <a href="./12.html">unique ancestor</a>, the context markers can come from different files, but the same rules about overriding markers of the same type still apply across files. This is useful for braiding together <a href="./12.html">similar text blocks</a> through “helper pages” that only contain the two text blocks that are meant to be associated. The helper page can decide whether to use no headings (in which case the context is determined by the file where the text block appears) or whether it deliberately overrides e.g. the level 1 heading to alter the name of the link.</p>
+<p>The output of the link tool is a file that records all implicit links and their names. For each block with links, the file identifies the block by its combination of file name and line number, then lists all the links, each with its full context (e.g. one segment per line) and the target, also identified by its combination of file name and line number.</p>
+<p>The link tool also supports a file that lists text blocks that should be ignored when linking content. Whenever such a text block is found, it will not link to other blocks, nor will other blocks link back to it. The file applies recursively to all subfolders, more specific files in subfolders act as overrides.</p>
+<h2>Markdown as markup</h2>
+<p>Based on the links generated by the link tool, the next step in the pipeline is the markup tool, which is in charge of converting files to HTML or other formats, such as RSS feeds. The following is a proposal for a Markdown-to-HTML/RSS converter.</p>
+<p>Instead of relying on configuration formats such as TOML (or, god forbid, YAML), two files are involved:</p>
+<ul><li>a template in the language to be generated (HTML or RSS XML)</li><li>a file with whitelisted html tags</li></ul>
+<p>A template has a name of the form <code>&lt;file&gt;.template.html</code>, where <code>&lt;file&gt;.md</code> is a file at the same level as the template file. If the template is name <code>index.template.html</code>, it applies to all subfolders. If the template has the name of a specific file, it applies only to that file. Templates in subfolders override templates in parent folders.</p>
+<p>The template language uses string replacement and supports only a few predefined constructs:</p>
+<ul><li><code>&lt;!-- body --&gt;</code> is replaced with the converted HTML content</li><li><code>&lt;!-- root --&gt;</code> is replaced with the relative path to the site root</li><li><code>&lt;!-- breadcrumbs --&gt;</code> is replaced with navigation links</li><li><code>&lt;!-- title --&gt;</code> is the content of the first <code>h1</code> in a file</li><li><code>&lt;!-- date --&gt;</code> is replaced with the date of a file</li></ul>
+<p>The last two, <code>title</code> and <code>date</code> stop the template from producing any output if no title or date was set. The title is always assumed to be the first level 1 heading of a file. The date must be part of the file path (<code>YY/MM/DD/&lt;file&gt;.md</code>) or the file name (<code>YY-MM-DD-&lt;file&gt;.md</code>).</p>
+<p>Additionally, it's possible to include either an ancestor or a collection of all descendants using the syntax <code>&lt;!-- file.extension --&gt;</code>, which automatically inserts the content(s) of the files with that name in the template. This is useful e.g. for including all children such as <code>&lt;!-- item.xml --&gt;</code> in RSS feeds.</p>
+<p>The files for whitelisted html are named <code>&lt;file&gt;.html.allowed</code> and must contain the names of tags that are not meant to be escaped, one tag per line:</p>
+<pre><code>sub
+sup
+section
+</code></pre>
+<p>Just like template files, whitelisted tags apply recursively to subfolders if <code>index.html.allowed</code> files are used. More specific files override more general files.</p>
+<h2>Fuzzy similarity links</h2>
+<p>Built on top of these building blocks, though called as the first step in any build process, is the similarity tool, which is in charge of establishing links between text blocks that aren't identical, but textually <em>similar</em>. What should be considered similar depends on the situation, so here's merely a sketch for something that works reasonably well in various contexts: An n-gram based search index.</p>
+<p>Before the link tool does its job, the similarity tool indexes all text blocks and builds a 3-gram index, either on the character (code point) level or on the word level (if it's a language like English that has clear word boundaries). For each text blocks that has similar text blocks (e.g. shares at least half of the 3-grams), the similarity tool emits a helper page that merely includes the two textually similar blocks. Now that a page containing both text blocks exists, the link tool will automatically create a link between the similar blocks that leads to this helper page.</p>
+<p>That's it! Three tools with separate jobs, which work together to create a hyperlinked web of documents. This makes it easy to switch out tools: Don't like Markdown? Keep the similarity tool and link tool, just implement your own markup converter. Need a different notion of similarity? Easy enough, just build your own tool that emits simple text files. The other tools still work, because they rely on a shared <em>grammar</em>, a shared understanding of what hypertext means.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
