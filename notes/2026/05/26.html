@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Staged programming and deferred effects</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/05/26</p>
+<h1>Staged programming and deferred effects</h1>
+<p>Continuation of <a href="../03/31.html">A sketch for a minimal staged programming language</a>.</p>
+<p>Let's extend a simple programming language with the notion of <em>stages</em>, so that a function application can happen either at comptime or runtime:</p>
+<pre><code>t = v // variable
+  | (v, v, ..., v) =&gt; { t } // abstraction
+  | t@...@(t, t, ... t) // application
+</code></pre>
+<p>This is basically standard lambda calculus (with JS-like syntax), except that applications can have an annotation like <code>@@</code> which marks them as happening at stage 2. We start by evaluating all applications of stage 0, then return the resulting bytecode as the output of stage 0, which might contain applications of later stages, such as <code>f@(...)</code>, <code>g@@(...)</code>, etc. After every stage, the stage annotations of all remaining function applications get decremented by the stage of the smallest remaining stage annotation in the resulting bytecode (so that the next smallest stage becomes stage 0), effectively eliminating one or more <code>@</code> per function call.</p>
+<p>Let's assume we also have some built-in functions and data types such as <code>+</code> and integers (where <code>2 +@ 2</code> evaluates <code>2 + 2</code> at stage 1), as well as let bindings to make our code a bit more readable.</p>
+<p>Let's also assume that all function definitions are bound using let bindings and that a let binding is by default evaluated at stage 0 unless it is annotated, for example as <code>=@</code> or <code>=@@</code>. Here's a full example:</p>
+<pre><code>twice = (f, x) =&gt; {
+    f@@(f@@(x))
+}
+
+add2 =@ (x) =&gt; {
+    x +@@ 2
+}
+
+add4 =@@ (x) =&gt; {
+    twice(add2, x)
+}
+
+add4@@(5)
+</code></pre>
+<p>Stage 0 of the above example would then evaluate to the following stage 1:</p>
+<pre><code>add2 = (x) =&gt; {
+    x +@ 2
+}
+
+add4 =@ (x) =&gt; {
+    add2@(add2@(x))
+}
+
+add4@(5)
+</code></pre>
+<p>Stage 1 would then evaluate to the following stage 2:</p>
+<pre><code>add4 = (x) =&gt; {
+    (x + 2) + 2
+}
+
+add4(5)
+</code></pre>
+<p>Stage 2 would then evaluate to the final output of <code>9</code>.</p>
+<p>This works, but implementing stages in such a way comes with a big disadvantage: A function application has to choose the exact stage it is evaluated at. But what if we want to fully apply the same function at different stages, for example reversing a list at comptime and another one at runtime?</p>
+<p>Let's use a slightly more lenient approach where a stage annotation like <code>f@@</code> marks the stage at which the function <code>f</code> is applied <em>at the latest</em>. If <code>f</code> is not fully resolved at stage 2, an error is thrown for <code>f@@</code>. But <code>f</code> can be applied earlier than at stage 2 if a function of stage 0 or 1 triggers a function call of <code>f</code>. This is useful because it allows us to now use the same function at multiple stages.</p>
+<p>In the above example, the <code>f@@(f@@(x))</code> call would then be immediately evaluated as part of <code>twice(add2, x)</code>, which requires <code>add2</code> to be bound at stage 0, so we need to change the let binding for <code>add2</code> to use <code>=</code> instead of <code>=@</code>. Notice how there are only two stages because stage 1 is fully skipped:</p>
+<pre><code>// stage 0:
+
+twice = (f, x) =&gt; {
+    f@@(f@@(x))
+}
+
+add2 = (x) =&gt; {
+    x +@@ 2
+}
+
+add4 =@@ (x) =&gt; {
+    twice(add2, x)
+}
+
+add4@@(5)
+
+// stage 1 is skipped as there's no @(...), only @@(...)
+
+// stage 2:
+
+add4 = (x) =&gt; {
+    (x + 2) + 2
+}
+
+add4(5)
+</code></pre>
+<h1>Why more than 2 stages?</h1>
+<p>But why have an arbitrary number of stages at all? Isn't it enough to have a single comptime and a single runtime stage? Let's take a step back and consider why we might want to have different stages (and a split between comptime and runtime) at all. There are fundamentally two reasons:</p>
+<ul><li>We might be able to theoretically run everything at the same stage but want to separate stages for performance reasons. The classic example is compiling away the overhead of macros or other metaprogramming facilities so that we don't have to pay for them at runtime.</li><li>We might only have access to some data at comptime but not at runtime (e.g., we might have network access during compilation but not when running the program) or vice versa (e.g., we might depend on user data only available at runtime).</li></ul>
+<p>If we only cared about the first of these two reasons, a split into a single comptime and a single runtime stage might be all we need. But once we add in side effects and data dependencies, two stages become overly restrictive. We might want to implement an import system as a comptime stage with network access, but this import system might rely on macros which we need to fully evaluate first for performance reasons, so we already need two comptime stages. If the imported code relies on staged evaluation, we might need to run further comptime stages.</p>
+<p>What about multiple runtime stages? Having the ability to evaluate runtime code in stages gives us a limited form of just-in-time compilation: We could for example evaluate a regular expression and turn it into more performant code, even if it depends on user input at runtime, and then use the staged regular expression to match strings at a later runtime stage.</p>
+<p>This raises the question of how the dependencies between stages should be specified. In the above examples, we assumed a numeric ordering, with every function application either belonging to a single fixed stage or being evaluated at that stage at the latest. But is that the right model in a world of side effects, where one stage might introduce other stages?</p>
+<p>One possible alternative is to interpret stage annotations relative to the function they are defined in, so that an annotation marks a function application as being evaluated inside a function body before the function is called. This doesn't immediately solve the problem of establishing an order between multiple stages with complex data dependencies, but it might be a first step towards a dependency tree instead of a global linear order.</p>
+<h1>Deferred effects</h1>
+<p>So far we have assumed that each run goes from a lower stage to a higher stage, so that we are guaranteed to come to an end after a finite number of stages. But what if a stage can't be successfully completed, for example because a network call is failing? We could of course retry that call in a loop, but that would block the entire stage at that point, when other parts of the stage might not depend on the network call at all. Is there value in letting an effect <em>defer</em> a stage, effectively staying on the same stage?</p>
+<p>Staying on the same stage is not possible for regular function applications, because there is no way to specify that an application should remain <em>on the same stage after that stage is evaluated</em> when all we have are annotations such as <code>f@(...)</code>. If <code>f</code> is evaluated at stage 1, it cannot contain function applications of stage 0 anymore (because they have already been evaluated) and a function application of stage 1 would be evaluated immediately as part of the current stage, while a function application of stage 2 would only be evaluated at the next stage. There's no way to insert the same stage again. But we can potentially work around that by giving effect handlers the ability to not just resume a continuation but also to <em>defer</em> it, which effectively just re-introduces a function application of the current stage without evaluating it.</p>
+<p>This would give stages a way of recursing, by evaluating the same stage an arbitrary number of times, thus giving the evaluation <em>across</em> stages the same computational power as evaluation <em>within</em> a stage (where recursion is of course possible). Is that a good thing? Or would it be preferable to have the guarantee that once a stage is evaluated, we can move on to the next stage, guaranteeing that there's always a finite number of stages?</p>
+<p>This is also related to the idea of implementing an import system as a comptime stage that can pull in more code (which can itself rely on various comptime stages). If we require a stage to move on to the next stage without deferring/re-evaluating itself or introducing new stages, the stage responsible for importing code has to execute all of the comptime evaluation of the imported code as part of a single stage.</p>
+<p>Is there a difference in practice? Is it really so bad if we defer a stage by looping inside of the effect handler until the effect can be handled? Perhaps we only need different stages beyond one comptime and one runtime stage if different stages require different effect handlers and we want to make sure that different stages are being run with different <em>capabilities</em>. If we see effect handlers as capabilities, we might want to compile different stages with different effect handlers, so that we can for example guarantee that only some stages can make network calls.</p>
+<p>But how do we specify that our own macro processing stage can access the file system (but not the network) whereas the import stage can access the network (but not the file system)? And do we still support multiple different runtime stages even if they have the exact same capabilities / effect handlers?</p>
+<p>More questions than answers at this point...</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
