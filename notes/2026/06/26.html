@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Fuck the emoji police</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/06/26</p>
+<h1>Fuck the emoji police</h1>
+<p>Unicode works. Unicode solves problems that ASCII and other custom encodings couldn't solve. Unicode allows billions of people to communicate in their native languages and writing systems.</p>
+<p>Unicode sucks. Unicode assimilates bespoke encodings into a single and universal standard. Unicode forces minority languages and writing systems to fight for inclusion in one global standard.</p>
+<p>This has been tried before. It never ends well.</p>
+<blockquote><p>One Ring to rule them all, One Ring to find them, One Ring to bring them all, And in the darkness bind them.</p>
+<p>— Some dude who really liked inventing languages and writing systems</p>
+</blockquote>
+<p>Or, if you want to score some points with philosophy sophomores, you can also invoke some French guy to say the same thing.</p>
+<blockquote><p>Such consensus does violence to the heterogeneity of language games.</p>
+<p>— Jean-François Lyotard</p>
+</blockquote>
+<p>Unicode is philosophically rotten. It fundamentally misunderstands what language is: Not a single system that we could all agree on but instead a colorful variety of language games, expressed in various languages and writing systems.</p>
+<p>What if twins become bored of <a href="https://whytheluckystiff.net/five_minute_plays/withAnOctopus.html">staging 5 minute plays</a> and instead invent their own language and writing system? Do you think they are going to successfully lobby the UNICODE CONSORTIUM to consider their language next to Klingon? Yeah, I don't think so.</p>
+<h2>No Unicode != ASCII</h2>
+<p>What's the alternative? Going back to ASCII? No. Instead of going from a single (universal) encoding back to a single (specific) encoding, any alternative to Unicode that wants to grasp languages and writing systems in all of their variety needs to support a multitude of systems, even ones that are built ad-hoc and might exist for just a few minutes before falling into disuse.</p>
+<p>So here's a thought experiment: What if you had a chat app that allowed you to pick and even invent a writing system on the fly? One where you could choose which characters, pictographs, images and memes to send and write? (After all, aren't memes just images that through iterability have become signs?)</p>
+<p>This chat app would allow you to decide what your keyboard looks like. It could just be a single button that sends “Yo” (remember when that was worth millions of dollars?), it could your typical QWERTY layout except that all of your keys show and send different cat memes, or it could be a mostly typical QWERTY layout with a few rearranged or additional keys for sending “stuff” that you send frequently, where “stuff” could be as simple as a single glyph or as complex as an entire sentence.</p>
+<p>Making the keyboard malleable is the easy part. The hard part is supporting various writing systems without baking in any assumptions about how we write. Left to right? Right to left? Top to bottom? <a href="https://en.wikipedia.org/wiki/Boustrophedon">Boustrophedon</a>? <a href="https://en.wikipedia.org/wiki/Phaistos_Disc">Spiraling</a>?</p>
+<p>Instead of looking like a typical chat app, it would look more like a shared canvas, and a chat would develop as a collaborative form of <a href="https://www.kickscondor.com/scrapchat-with-rebane/">scrapchatting</a>. Do you write the glyphs left to right or right to left? Up to you. Are there line breaks or just one endless line? Up to you.</p>
+<p>But that's just the direction. How are different glyphs combined? Most Latin alphabets are relatively tame: You might run into a couple of ligatures, but that's mostly it. But what about something like the Arabic script, where a letter can have up to four different forms depending on how it's combined with preceding or following characters. Or Hangul, the Korean alphabet, where a combination of characters is arranged in a block, as two or three characters, sometimes horizontally, sometimes vertically.</p>
+<p>Our hypothetical chat app would need to support specifying all these rules. Rules that determine how a sequence of keystrokes are turned into a layout of glyphs on the screen. We could hardcode these rules for a bunch of languages, but then we'd be right back at what Unicode is trying to do. What we need is a way to express the rules. A language of languages (well, writing systems) of sorts.</p>
+<h1>A (non-)language of languages</h1>
+<p>Before sketching out a “language” for the rules of various writing systems, let's add one more requirement: The language of rules shouldn't privilege an existing language. No English-derived programming language keywords, etc. Is this just making our lives harder to illustrate a philosophical point? Maybe.</p>
+<p>What we need is a visual programming language. (The horror, the horror.) Since the self-imposed constraint of not relying on an existing language or writing system is already hard enough, let's at least make our lives a little easier by deciding what is fixed in our rule language:</p>
+<p>Rules are only executed in response to a keystroke. They are functions that operate on structured input (like a list of previous keystrokes) and can access variables (like a variable storing a cursor position). The only effect that rules can have is placing glyphs at positions and removing existing glyphs (so that two keystrokes can show up as a single combined character). Since a chat app is collaborative, there is data that is read-only (the keystrokes of other participants, local variables set by other participants) and data that can be mutated (your own placed glyphs, shared variables for the cursor position).</p>
+<p>As data types, there are glyphs (images that are stored outside the app), 2D coordinates (for both absolute points and relative distances), and numbers (as angles for rotating glyphs, as scaling factors).</p>
+<p>How are variables identified in the language if the goal is not to use English (or any other fixed language) labels anywhere? We could either identify variables using a combination of glyphs freely positioned on the canvas (without any rules governing the placement or combination) or simply not use any names at all and instead draw lines from the value of a variable to where it's used in the rule.</p>
+<p>How are literal values shown? Using decimal numbers? This might be acceptable (and is certainly more general than using English language identifiers for variables), but would privilege one specific writing system for numbers over other representations. What if we show the value of a variable visually, as follows:</p>
+<ul><li>A glyph is shown as its image.</li><li>A 2D coordinate is shown as a relative vector pointing from point to point.</li><li>An angle is shown as exactly that, a visual angle between two lines.</li><li>A scaling factor is shown as two lines, the unit line and the scaled line.</li></ul>
+<p>This assumes that there are different types for scalar values like angles and scaling factors. Alternatively, if we just want a single integer number type, we could use tally marks, with numbers 1 to 4 being shown as unary marks.</p>
+<p>But maybe this is all going a bit too far? Maybe it would be acceptable to piggyback on ASCII for the rule language and start with a simple textual programming language to get the data types and semantics of the language right? Adding a visual programming language that is translated to that textual language could then be done in a second step.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
