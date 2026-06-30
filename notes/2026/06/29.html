@@ -1,0 +1,73 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Inciting an emoji riot</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/06/29</p>
+<h1>Inciting an emoji riot</h1>
+<p>Here's a sketch of a simple language for expressing <a href="./26.html">rules of arbitrary writing systems</a> in a chat app without using Unicode.</p>
+<p>The language is event driven. Functions are only invoked in response to keypresses (on a user defined on-screen keyboard with arbitrary layout). Each key corresponds to exactly one function. There is no other way to execute code.</p>
+<p>A function can freely read and set variables. Reading a variable that hasn't been set (as a result of an earlier keypress) returns <code>nil</code>. Variables can be manually cleared by setting them to <code>nil</code>. A function doesn't return anything, its implicit effect is its entire world state, meaning the final value of all variables.</p>
+<pre><code>offset = 10
+cursor = (0, 0)
+</code></pre>
+<p>A variable belongs either to the user that pressed the key (in which case the variable is mutable for that user) or to the other user (in which case it is read-only for the current user and must be prefixed with <code>other.</code> to be accessed).</p>
+<pre><code>offset = other.offset + 10
+cursor = other.cursor + (0, offset)
+</code></pre>
+<p>There are two special variables: <code>canvas</code> and <code>history</code>.</p>
+<ul><li>The list of drawn glyphs with their coordinates is stored in the <code>canvas</code> variable, which is a list of pairs of <code>(glyph, position)</code>.</li><li>The world state returned by a function is added to the <code>history</code> variable, which is a list of pairs of <code>(keypress, world_state)</code>. The <code>history</code> variable is always read-only.</li></ul>
+<p>(Undo is not part of the language but is a built-in function of the system that cannot be accessed or changed from within the rule language. The undo system is the only way to undo a keypress and pop a history entry.)</p>
+<p>The language only allows bounded loops. The only iteration construct is a for loop bounded by either a number (of iterations) or a list (which iterates through the list, each element at a time). There is no recursion.</p>
+<pre><code>for x in 0..n {
+    // do something
+}
+
+for x in list {
+    // do something
+}
+</code></pre>
+<p>The only way to branch conditionally is if-else (with optional else if clauses).</p>
+<pre><code>if x &lt; 5 {
+    // do something
+} else if x &lt; 10 {
+    // do something
+} else {
+    // do something
+}
+</code></pre>
+<p>The built-in types are glyphs, (fixed precision) numbers, booleans, tuples, and lists. There are no user-defined types. Tuples can only be accessed by fully destructuring them, lists can only be accessed by iterating over them.</p>
+<pre><code>// tuple destructuring
+(x, y) = point
+
+// list iteration
+for x in [1, 2, 3] {
+    // do something
+}
+</code></pre>
+<p>There is no list mutation. New lists can only be created as literals or using a limited form of list comprehension (similar to Python, but more general, like Dart's collection expressions).</p>
+<pre><code>// 0, 2, 4, ...
+[for x in 0..n {
+    x * 2
+}]
+
+// 1, 1, 2, 4, 3, 9, ...
+[for x in 1..n {
+    ...[x, x * x]
+}]
+
+// 0, 2, 4, 6, ...
+[for x in 0..n {
+    if x % 2 == 0 {
+        x
+    }
+}]
+</code></pre>
+<p>There are built-in functions for the standard arithmetic and trigonometric operations on numbers. Function definitions can be used to share functionality between different keypress handlers.</p>
+<p>This language should feel pretty standard. Deliberately Turing-incomplete, with limited abstraction, no user-defined types, and a slightly imperative feel. No first class functions. No recursion. (Simple enough that static types with explicit function parameter type annotations and without generics should be sufficient.)</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
