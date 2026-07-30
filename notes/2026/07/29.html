@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Flat closures (that fully live on the stack)</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/07/29</p>
+<h1>Flat closures (that fully live on the stack)</h1>
+<p>Going back to the idea of keeping <a href="../03/15.html">immutable lists/tuples on the stack</a>, I've been thinking about how to extend this idea. Briefly, the idea of that earlier exploration was to store (dynamic) lists fully on the stack, by using lightweight stack-internal pointers that could only point backwards, thus encoding a sort of borrowing concept. The hard part is returning these lists from functions without ending up with dangling pointers, which is why the return instruction ended up implementing a 4-pass mark-and-compact algorithm that looks suspiciously like GC.</p>
+<p>(There was one correctness issue in the 4-pass algorithm as described previously, which is not relevant for the following discussion though, so I'm just mentioning it for completeness. I previously wrote that “An unmarked tuple below inside_floor is garbage, we skip past its elements”, but that's unsound: Pass 1 must not skip past a garbage list's extent, because a garbage list's adopted area can contain child data that is still referenced by the return value, so we need to check that child's children in pass 1.)</p>
+<p>This might sound vaguely reminiscent of another idea, namely <em>escape analysis</em> in the context of closures. That's no coincidence, because one of my main motivations for the whole experiment was to find a bytecode that could store and manipulate closures on the stack (so that I can eventually evaluate the bytecode at comptime and get back more flat bytecode).</p>
+<p>Closures, if you squint a bit, look a lot like lists, because both “wrap around” some data that they need to hold onto if the entire closure or list is returned from a function. Let's say that our lists store the number of their elements (each with a fixed size of one stack slot, because compound data structures are stored on the stack before the list and being pointed to) + the total size of <a href="../03/07.html">“adopted” or “ghost data”</a>.</p>
+<pre><code>00: PUSH_INT(1)
+01: PUSH_INT(2)
+02: MAKE_LIST { elems: 2, adopted: 0 }
+03: PUSH_INT(3)
+04: PUSH_INT(4)
+05: REF(02)
+06: MAKE_LIST { elems: 3, adopted: 3 }
+</code></pre>
+<p>Conceptually:</p>
+<pre><code>1 |
+2 |
+__| &lt;==+
+3   |  +
+4   |  +
+=======+
+____|
+</code></pre>
+<p>Let's say that we also have an instruction to push a non-closure function onto the stack, like <code>PUSH_FUNC { code_pointer: usize }.</code> We can now extend this to closures by merging both of these instructions together, so that we get a function that also stores some partially applied arguments:</p>
+<pre><code>00: PUSH_INT(1)
+01: PUSH_INT(2)
+02: PUSH_CLOSURE { args: 2, adopted: 0, code_pointer: ... }
+</code></pre>
+<p>Instead of ints, the closed-over arguments could be refs to arbitrarily large data on the stack. The same 4-pass mark-and-compact algorithm that takes care of returning lists would then also compact and return just the closed-over data, cleaning up anything that is not held onto by the closure.</p>
+<p>How do we refer to positional arguments on the (runtime) stack from (within the bytecode of) a function? (This applies equally to normal functions and closures.) Since lists can grow arbitrarily large and are stored fully on the stack, we need a way to map from the static notion of nth function argument to position on the stack. The easiest way is probably to resolve variables <em>relative</em> to a function's call frame, by introducing an instruction like <code>VAR(usize)</code>, in contrast to the <em>absolute</em> stack position of <code>REF(usize)</code>.</p>
+<p>Is a separate instruction even needed for closures? Or are closures just a combination of a <code>MAKE_LIST</code> instruction and <code>PUSH_FUNC</code> instruction? The easiest way would be to define a closure as a list wrapped around a function as its last (or first, depending on the calling convention) element, in which case the <code>CALL</code> instruction needs to recognize a list in a function position (or a ref to one) as a closure. An alternative would be to treat “normal” functions as a special case for closures with 0 captured arguments and to only provide a single instruction for closures and functions.</p>
+<h2>Function calling convention</h2>
+<p>How are function pointers and function arguments positioned on the stack? Let's say we want to call <code>f(a, b, c)</code>, with <code>f</code> being translated to the bytecode instructions <code>f_0, ..., f_n</code> or <code>f...</code> for short, <code>a</code> being translated to <code>a_0, ..., a_n</code> or <code>a...</code> for short, etc. Let's also say that we have a <code>CALL { args: usize }</code> instruction that applies a function to the specified number of arguments. What calling convention should we use? There are several options:</p>
+<ul><li><code>c... b... a... f... CALL</code>, args from right to left, then the function</li><li><code>a... b... c... f... CALL</code>, args from left to right, then the function</li><li><code>f... c... b... a... CALL</code>, function first, then args from right to left</li><li><code>f... a... b... c... CALL</code>, function first, then args from left to right</li></ul>
+<p>We can choose relatively freely if our language is pure, but in the presence of side effects the order of arguments on the stack will also determine the order of side effects. I want my function arguments (and their side effects) to be evaluated according to their left-to-right reading order, which leaves the options <code>a... b... c... f... CALL</code> and <code>f... a... b... c... CALL</code>. For choosing between these two options, we are less restricted by the order of side effects: Evaluating a function itself (before applying it to any arguments) rarely has a side effect and we could even add a restriction to the language that disallows something like <code>(f(a, b))(c, d)</code> and instead enforces a normal form like <code>g = f(a, b); g(c, d)</code> that makes the order of side effects clear, for example <a href="https://en.wikipedia.org/wiki/A-normal_form">A-normal form</a>.</p>
+<p>How do closures fit into either of these two calling conventions? A closure effectively carries around partially applied arguments, which need to be accessible on the stack as if they were regular arguments. So instead of <code>f...</code> just being a bunch of bytecode instructions for the function <code>f</code>, the closure needs to wrap around the partially applied <code>f(a, b, _)</code>.</p>
+<p>If our calling convention is <code>f... a... b... c... CALL</code> and our closure is a list that wraps around <code>f... a... b...</code> and follows them with a <code>MAKE_LIST</code> instruction, our stack before our call looks like the following:</p>
+<pre><code>f... a... b... MAKE_LIST c... CALL
+\______________________/
+       closure
+</code></pre>
+<p>Similar to what our calling convention expects, but with a <code>MAKE_LIST</code> instruction in the way, which <code>CALL</code> needs to remove before being able to apply the function. This requires us to move around the arguments so that we end up with <code>f... a... b... c... CALL</code>, which could be expensive unless we require all function arguments to be of atomic size.</p>
+<p>Luckily, this is already a requirement for lists (and thus also closures, which only store atomic values / refs as their direct elements), so it's not a stretch to extend this requirement to our <code>CALL</code> instruction. If we can assume that all arguments are just atomic (and any adopted data lives in a bulk area before the actual arguments), we can just pick a calling convention arbitrarily, and thus go with <code>f... a... b... c...</code> for the ordering of side effects that it gives us.</p>
+<p>But how would the compiler be able to emit refs to arguments in situations like <code>f(g(x), h(y))</code>, where the size of <code>g(x)</code> or <code>h(y)</code> at the point of calling <code>f</code> cannot be determined statically during compilation? We need a separate call instruction with the semantics of calling a function for the “top N elements” (whatever size they might have), which dynamically creates the right atomic refs at runtime and then acts like a regular <code>CALL</code> instruction.</p>
+<p>This is a pattern that we can see in multiple places, notably for lists and references: To be able to represent data efficiently on the stack (as a runtime representation), we need lists with an explicit size in terms of stack slots + adopted data. But to be able to emit bytecode (and consume it as part of running the VM), we need an instruction that can just say “turn the N topmost values into a list”. Same for references, which need to exist as absolute refs into the stack (the efficient runtime representation) as well as relative references that look up variables relative to a call frame (the input bytecode for the VM that's emitted by the compiler).</p>
+<p>There's more to say about this duality when it comes to an efficient bytecode representation, but I'll leave that for another time.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
