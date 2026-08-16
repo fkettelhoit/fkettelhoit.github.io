@@ -1,0 +1,146 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Flat stack closures and 2-pass mark-and-compact</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/08/15</p>
+<h1>Flat stack closures and 2-pass mark-and-compact</h1>
+<p>Over the past two weeks, I was busy building a simple bytecode VM that extends the idea of representing lists as <a href="https://fredkettelhoit.com/notes/2026/03/07.html">flat data on the stack</a> to closures. In addition to storing lists and closures on the main VM stack, the VM has two other interesting properties:</p>
+<ul><li>The input bytecode representation and output value representation are <a href="../07/30.html">one and the same</a>, with the goal of eventually using it for staged programming / comptime evaluation.</li><li>A 2-pass mark-and-compact algorithm that runs on return replaces the older 4-pass mark-and-compact algorithm, while also being much simpler. The new algorithm clocks in at 50 lines and there's no need for any other form of GC.</li></ul>
+<h2>Bytecode representation</h2>
+<p>Here's what the (decoded) bytecode looks like:</p>
+<pre><code>// Ops are atomic integers/variables/references or dynamically sized operations
+pub enum Op {
+    Int(i64),
+    Var { elem: usize },
+    Ref { offset: usize },
+    Sized(SizedOp, usize), // the size field allows O(1) access as output
+}
+
+pub enum SizedOp {
+    BlobStart,
+    BlobEnd,
+    FuncStart,
+    FuncEnd { args: usize },
+    Call { args: usize },
+    List { elems: usize },
+    Push { elems: usize },
+    Set,
+    Get,
+    If,
+    Len,
+    Bin(BinOp),
+}
+
+pub enum BinOp {
+    Eq,
+    Add,
+    Sub,
+    Mul,
+}
+</code></pre>
+<p>The crucial detail is that all operations track their <em>size</em> on the stack, which makes the representation suitable as a fast <code>O(1)</code> output value representation on the stack in addition to being an input bytecode representation. It's possible to read the stack <em>starting at the top</em> and know immediately how many stack slots the topmost element takes up.</p>
+<p>This is usually <em>not</em> true for bytecode representations: Think about an AST such as <code>(3 - 2) + 1</code>, which might normally be represented as a bytecode of the form <code>3 2 - 1 +</code>. Just looking at the topmost stack slot, <code>+</code>, it's not clear how far the operands to the addition extend. In the above example they extend all the way to the bottom of the stack, but that's only clear by scanning through the stack from the bottom.</p>
+<p>By tracking the size of operations + operands, the bytecode representation becomes an AST/bytecode hybrid, making it possible to manipulate and rewrite parts of the AST without being a dumb input-only tape. Since the output stack that is being manipulated uses the same representation as the input stack (in fact, the program being executed is simply a fixed prefix of the “output” stack), the result of running the VM is another stack of bytecode, which can be executed again, opening the door for staged evaluation.</p>
+<p>One interesting detail is that while the representation is the same for input and output, some of the operations undergo a transformation as they are being executed: For example, the operation <code>Ref { offset: usize }</code> is used to reference/borrow an element earlier on the stack, with its <code>offset</code> referring to a position in the <em>input bytecode</em> (relative to the current instruction pointer) when the operation is executed, but is stored on the output stack with its <code>offset</code> referring to a position on the <em>output stack</em> (relative to its own position on the output stack). Depending on whether it is an input instruction or output data, the offset thus takes on a different meaning.</p>
+<p>The same is true for <code>Call { args: usize }</code> and <code>List { elems: usize }</code> instructions, which both store a <em>logical number of operands</em> (each of which can take up multiple stack slots) in addition to the <code>usize</code> field of stack slots that each <code>Op::Sized</code> tracks. When used as input instructions, there's no requirement that the <code>args</code>/<code>elems</code> are atomic. But for lists or call frames on the stack, the requirement is that each argument or element is atomic (which means complex values need to be stored lower on the stack and then referenced) so that knowing the logical number of elements allows accessing the atomic elements in <code>O(1)</code>.</p>
+<p>Here's the stack layout of <code>[[1, 2], 3, 4]</code> as input bytecode:</p>
+<pre><code>Int(1)            \  \
+Int(2)            |  |
+List { elems: 2 } /  |
+Int(3)               |
+Int(4)               |
+List { elems: 3 }    /
+</code></pre>
+<p>Executing it turns the first argument into an atomic reference and copies the other two:</p>
+<pre><code>Int(1)            \
+Int(2)            |
+List { elems: 2 } / &lt;--+
+Int(3)                 |   // garbage
+Int(4)                 |   // garbage
+Ref { offset: 3 } -----+ \
+Int(3)                   |
+Int(4)                   |
+List { elems: 3 }        /
+</code></pre>
+<p>Note how <code>Int(3)</code> and <code>Int(4)</code> just get copied and thus leave garbage on the stack, which will be reclaimed by the mark-and-compact algorithm that runs on return. So let's look at that next.</p>
+<h2>2-pass mark-and-compact</h2>
+<p>I previously built a <a href="https://fredkettelhoit.com/notes/2026/03/07.html">4-pass mark-and-compact algorithm</a> running on every function return that would rewrite references and compact all the data being returned from a function. The new 2-pass algorithm is much simpler, but follows the same idea and still runs on return. It simply manages to merge 3 of the passes by using a bit more space on the stack. Here are the 2 phases of the new algorithm:</p>
+<ul><li>Pass 1, mark top to bottom: Run through the “threatened area” (everything allocated on the stack as part of the function) and transitively mark all refs reachable from the return value. Since refs only point down the stack, this is a linear pass.</li><li>Pass 2, compact bottom to top: Now that we know what's garbage, run through the stack and keep track of how much garbage has been compacted. Increase this counter when we encounter garbage, and move everything that's not garbage by this amount down the stack, <em>but store by how much the value has been shifted at the old location</em> so that old refs still resolve and can be “redirected” by that amount.</li></ul>
+<p>Note how we need to keep track of how far data has been shifted <em>after</em> we have shifted it, because we will encounter refs to it later on the stack as we move closer to the top. This means that moving data down the stack <em>must not overwrite</em> this meta information. The solution is to split each stack slot into a fixed part for the <code>Op</code> (e.g. 8 bytes) and a separate fixed part for the meta information (e.g. 4 bytes), holding the tag that identifies an operation as well as a mark bit (for reachability during the first pass) and the amount by which an operation has been shifted during compaction:</p>
+<pre><code>     1    2    3    4    5    6    7    8    9   10   11   12
++----+----+----+----+----+----+----+----+----+----+----+----+
+| op                                    | t  | shift        |
++---------------------------------------+----+--------------+
+\____________________________________________/
+           moved during compaction
+                                              \_____________/
+                                                   fixed
+</code></pre>
+<p>In the above encoding scheme, the maximum shift would be <code>2^24 * 12 B == ~200 MB</code>. Nothing breaks if we clamp the gap to that maximum shift and the garbage exceeds this threshold, it would simply take the next compaction (triggered by the next function return) to reclaim more space. If 3 bytes for shift turn out to be too little, other options would be to use 8 bytes for the meta information or to encode the shift in powers of two (which would leave unused space on the stack that could potentially be re-used for <a href="../07/31.html">direct mutation</a>).</p>
+<p>Storing the tag outside of the 8 bytes for the op also nicely solves the problem of how to store <a href="../07/30.html">64 bit ints on the stack</a>.</p>
+<p>All of this makes garbage collection trivial. It runs on return (whenever the size of the threatened area minus return value exceeds the size of the return value, leading to amortized compaction for incremental garbage) and the entire function is short enough to fit in less than 50 lines of code:</p>
+<pre><code>fn compact(&amp;mut self, floor: usize) -&gt; Result&lt;(), &amp;'static str&gt; {
+    // resolve the return value first
+    let ret = self.resolve_slot(self.sp())?;
+    match self.op(ret)? {
+        Sized(List { elems: n } | Call { args: n }, _) =&gt; {
+            for sp in ret - n..=ret {
+                self.stack.get_mut(sp).ok_or(ERR_UNDERFLOW)?.meta.mark = true;
+            }
+        }
+        _ =&gt; self.mark(ret)?,
+    }
+    // pass 1: mark (bottom &lt;- top)
+    for sp in (floor..=ret).rev() {
+        if self.stack[sp].meta.mark {
+            let r = self.resolve_slot(sp)?;
+            if r &gt;= floor &amp;&amp; r &lt; sp {
+                self.mark(r)?;
+            }
+        }
+    }
+    // pass 2: compact (bottom -&gt; top)
+    let mut gap = 0;
+    for sp in floor..=ret {
+        let mut slot = self.stack[sp];
+        if slot.meta.mark {
+            if let Ref { offset } = slot.op {
+                let shift = if sp - offset &gt;= floor {
+                    self.stack.get(sp - offset).ok_or(ERR_UNDERFLOW)?.meta.shift
+                } else {
+                    0
+                };
+                let src = sp - gap;
+                let dst = sp - offset - shift;
+                slot.op = Ref { offset: src - dst };
+            }
+            self.stack[sp].meta.shift = gap;
+            self.stack[sp - gap].op = slot.op;
+            self.stack[sp - gap].meta.mark = false;
+        } else {
+            gap += 1;
+        }
+    }
+    self.stack.truncate(ret + 1 - gap);
+    if let Slot { op: Sized(_, slots), .. } = self.stack.last_mut().ok_or(ERR_UNDERFLOW)? {
+        *slots = (ret - gap) - floor;
+    }
+    Ok(())
+}
+</code></pre>
+<h2>Finally, closures</h2>
+<p>So how do closures fit in? Given the above bytecode + mark-and-compact on return there's barely anything else needed in the VM, because closures end up being just a combination of lists and functions. The calling convention for functions on the stack is function first, then arguments from left to right, so that <code>f(a, b, c)</code> on the stack would be represented as <code>f, a, b, c, Call { args: 3 }</code>, with <code>f</code> and its arguments standing in for one or more stack slots.</p>
+<p>The compiler is expected to do closure conversion, so that a function that is identical to <code>f</code> but with the first argument coming from an outer scope is first converted into a three argument <code>f(a, b, c)</code>. At the point where the closure <code>f(a, _, _)</code> is returned, we then simply store <code>f</code> and <code>a</code> together <em>in a list</em>, with <code>f</code> as the first element and <code>a</code> as the second.</p>
+<p>When the closure is applied to its remaining two arguments <code>b</code> and <code>c</code>, we encounter a stack of the following form, with <code>f</code> and its arguments again standing in for one or more stack slots:</p>
+<pre><code>f, a, List { elems: 2 }, b, c, Call { args: 2 }
+</code></pre>
+<p>This is <em>almost</em> like the non-closure call <code>f, a, b, c, Call { args: 3 }</code>, except for the <code>List { elems: 2 }</code> and the different <code>args</code> count. So all we need to turn the closure into a regular call is to move around the arguments on the stack before treating it like a call with 3 arguments. And here's where the requirement that <em>both</em> <code>Call</code> and <code>List</code> store arguments as <em>atomic</em> elements comes in, because we can always trivially and cheaply move around atomic elements without moving the underlying data of references.</p>
+<p>The result is a regular function call. And since the captured arguments of a closure are just stored in a list, the mark-and-compact that happens on return ensures that garbage is compacted by the time the closure leaves its frame. The closure remains stored on the stack, as a flat list.</p>
+<p>So that's it. The VM is still in its early stages and whether the design works will depend on whether I can get comptime to play nicely with it. But I think the combination of flat data on the stack (for both closures and lists), a unified input/output bytecode representation, and a really simple 2-pass mark-and-compact algorithm is promising.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Unresolved variables during comptime evaluation</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/08/16</p>
+<h1>Unresolved variables during comptime evaluation</h1>
+<p>Let's assume we have a <a href="./15.html">unified bytecode representation</a> that is used as both input and output of a bytecode VM, so that we can treat the output of one stage as the input of another. That's a good first step if we want to do comptime evaluation, but there's one key piece missing: At runtime we can assume that variables can only appear as part of the <em>input bytecode</em>, never as part of the <em>output</em> (because they are resolved during evaluation), but that's not true for comptime evaluation, where we might call a function with unevaluated arguments. Here's an example:</p>
+<pre><code>y = ... // some value that is not resolved at comptime
+
+f(x) = {
+    if (x == y) {
+        &quot;equal&quot;
+    } else {
+        &quot;different&quot;
+    }
+}
+
+// comptime call, with x and y resolving to the same value
+f(y)!
+</code></pre>
+<p>Without knowing what <code>y</code> is bound to, we can see that in the comptime call <code>f(y)!</code> both <code>x</code> and <code>y</code> resolve to the same value, so we could evaluate the entire expression <code>f(y)!</code> to <code>&quot;equal&quot;</code> at comptime and drop the entire function definition of <code>f</code> from the runtime bytecode if the function isn't used anywhere else.</p>
+<p>But to do that, we need to give our VM the ability to operate on <em>unresolved</em> variables such as <code>y</code> at comptime. We cannot guarantee that variables are fully resolved before arguments are passed into a function, which means that variables inside of a function body can come from different scopes, not just the directly enclosing function. Unless we want to introduce separate bytecode operations for “internal” (coming from the enclosing scope) and “external” (coming from scopes farther up) variables, we need to track which <em>call frame</em> a variable refers to.</p>
+<h2>Tracking the call frame of each var</h2>
+<p>This also makes closure conversion less useful. If we already need the ability to refer to variables in an outer scope, should we make a compiler go to the trouble of converting a closure into a regular function instead of just referring to the closed-over variables in the outer scope? There are still arguments for doing closure conversion though: Without it we'd have to ensure that several separate call frames are installed before a closure is called and all torn down together. Worse, each closed-over frame might have a mix of closed-over and unreferenced variables.</p>
+<p>Either way, it seems that a simple <code>Var { elem: usize }</code> instruction that merely refers to the n-th variable in the <em>current</em> call frame doesn't quite cut it, because we need to be able to refer to outer frames as well. So let's use something along the lines of <code>Var { frame: usize, elem: usize }</code>, which looks up variables in a specific frame, with the current frame always being <code>0</code>.</p>
+<p>Comptime evaluation then needs to <em>shift</em> variables whenever they are passed into a function as arguments (each variable's <code>frame</code> must be incremented) and whenever they are returned from a function as a return value (each variable's <code>frame</code> must be decremented). Since arguments and return values can be complex data types, this requires a linear scan of each argument or return value.</p>
+<p>This is the first example of work that the comptime stage has to do but which is unnecessary at runtime, because we can assume that at runtime all variables have been fully resolved. It also isn't trivial, because we still need to ensure that variables escaping a function as part of a closure are stored not as variables but resolved as part of the closure, otherwise we'd hold onto a variable without its frame.</p>
+<h2>Referencing unresolved vars</h2>
+<p>What about references? If references can point to unresolved variables at comptime, this would force us to resolve variables from an arbitrary call frame, requiring us to shift multiple times, potentially by walking the call frame stack in <code>O(n)</code> to figure out which frame an offset belongs to (since the <code>Var { frame: usize, elem: usize }</code> instruction itself only stores a frame relative to the function frame where it appears). But can references ever point to variables? If we consider input bytecode to be invalid if it contains references to variables, we can easily maintain that invariant during the execution of the VM because vars are considered <em>atomic</em> and will thus get copied by value whenever a ref would be created.</p>
+<p>However, what if we exploit the observation that refs never point to variables today and repurpose the ref-to-var case? This brings us back to the initial observation that comptime needs to be able to operate on both “external” and “internal” variables in the body of a single function: What if we distinguish between these two cases by never passing variables from an outer scope into a function, instead creating <em>references</em> to them at the function call boundary (and thus giving up the invariant that vars are always copied by value)?</p>
+<p>In the motivating example of <code>f(y)!</code>, the equality of <code>x</code> and <code>y</code> would thus be established by two refs pointing at the exact same offset which holds an unresolved var. There's no need to shift variables because vars only live inside a single call frame and anything passed as arguments or returned from the function is a ref with an offset, which reuses the existing machinery.</p>
+<p>One potential advantage to using refs like this: Closure conversion could become something done by the VM, for free, because a closed-over variable would just be compiled to a ref to a variable in the outer scope (requiring us to give up the invariant that refs never point to vars even for the input bytecode). When a closure is returned from the function that holds the closed-over variables, the 2-pass mark-and-compact would then do the necessary work to keep the ref alive, which only requires extending the mark-and-compact support to function bodies.</p>
+<p>Additionally, repurposing refs requires no bytecode change for the <code>Var</code> instruction and also gets rid of the need to linearly scan arguments and return values to shift variables.</p>
+<h2>Teaching operations about vars</h2>
+<p>There is one more thing to do, which so far has been taken for granted: Operations such as <code>If</code> need to be taught how to handle vars, so that comparing two identical vars is true at comptime. Other operations could similarly operate <em>symbolically</em> on their operands: <code>x + x</code> evaluates to <code>x &lt;&lt; 1</code>, <code>x + 0</code> evaluates to <code>x</code>, <code>x - x</code> evaluates to <code>0</code>, etc.</p>
+<p>However, this is only true if we assume that the operands are already of the right type such as int. If <code>x</code> resolved to an empty list, <code>x - x</code> should probably not evaluate to <code>0</code>, definitely not at runtime. This is where accepting that comptime and runtime have slightly different semantics might make sense. Or we could take a principled stance and evaluate <code>x - x</code> to something that returns <code>0</code> at runtime only if <code>x</code> is of type int. Or simply accept that no evaluation takes place until the arguments can be fully resolved, at the cost of making comptime potentially less useful. But maybe that's fine, because most comptime calls will have concrete arguments where it matters and can thus be fully resolved?</p>
+<p>In any of these cases, operations need to be taught how to remain unevaluated until runtime. For example, <code>if (x == y) { ... } else { ... }</code> is simply not decidable at comptime if <code>x</code> and <code>y</code> can't be resolved until runtime. In such a case the comparison and subsequently the if operation need to re-emit bytecode as a result of evaluating their operands.</p>
+<p>Either way, using refs in the place of unresolved vars from an outer scope sounds like an idea worth trying and could potentially make comptime evaluation much easier than I previously thought.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
