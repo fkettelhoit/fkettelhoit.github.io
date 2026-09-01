@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>How to resolve effects at comptime</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/08/31</p>
+<h1>How to resolve effects at comptime</h1>
+<p>Is there a way to get non-trivial static checks in a programming language without giving in to the <a href="../05/13.html">siren call of type systems</a>? By “non-trivial checks” I mean any check that can't trivially be done as part of parsing. An example of a trivial check would be checking that variable names can be lexically resolved in the current scope.</p>
+<p>Many non-trivial properties can be checked at compile time if you're willing to add a type system. But is there a way to check some interesting properties without adding a full type system, by relying on the evaluation semantics that a language already has, but before the program is actually run? In other words, by using comptime evaluation?</p>
+<p>An example of a non-trivial check that I'm interested in is <em>statically checking that effect handlers can be resolved</em>. Let's say I use an effect called as <code>read-file(...)?</code> in a function <code>f</code> somewhere. The entire point of having effect handlers is that the function <code>f</code> that's using the <code>read-file</code> effect doesn't need to care about the implementation of <code>read-file</code> and that <code>read-file</code> isn't even (lexically) bound in <code>f</code>. Instead, a <em>caller</em> of <code>f</code> needs to ensure that <code>read-file</code> is bound to some handler while <code>f</code> is active:</p>
+<pre><code>f(name) = {
+    file = read-file(name)?
+    // do something with the file
+}
+
+// f(...) called in a test:
+try {
+    f(&quot;foo.txt&quot;)
+} [
+    [read-file(arg)?, resume] =&gt; {
+        resume(&quot;mock content&quot;)
+    }
+]
+
+// f(...) called as production code:
+try {
+    f(&quot;foo.txt&quot;)
+} [
+    [read-file(arg)?, resume] =&gt; {
+        // read an actual file, then resume
+        // ...
+    }
+]
+</code></pre>
+<p>A parser can't lexically resolve <code>read-file</code> in <code>f</code>, because the specific handler depends on how <code>f</code> is called. Worse, the definition of <code>f</code> might be separated from the call site of <code>f</code> through multiple intermediate function calls, which shouldn't care about <code>f</code> being effectful. This means that the simplest solution, which would be to simply thread the implementation of <code>read-file</code> through the call stack as an explicit extra argument, is out, because it would require a non-local transformation of large parts of a program. So, what are our options?</p>
+<h2>Dynamic environment of effects</h2>
+<p>The simplest solution that doesn't require manual threading of effect handlers is <em>dynamic scope</em>, implemented by (implicitly) threading an extra argument that stores the dynamic environment through <em>all</em> functions, for example as an array of handler implementations indexed by (interned) effect name. A compiler would simply add this extra argument to all function calls and definitions, even if the function in question does not use any effects or call any effectful functions, thus keeping compilation simple. Calling an effect corresponds to looking up the effect name in the environment, handling an effect corresponds to binding the effect name in the environment:</p>
+<pre><code>f(env, name) = {
+    read-file = resolve(env, &quot;read-file&quot;)
+    file = read-file(name)
+    // do something with the file
+}
+
+// f(...) called in a test:
+bind((env) =&gt; {
+    f(env, &quot;foo.txt&quot;)
+}, &quot;read-file&quot;, (arg) =&gt; {
+    &quot;mock content&quot;
+})
+
+// f(...) called as production code:
+bind((env) =&gt; {
+    f(env, &quot;foo.txt&quot;)
+}, &quot;read-file&quot;, (arg) =&gt; {
+    // read an actual file, then resume
+    // ...
+})
+</code></pre>
+<p>This is simple, but has a few disadvantages:</p>
+<ul><li>Every function now needs to thread the environment around, even if the function is pure.</li><li>Every effect resolution is a lookup, which is slower than just accessing an argument.</li><li>A missing effect handler is a runtime error, not a compile time check.</li></ul>
+<p>As for how to implement the environment, the data structure could either be an array indexed by an interned effect name (in <code>O(1)</code>, but with the environment's size determined by the total number of effects in the entire program, regardless of how many of them are bound at any particular time), or a linked list of handler implementations (with a size corresponding to the number of active handlers, but with <code>O(n)</code> lookup due to the need to walk the list).</p>
+<h2>Comptime specialization</h2>
+<p>Wouldn't it be nice if we could resolve effects at compile time, thus getting rid of the dynamic lookup overhead? What if instead of threading around an environment <em>at runtime</em>, we instead rely on machinery that binds and resolves variables <em>at comptime</em>? This requires more than just the ability to evaluate some comptime-annotated function calls at compile time, because we need the ability to set the effect bindings during comptime evaluation (in an extra out-of-band data structure that doesn't survive comptime) and <em>specialize even non-comptime-called function bodies</em> so that any effect that is resolved in their body (or any of the functions called in their body) is resolved <em>at comptime</em> through specialization:</p>
+<pre><code>f(name) = {
+    read-file = resolve!(&quot;read-file&quot;)
+    file = read-file(name)
+    // do something with the file
+}
+
+// f(...) called in a test:
+bind!(() =&gt; {
+    f(&quot;foo.txt&quot;)
+}, &quot;read-file&quot;, (arg) =&gt; {
+    &quot;mock content&quot;
+})
+
+// f(...) called as production code:
+bind!(() =&gt; {
+    f(&quot;foo.txt&quot;)
+}, &quot;read-file&quot;, (arg) =&gt; {
+    // read an actual file
+    // ...
+})
+</code></pre>
+<p>This is effectively <em>partial evaluation</em>, because we need to resolve bound variables (of effects) in function bodies without calling them. Not only do we need additional comptime machinery for this (specialization and the extra VM data structure for the bound effects at comptime), we also rely on something that can easily lead to non-termination if we naively specialize functions by resolving all variables that can be resolved. We could try to restrict the specialization to only what we need for effects (for example by only substituting variables that resolve to values, never if they remain deferred computations with variables in them), but partial evaluation remains far from trivial.</p>
+<h2>Desugaring effects where they are mentioned</h2>
+<p>Another option, still fully at comptime, is to track the effect signature of each function. This normally requires a relatively sophisticated type system (well, effect system) because of cases like the following:</p>
+<pre><code>f(name) = {
+    file = read-file(name)?
+    // do something with the file
+}
+
+// note how f is an effectful function here:
+map(f, [&quot;foo.txt&quot;, &quot;bar.txt&quot;])
+</code></pre>
+<p>It's easy enough to say that the definition of <code>f</code> requires the effect <code>read-file</code>, but what about the definition of <code>map</code>? If we call <code>map</code> with a function like <code>f</code> that expects an effect handler for <code>read-file</code>, the call <code>map(f, [&quot;foo.txt&quot;, &quot;bar.txt&quot;])</code> will only be valid if the effect <code>read-file</code> is required here. But if <code>f</code> doesn't require an effect, then neither does <code>map(f, [&quot;foo.txt&quot;, &quot;bar.txt&quot;])</code>. In other words, <code>map</code> is <em>effect polymorphic</em> and we need an effect system that can express this polymorphism for <code>map</code>.</p>
+<p>At least that's the usual story. But is there a simpler alternative? What if we simply require all first-class functions (including <code>map</code>'s parameter <code>f</code>) to be fully bound with effect handlers at the site where they are <em>mentioned</em>? Inside <code>map</code>, the parameter <code>f</code> would then <em>always</em> be a fully effect-bound function and <code>map</code> never has to care where the effect binding comes from, because the effect binding must be in scope when the <em>argument is passed to map</em>.</p>
+<pre><code>f(name) = {
+    file = read-file(name)?
+    // do something with the file
+}
+
+f_with_effect = bind(f, &quot;read-file&quot;, (arg) =&gt; {
+    &quot;mock content&quot;
+})
+
+map(f_with_effect, [&quot;foo.txt&quot;, &quot;bar.txt&quot;])
+</code></pre>
+<p>Under the hood, all effectful functions (and transitively their callers) are rewritten by the compiler to pass one additional argument per effect. This doesn't require any additional machinery in the VM, but it makes the compiler more complicated, because it now has to implement a (fully inferred) effect system that desugars to normal parameter passing.</p>
+<p>Another disadvantage is that <em>effect bindings</em> must be statically observable by the compiler, meaning <code>bind(f, &quot;read-file&quot;, ...)</code> has to explicitly name the <code>read-file</code> effect, it cannot come from a variable (or we would have to resolve variables at comptime), making effect names second-class citizens in the language.</p>
+<p>One detail worth noting is that comptime specialization and desugaring effects where they are mentioned lead to different semantics in the case of nested effect handlers such as the following snippet that binds the <code>log</code> effect to either log to the console or to a file:</p>
+<pre><code>bind(() =&gt; {
+    task = () =&gt; {
+        // the log effect is _mentioned_ here:
+        log(&quot;hello&quot;)?
+    }
+    bind(() =&gt; {
+        // the log effect is _called_ here:
+        task()
+    }, &quot;log&quot;, (arg) =&gt; {
+        // log to file
+    })
+}, &quot;log&quot;, (arg) =&gt; {
+    // log to console
+})
+</code></pre>
+<p>Does the call <code>log(&quot;hello&quot;)?</code> log to the console or to a file? With comptime specialization, it would log to a <em>file</em>, because at the point where <code>task()</code> is called (and comptime-specialized) the active implementation is <code>// log to file</code>. But if effect handlers are resolved where effects are mentioned, then the handlers already gets resolved within <code>task = () =&gt; { ... }</code> where the <code>log</code> is first mentioned and thus logs to the console.</p>
+<h2>Comptime specialization for dynamic environments</h2>
+<p>What if we combined comptime specialization with a dynamic environment parameter? We would then still pass around an environment as part of every function call, but this is cheap if we pass it by reference. The more expensive part, looking up the effect handler, would be specialized away by being bound and resolved at comptime. This would have two advantages: First of all, there's no need for an extra data structure in the VM, because the environment is simply a normal function parameter. Second, we can choose whether to resolve an effect at comptime or at runtime: If the effect call is comptime-annotated, the resolution fails at comptime if the environment does not contain the handler. If the resolution is just a regular call, it will be resolved at runtime and fails if there's no effect with the given name in scope. Dynamic scope, optionally resolved at comptime.</p>
+<p>Would this hit a sweet spot? The only new machinery is specialization for bound values (anything that is not fully evaluated to a value remains deferred) and the error messages remain good because a comptime-annotated resolution fails at comptime at the effect call site. But patterns that require runtime resolution of effects (such as storing effect handlers or effectful functions in data structures as callbacks) remain possible.</p>
+<p>One thing to note though is that giving up dynamic effect resolution and relying fully on either comptime specialization or mention-is-resolution might be a smaller loss than it might initially appear, because effect resolution at compile time only implies that the <em>name</em> must be bound and resolved at compile time, while the specific <em>value</em> of the effect handler can still rely on runtime values. An effect could thus resolve to a handler that simply picks a concrete handler implementation out of a list based on a runtime list index.</p>
+<h2>Tail resumption, one-shot resumption</h2>
+<p>One aspect glossed over in the above discussion of how to <em>resolve</em> an effect is how <em>resuming</em> an effect call site actually works, including for non-resuming effect handlers, which are how effect handlers can model control flow constructs. After all, effect handlers are <em>not</em> simply functions, because they might not resume, or resume with the call stack wrapped in an expression (such as <code>foobar(resume(...))</code>, which wraps the <em>result of resuming the effect</em> in <code>foobar(...)</code>), or even resume multiple times if multi-shot continuations are supported.</p>
+<p>We can categorize effect handlers roughly based on how they resume a continuation:</p>
+<ul><li>Tail resumption, effectively function calls</li><li>Aborting handlers where resume is never called</li><li>Tail resumption while also binding state to a new value</li><li>Non-tail resumption or multi-shot resumptions</li></ul>
+<p>Luckily, most effect handlers seem to fall in the first three categories (or a combination of them, such as either tail-resuming or aborting based on an if statement), which do not require fully reified stacks but only normal function calls (for tail resumption) or a single extra VM instruction to unwind the stack (for aborts).</p>
+<p>Resuming and rebinding state to a new value is common enough that machinery for such state can be made part of how handlers work, which is how Koka seems to work. A reified call stack that can be passed around and potentially resumed multiple times is then only necessary for handlers of the last category. But such handlers seem to be rare in practice, perhaps it's sufficient to simply not support these resumption patterns?</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
