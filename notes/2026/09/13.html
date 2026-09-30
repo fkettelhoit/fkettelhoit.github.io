@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Type systems as user-defined libraries</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/09/13</p>
+<h1>Type systems as user-defined libraries</h1>
+<p>I've been wondering whether it would be possible to implement a type system fully on top of comptime evaluation, in such a way that the type system is defined by the user, as a comptime check for an otherwise dynamic language. First of all, here's what this <em>wouldn't</em> do: Being optional and user-defined, such a type system wouldn't speed up the language implementation. But it <em>could</em> catch type errors at compile time and improve tooling support. TypeScript is a language that seems to do pretty well with that sort of tradeoff (then again, a lot of effort has gone into making JS fast even in the absence of types).</p>
+<p>Here's the basic idea: Let's treat type annotations in the language as <em>values</em> and let's do type checking by comptime evaluating our program with these annotation values, effectively doing a sort of abstract interpretation. Implementing a type system would come down to defining how the primitive parts of the language evaluate annotation values.</p>
+<pre><code>// The part after `:` is simply a value that gets passed to the type checker:
+add(x: Int, y: Int) = {
+    x + y
+}
+
+// this should produce a type error:
+add(1, &quot;two&quot;)
+</code></pre>
+<p>So in a function definition such as <code>add(x: Int, y: Int) = { ... }</code> we would literally call the function <code>add</code> with the two keywords <code>Int</code> and <code>Int</code> as its arguments. If <code>add</code> calls other user-defined functions, these would in turn be called with these values, but in the above case we merely call the built-in <code>+</code>. How does addition know how to handle the keywords <code>Int</code> and <code>Int</code>? Through user-defined definitions for how the “type system” is supposed to handle the built-in parts of the language.</p>
+<p>The definition of (a part of) the “type system” would then look as follows:</p>
+<pre><code>+(x, y) = {
+    match [x, y] [
+        [Int, Int] =&gt; { Int }
+        [x, y] =&gt; { error(&quot;expected two ints&quot;) }
+    ]
+}
+</code></pre>
+<p>Since such a type system is entirely user-defined, there is no guarantee that the type checker “makes sense”. It would for example be possible to define the check for <code>+(x, y)</code> in such a way that two strings are accepted, even if the built-in addition of the language doesn't know how to handle such an addition and would fail at runtime.</p>
+<p>The upshot is that it's also possible to check more sophisticated properties, such as by defining addition over a type such as <code>PositiveInt</code> or making sure that numbers are only divided by <code>NonZeroInt</code>. Since “type checking” is really just abstract evaluation at compile time, it's entirely up to a user to decide which properties need to be checked (and it's also their responsibility to ensure that a type system is sound).</p>
+<p>Where can type annotations be placed? A colon followed by a type can only be used after <em>bindings</em>, in other words wherever new variables come into scope, for example in function definitions, let statements, and patterns in general. (This means that a function's return type can be annotated as part of <em>naming</em> the function as a binding, or as part of assigning an anonymous function to a variable.)</p>
+<p>What happens when type annotations are missing? Since there is no way to evaluate the function by itself without any types as arguments, it will simply not be type-checked <em>by itself</em> and instead be fully instantiated as its body wherever it is used (and where concrete types are available), effectively <em>monomorphizing</em> the function at comptime. There is thus <em>no type inference</em> and no guarantee that all functions or definitions will be type-checked. The advantage (besides being simple) is that a monomorphized function can have a much more precise type without requiring any form of polymorphism on the level of types.</p>
+<pre><code>twice(x) = {
+    match (type(x)) [
+        Int =&gt; { x + x }
+        Str =&gt; { concat(x, x) }
+        _ =&gt; { error(&quot;expected either int or string&quot;) }
+    ]
+}
+
+// this works:
+int_twice: Int = twice(2)
+str_twice: Str = twice(&quot;foo&quot;)
+</code></pre>
+<p>The above can be checked without any problems, because <code>twice(Int)</code> evaluates to <code>Int</code> while <code>twice(Str)</code> evaluates to <code>Str</code>, without the need for an intersection type like <code>(Int -&gt; Int) &amp; (Str -&gt; Str)</code> which would add considerable complexity to the type system.</p>
+<p>If the burden of checking each monomorphized instance of <code>twice</code> independently becomes too much, we can always opt for a simpler type system with less precision, for example by introducing union types and giving <code>twice</code> the type <code>(Int | Str) -&gt; (Int | Str)</code>. This would then only check <code>twice_typed</code> once and memoize its type, at the cost of having to choose the less precise union type:</p>
+<pre><code>// same as twice but with type annotations:
+twice_typed(x: Int | Str): Int | Str = {
+    twice(x)
+}
+
+// this fails the type check:
+int_twice_typed: Int = twice_typed(2)
+str_twice_typed: Str = twice_typed(&quot;foo&quot;)
+
+// but this looser type checks fine:
+int_twice_typed: Int | Str = twice_typed(2)
+str_twice_typed: Int | Str = twice_typed(&quot;foo&quot;)
+</code></pre>
+<p>To be clear, I'm not advocating for privileging union types in any way. The operator <code>|</code> would just be an infix function like any other and it's the job of the type system (well, the pluggable functions) to give it meaning, which also means that soundness depends on how the “type system” is defined. It's possible to write an unsound type system and that's fine.</p>
+<p>There also needs to be a way to lift literals such as <code>5</code> or <code>&quot;foo&quot;</code> into types, so that something like <code>x: Int = 5</code> can be type-checked. Perhaps it would even be possible to simply use an override for the existing <code>type</code> function for it? (An override of <code>type</code> would have to <em>both</em> lift literals into types and also properly type the usage of <code>type</code> at runtime, so that e.g. <code>type(Int)</code> returns the type <code>Tag(Int)</code>, which at runtime is just the tag <code>Int</code>.)</p>
+<p>The user-defined functions that make up the “type system” would then be simply nothing more than a different “standard library”, which does abstract evaluation at compile time. But the compile time machinery is not special in any way. All the primitive functions can be redefined simply because the same is true for the language even in the absence of type annotations. But the way function calls work cannot be redefined, for example. A function call in the type system is simply a comptime-evaluated call.</p>
+<p>This has implications for recursion: A type system can't just evaluate calls that involve recursion, because it has to evaluate-to-type-check both arms of a conditional, which would immediately lead to non-termination for most recursively defined functions. This is why all recursion must flow through <code>fix</code>, an explicit fixed point combinator, which can then be redefined by the user as part of the type system like any other built in primitive.</p>
+<p>This requires a “mini type system” that merely disallows implicit recursion, or perhaps we could simply accept that anything involving implicit recursion might lead to non-termination during type-checking. Either way, making recursion flow through an explicit fixed point combinator could be a desirable trait even in the absence of a type system.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>

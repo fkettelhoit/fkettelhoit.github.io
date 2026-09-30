@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>An explicit split between mutable and immutable lists</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/09/29</p>
+<h1>An explicit split between mutable and immutable lists</h1>
+<p>Here's another spin on <a href="./28.html">mutation in functional languages</a>: Instead of trying to solve in-place mutation implicitly behind the scenes, what if we separate immutable from mutable values, with mutability needing to be declared when a value is created at the top of the stack?</p>
+<p>Immutable values then support borrowed references as usual, but they don't support any mutable operations like <code>push</code> / <code>pop</code> / <code>set</code> (and instead raise an error). Immutable values can be turned into mutable values by explicitly copying them (which doesn't have to be a deep copy, a shallow copy would however keep any children immutable).</p>
+<p>Mutable values support in-place mutation in <code>O(1)</code> but only support a restricted form of borrowing. There are two options here:</p>
+<ul><li>Each mutable value is tagged with a version (increased each time we mutate it) and each borrowed reference stores the current version when the reference is created. Every read of such a borrowed reference can then succeed (if the version of the underlying value hasn't increased in the meantime) or fail (if the version is higher than the borrow). We could either return differently tagged values that must be pattern-matched on (such as <code>Ok(...)</code> vs <code>Err(...)</code>) or treat the successful case as the default and raise an error in the error case.</li><li>Alternatively, borrowing works as it does for immutable values (and can never fail), but whenever a value is mutated, we first check whether there are any live borrows to it by walking the stack and then store up until which point the mutable value has been checked (which will be the starting point of the next uniqueness walk). If there are any live borrows, the mutation raises an error, and so does any attempt to write a borrow of a value into anything that's older than that value's last mutation.</li></ul>
+<p>The second option requires scanning the stack but keeps reads infallible and raises errors only on mutation.</p>
+<p>A mutable value can always be turned back into an immutable value at no cost.</p>
+<p>Either way, the split between mutable and immutable values becomes explicit and copying never happens behind the scenes.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>

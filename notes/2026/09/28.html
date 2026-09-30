@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>A sketch for a uniqueness lifetime walk</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/09/28</p>
+<h1>A sketch for a uniqueness lifetime walk</h1>
+<p>(This is an attempt to sketch out a solution for a <a href="./27.html">uniqueness walk</a>.)</p>
+<p>How to check whether writing through a mutable reference is safe:</p>
+<p>Each value that supports mutation (such as lists) tracks a <em>high water mark</em> that determines up until which point in the stack they have been checked and found unique. Whenever we want to mutate a value through an owning ref, we walk from the value's high water mark to the top of the stack and either mutate the value directly, if there are no live refs to it, or otherwise copy-on-write (by turning the owning ref into a borrowed ref). After every such walk we raise the high water mark of the value to the top stack position.</p>
+<p>This takes care of situations where borrowed refs never outlive any mutations. But if a borrowed ref is stored anywhere <em>below</em> the current high water mark of the value, we need to keep track of such a live observer (which won't be seen by the next uniqueness walk, which starts at the high water mark) by tracking the number of <em>outstanding borrows</em> on the value using ref counting. The borrow is also marked using a bit on it, so that we know it is being refcounted. Whenever a refcounted borrow is destroyed, the number of outstanding borrows on its underlying value is decremented.</p>
+<p>Such a scheme is effectively a hybrid of a tracing walk and ref counting. How we set the high water mark determines the balance between tracing and ref counting: With a high water mark that is conceptually always set to the top of the stack (thus remembering nothing), we never trace anything and fully rely on refcounting. With a high water mark that is always set to the bottom of stack we would always have to trace the entire range from the top of the stack to the value being mutated and no ref counting ever occurs, but since we'd have to walk the same range potentially many times, uniqueness checks stop being constant time.</p>
+<p>A combination of tracing and ref counting gives us the constant time uniqueness behavior of ref counting while also being able to skip ref counting for any short-lived borrows.</p>
+<p>Another option is to sacrifice the preciseness that ref counting provides, by storing not just the high water mark but also the <em>lowest borrow</em> that was stored under the high water mark, <em>per owning ref and call frame</em>. Such a scheme would be conservative, because without ref counts we would only be able to tell whether such a borrowed ref existed at some point, not whether it still exists at the point of mutation. The advantage would be that ref counting becomes unnecessary.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>

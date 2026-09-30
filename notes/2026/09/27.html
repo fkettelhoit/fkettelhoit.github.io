@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Sketching out approaches to uniqueness analysis</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/09/27</p>
+<h1>Sketching out approaches to uniqueness analysis</h1>
+<p>(This is even more of a sketch than most other notes, see later notes for viable options.)</p>
+<p>Let's say we have a compiler that does <a href="./12.html">last-use analysis</a> so that we know when a variable is used for the last time in a lexical scope. Is it safe to mutate that variable (so that no other observers can see the effects of mutation) at the point when it is last used? Not unless we know more about the lifetimes of all of the usages of that variable. Here's an example:</p>
+<pre><code>{
+    l = [1, 2, 3] // l goes into scope
+    m = f(l) // l is first used here
+    g(m, l) // l is last used here, but m could still depend on l
+}
+</code></pre>
+<p>Just knowing that <code>l</code> is last used in <code>g(m, l)</code> is not enough to know whether <code>l</code> can be safely mutated by <code>g</code>. We need to know more about the lifetime of <code>l</code> in <code>f(l)</code>: Does <code>f</code> just read from <code>l</code>? Then it's safe for <code>g</code> to mutate <code>l</code>. Does <code>f</code> return <code>l</code> or store <code>l</code> so that it outlives <code>f</code>? Then it's not safe for <code>g</code> to mutate <code>l</code>. In code:</p>
+<pre><code>{
+    k = []
+
+    {
+        l = [1, 2, 3]
+        f(x) = { len(x) }
+        m = f(l) // m does not keep l alive
+        g(m, l) // safe for g to mutate
+    }
+
+    {
+        l = [1, 2, 3]
+        f(x) = { x }
+        m = f(l) // m keeps l alive
+        g(m, l) // cannot mutate l
+    }
+
+    {
+        l = [1, 2, 3]
+        f(x) = { push(k, x) }
+        k2 = f(l) // l outlives f
+        g([], l) // cannot mutate l
+    }
+}
+</code></pre>
+<p>How can we figure out whether <code>l</code> still has active observers at the point when <code>g</code> wants to mutate it?</p>
+<h2>Reference counting</h2>
+<p>The first option is to simply track the number of active observers on the target, in our case the underlying list of <code>l</code>. Whenever we create a reference to <code>l</code>, we increment the reference count. Whenever a reference is destroyed, we decrement the reference count. When we want to mutate <code>l</code> through a reference, we simply check whether the reference count is exactly 1, which would mean that we're the only observer and can safely mutate the underlying list.</p>
+<p>This sounds easy enough, but only works well if reference counting is <em>precise</em>. Many languages are <em>imprecise</em> and only decrement the reference count when a reference goes out of scope, not immediately when a reference is last used. In our first example above (where <code>f(x) = { len(x) }</code>) it would be safe for <code>g</code> to mutate <code>l</code>, but if the reference to <code>l</code> is only destroyed when it goes out of scope then we would still have a reference count of 2 at the point of <code>g(m, l)</code> and <code>g</code> would be forced to copy <code>l</code> instead of mutating it.</p>
+<p><a href="https://xnning.github.io/papers/perceus.pdf">Perceus</a> as implemented in the Koka language is the classic example of precise reference counting in a functional language.</p>
+<h2>Tracing the stack</h2>
+<p>Another option is to check at the point of mutation whether there are any remaining active references, by walking through any regions in memory that could contain references to the value we want to mutate. The phrase “any regions in memory” is potentially doing a lot of work here, because a completely unstructured language runtime that allows pointers from anywhere to anywhere would have to walk the entire stack and everything allocated by the language on the heap, on every mutation.</p>
+<p>This is obviously not practical, so we have to guarantee that the relevant region remains bounded, for example by only allowing references to <a href="../08/15.html">point backwards in the stack</a> and disallowing those references to be stored on the heap. This then restricts the region that we need to walk on the stack to the range between where the value first appeared (in our example where the underlying list <code>l</code> is first allocated on the stack) and where the mutation happens. Everything that has been allocated on the stack between these two points in time could potentially contain references to the value that we want to mutate.</p>
+<p>This is better, but would still lead to a uniqueness analysis whose cost grows linearly in a lot of cases. For example, let's say we want to pop elements from a list <code>l</code> and push them onto a list <code>m</code>, both stored as elements on the stack. The list <code>l</code> sits at the bottom of the stack, the list <code>m</code> at the top. Whenever we want to pop from <code>l</code>, we need to walk over all of <code>m</code> and check that it doesn't contain any references to <code>l</code>, but <code>m</code> grows with each iteration and so does our uniqueness analysis walk.</p>
+<p>If we want to be able to do uniqueness analysis in constant time per iteration, we need to be able to skip over the parts of the stack that grow but that we can safely ignore for our analysis, so that the parts to be checked remain of a constant size. This is easy enough to do for specific cases, but hard to generalize. For our two-list example, we could store a bit that indicates whether a list contains any references to a value that might be mutated later in the scope, which would allow us to hop over <code>m</code>, but such a bit is necessarily conservative and can't keep track of <em>different</em> mutable references. (For example, what if <code>m</code> doesn't store a reference to <code>l</code>, but to some other mutable list <code>n</code>?)</p>
+<p>The more general observation is that we need to keep track of lists that have already been visited. By recording previous visits, we can potentially avoid doing the same work again, thus trading space for time.</p>
+<p>For now, this is still a vague idea that I need to explore more.</p>
+<h2>Mutating optimistically</h2>
+<p>The last option is to stop worrying about whether there are any other observers when we mutate and simply mutate <em>optimistically</em> and then fail later with a runtime error whenever a remaining observer tries to read or write the (now mutated) value. While reference counting has to do work <em>both</em> when reading and mutating through references, and tracing the stack tries to do the work when we finally want to <em>mutate</em> the value (but keeps <em>reading</em> simple), mutating optimistically makes <em>mutating simple but requires the readers to do the work</em>, since every read has to ensure that the reference hasn't gone stale.</p>
+<p>While the easiest implementation strategy is to just set a bit after a value has been mutated, this would mean that any read after it would fail, even if the reference was borrowed <em>after</em> the value was originally mutated. A better option might be to store a monotonically increasing version number on lists and increment it whenever a mutable reference is first written through. Any read-only borrow would then record which version it was borrowed against and fail at runtime on a read if the underlying value has a different version.</p>
+<p>The resulting language would effectively have a Rust-like ownership system, but one that is checked at <em>runtime</em> instead of statically.</p>
+<p>The big problem is that such a language would not be a purely functional language anymore because it would effectively give up referential transparency: A function that simply reads the same borrowed value could fail or succeed for the same function arguments depending on whether some other observer has mutated the underlying value somewhere else. Even worse, the effects of such a violation would not be raised at the write site where it first happens and instead only be caught later at the read site.</p>
+<p>What's the takeaway? Reference counting seems to be the only proven strategy for functional languages here. Perhaps it's not worth spending innovation tokens on other approaches, especially since trying to trace-and-record uniqueness walks seems far trickier to get right, and mutating optimistically means giving up functional purity.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
