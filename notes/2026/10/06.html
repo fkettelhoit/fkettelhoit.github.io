@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>10/b</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/10/06</p>
+<h1>10/b</h1>
+<p>One disadvantage of Universal Function Call Syntax <code>a.f(b, c)</code> is that it makes pipelining awkward for any functions where the pipelined value doesn't appear as the first argument. In other words, <code>f(a, b, c)</code> can be pipelined using UFCS as <code>a.f(b, c)</code>, but there's no way to pull the <code>b</code> out of the pipeline.</p>
+<p>What if <code>a.f(b, c)</code> is just sugar for <code>a.f(_, b, c)</code>? We can then pull <code>b</code> out by writing <code>b.f(a, _, c)</code>. This generalizes UFCS while keeping the common case short. And <code>a.f</code> is sugar for <code>a.f()</code>. More interestingly, we can also use the pipelined value multiple times: <code>a.f(_, _, _)</code> And we can even transform the pipelined value before passing it as an argument, <code>a.f(g(_), _, c)</code>, or pass the pipelined value into another pipeline: <code>a.f(_.g(b, c), _, e)</code></p>
+<p>Is pipelining important enough to receive its own syntax in languages that already have infix functions? Why not just use an infix operator such as <code>|&gt;</code>? Perhaps that's the wrong question to ask, because UFCS (with or without <code>_</code> as a placeholder) is much more about implicitly constructing anonymous functions than it is about <code>.</code> vs <code>|&gt;</code>. It's just that <code>.</code> is a convenient way to delimit the extent of the lambda syntactically: <code>a.f(g(_))</code> is <code>(x) =&gt; f(g(x))</code> applied to <code>a</code>, whereas just <code>f(g(_))</code> would leave it unclear whether it's meant to be <code>(x) =&gt; f(g(x))</code> or <code>f((x) =&gt; g(x))</code>.</p>
+<p>No special syntax for <code>.</code>, but anonymous function with directly bound <code>_</code>: If <code>f(g(_))</code> is always <code>f((x) =&gt; g(x))</code>, then the pipeline operator can just be a regular infix function like <code>|&gt;</code>.</p>
+<p>If <code>_</code> is just sugar for a single anonymous function argument so that <code>f(_)</code> desugars to <code>(x) =&gt; f(x)</code>, what is the meaning of <code>f(_, _)</code> and <code>f(g(_))</code>? Are these forms allowed or is it better to restrict the shortform to a single <code>_</code> in a top level prefix expression? Let's say <code>f(_, _)</code> is short for <code>(x) =&gt; f(x, x)</code> and <code>f(g(_))</code> short for <code>f((x) =&gt; g(x))</code>.</p>
+<p>If function call syntax and lambda syntax are kept fully extensible and general even with additional sugar, is it defensible to have sugar like <code>[x, y]</code> for lists that privileges them over user-defined data structures? Should there just be a uniform <code>list(x, y)</code>, which is the same as <code>set(x, y)</code> etc? But that would require giving up the combination of trailing <code>[...]</code> arguments and infix functions, because <code>f(x) g (y h z)</code> could be either (with <code>g(...)</code> as the trailing argument) <code>f(x, g(h(y, z)))</code> or (with <code>... g ...</code> as an infix function) <code>g(f(x), h(y, z))</code>. Unless the languages distinguishes between <code>g(...)</code> and <code>g (...)</code>? Which might be fine in practice?</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
