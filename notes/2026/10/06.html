@@ -3,11 +3,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="../../../styles/style.css" />
-<title>10/b</title>
+<title>Universal function call syntax, pipes, anonymous functions, infix and trailing args</title>
 </head>
 <body>
 <p><a href="../../..#notes">Notes</a><br />2026/10/06</p>
-<h1>10/b</h1>
+<h1>Universal function call syntax, pipes, anonymous functions, infix and trailing args</h1>
 <p>One disadvantage of Universal Function Call Syntax <code>a.f(b, c)</code> is that it makes pipelining awkward for any functions where the pipelined value doesn't appear as the first argument. In other words, <code>f(a, b, c)</code> can be pipelined using UFCS as <code>a.f(b, c)</code>, but there's no way to pull the <code>b</code> out of the pipeline.</p>
 <p>What if <code>a.f(b, c)</code> is just sugar for <code>a.f(_, b, c)</code>? We can then pull <code>b</code> out by writing <code>b.f(a, _, c)</code>. This generalizes UFCS while keeping the common case short. And <code>a.f</code> is sugar for <code>a.f()</code>. More interestingly, we can also use the pipelined value multiple times: <code>a.f(_, _, _)</code> And we can even transform the pipelined value before passing it as an argument, <code>a.f(g(_), _, c)</code>, or pass the pipelined value into another pipeline: <code>a.f(_.g(b, c), _, e)</code></p>
 <p>Is pipelining important enough to receive its own syntax in languages that already have infix functions? Why not just use an infix operator such as <code>|&gt;</code>? Perhaps that's the wrong question to ask, because UFCS (with or without <code>_</code> as a placeholder) is much more about implicitly constructing anonymous functions than it is about <code>.</code> vs <code>|&gt;</code>. It's just that <code>.</code> is a convenient way to delimit the extent of the lambda syntactically: <code>a.f(g(_))</code> is <code>(x) =&gt; f(g(x))</code> applied to <code>a</code>, whereas just <code>f(g(_))</code> would leave it unclear whether it's meant to be <code>(x) =&gt; f(g(x))</code> or <code>f((x) =&gt; g(x))</code>.</p>
