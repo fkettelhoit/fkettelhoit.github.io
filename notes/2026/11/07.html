@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../../styles/style.css" />
+<title>Growing lists on the stack</title>
+</head>
+<body>
+<p><a href="../../..#notes">Notes</a><br />2026/11/07</p>
+<h1>Growing lists on the stack</h1>
+<p>Continuing along the lines of the <a href="../09/29.html">sketch for mutable lists from a few weeks ago</a>, what happens when we try to push an element onto a list that has reached its max capacity? The same question already came up in the context of an <a href="../09/12.html">arena</a> <code>l</code>:</p>
+<blockquote><p>If <code>l</code> is full, there are two choices: We could either grow <code>l</code> in place by doubling its capacity, moving the entire stack above it and shifting references accordingly, or we could simply keep <code>x</code> at the top of the stack, degrading to the normal mark-and-compact on return.</p>
+</blockquote>
+<p>Growing a list or an arena in place by e.g. doubling its capacity requires moving and rewriting the entire stack above it. It's not enough to simply copy the memory, because we need to rewrite references that point below the new “gap” (if references are relative) or above it (if references are absolute).</p>
+<p>Keeping the existing list or arena as it is and simply storing the new element at the top of the stack (together with a copy of the entire list in the case of a list) is a viable alternative in a functional language where references always point down, because existing references cannot observe the new element anyway.</p>
+<p>But such a behavior is strange in the case of an arena, whose whole purpose is to make memory allocation and deallocation predictable: An arena at max capacity would degrade to the non-arena case for new elements.</p>
+<p>The simplest solution is perhaps to simply double both lists and arenas whenever they would exceed max capacity and accept that the entire stack above it might move (and refs need to be rewritten). We could couple it with (optional) explicit initial capacity and a default capacity for mutable lists and arenas of maybe 8 or 16 stack slots. This keeps everything predictable and easy to implement.</p>
+<footer>Want to become a better programmer? <a href="https://www.recurse.com/scout/click?t=764048f99cede394c1905c64e1545a5d">Join the Recurse Center!</a></footer>
+
+</body></html>
